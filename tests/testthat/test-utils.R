@@ -60,20 +60,20 @@ test_that("get_theta() input type", {
 
   expect_error(get_theta(TAU = rep(NA, sum(cat)-p),
                          LOADINGS = load, LATENT_COV = latent_cov,
-                         CAT = cat, A = A), 'TAU not numeric.')
+                         CAT = cat, CONSTRMAT = A), 'TAU not numeric.')
   expect_error(get_theta(TAU = tau,
                          LOADINGS = NA, LATENT_COV = latent_cov,
-                         CAT = cat, A = A), 'LOADINGS not numeric.')
+                         CAT = cat, CONSTRMAT = A), 'LOADINGS not numeric.')
   expect_error(get_theta(TAU = tau,
                          LOADINGS = load, LATENT_COV = Inf,
-                         CAT = cat, A = A), 'LATENT_COV not numeric.')
+                         CAT = cat, CONSTRMAT = A), 'LATENT_COV not numeric.')
   expect_error(get_theta(TAU = tau,
                          LOADINGS = load, LATENT_COV = latent_cov,
-                         CAT = NaN, A = A), 'CAT not numeric.')
+                         CAT = NaN, CONSTRMAT = A), 'CAT not numeric.')
 
   theta <- get_theta(TAU = tau,
                      LOADINGS = load, LATENT_COV = latent_cov,
-                     CAT = cat, A = A)
+                     CAT = cat, CONSTRMAT = A)
 
 })
 
@@ -87,7 +87,7 @@ test_that("get_theta() basic output checks", {
 
   theta <- get_theta(TAU = tau,
                      LOADINGS = load, LATENT_COV = latent_cov,
-                     CAT = cat, A = A)
+                     CAT = cat, CONSTRMAT = A)
   expect_identical(sum(theta[1:(sum(cat)-p)]-tau), 0)
   expect_identical(sum(!(theta[(sum(cat)-p+1):(q*(q-1)/2)]%in%load)), 0L)
 })

@@ -66,7 +66,7 @@ get_lambda <- function(THETA, C, P, Q){
 #' to \eqn{0}.
 #'
 #' @export
-get_theta <- function(TAU, LOADINGS, LATENT_COV, CAT, A){
+get_theta <- function(TAU, LOADINGS, LATENT_COV, CAT, CONSTRMAT){
 
   if(sum(!is.finite(TAU))>0)stop('TAU not numeric.')
   if(sum(!is.finite(LOADINGS))>0)stop('LOADINGS not numeric.')
@@ -74,15 +74,15 @@ get_theta <- function(TAU, LOADINGS, LATENT_COV, CAT, A){
   if(sum(!is.finite(CAT))>0)stop('CAT not numeric.')
   if(!matrixcalc::is.positive.definite(LATENT_COV))stop('Latent correlation matrix not positive definite!')
 
-  if(sum(dim(LOADINGS)==dim(A))<2)stop('LOADINGS and A dimensions do not match.')
+  if(sum(dim(LOADINGS)==dim(CONSTRMAT))<2)stop('LOADINGS and A dimensions do not match.')
   if(ncol(LOADINGS)!=ncol(LATENT_COV))stop('LOADINGS and LATENT_COV dimensions do not match.')
-  if(length(TAU)!=(sum(CAT)-nrow(A)))stop('TAU and CAT dimensions do not match.')
+  if(length(TAU)!=(sum(CAT)-nrow(CONSTRMAT)))stop('TAU and CAT dimensions do not match.')
 
   load_vec <- c()
   s <- 1
   for (j in 1:ncol(LOADINGS)) {
     for (i in 1:nrow(LOADINGS)) {
-      if(A[i,j]!=0){
+      if(CONSTRMAT[i,j]!=0){
         load_vec[s] <- LOADINGS[i,j]
         s = s+1
       }

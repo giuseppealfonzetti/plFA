@@ -30,13 +30,16 @@ compute_frequencies <- function(Y, C_VEC){
 #' @param STRUCT Label for the constraint structure chosen. Only two possible values:
 #' 'triangular' and 'simple'.
 #'
-#'@export
+#' @export
 build_constrMat <- function(P, Q, STRUCT = 'triangular'){
+  if(!is.finite(P))stop('P not numeric.')
+  if(!is.finite(Q))stop('Q not numeric.')
+  if(!(STRUCT %in% c('simple', 'triangular')))stop('STRUCT not available.')
   if(STRUCT == 'triangular'){
     # Build lower trinagular matrix
     constrMat <- matrix(1, nrow = P, ncol = Q)
-    for(j in 1:p){
-      for (h in 1:q) {
+    for(j in 1:P){
+      for (h in 1:Q) {
         if(h > j) constrMat[j,h] <- 0
       }
     }
@@ -57,25 +60,30 @@ build_constrMat <- function(P, Q, STRUCT = 'triangular'){
   return(constrMat)
 }
 
-#'@export
-# generate normal random latent scores [nxq]
-gen_scores <- function(N, Q, RHO = 0, SEED = 123){
-  set.seed(SEED)
-  cov_mat <- matrix(RHO, nrow = Q, ncol = Q)
-  diag(cov_mat) <- 1
 
-  out <-  mvtnorm::rmvnorm(N, mean = rep(0, nrow(cov_mat)), sigma = cov_mat)
-  return(out)
-}
-
-#'@export
+#' Construct loading matrix
+#'
+#' gen_loadings() construct a (possibly) random loading matrix following the
+#' constraints passed.
+#'
+#' @param FIXED Fixed value to assign to all free loadings. If 'NULL' it draws
+#' them randomly from Unif(0,1)
+#' @param CONSTRMAT Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
+#' that the corresponding element in the loading matrix is free to be estimated.
+#' A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
+#' to \eqn{0}.
+#' @param SEED Random seed.
+#'
+#' @export
 # generate the matrix of loadings [pxq] drawing from normal rv
-gen_loadings <- function(FIXED = NULL, CONSTRAINT_MAT = NULL, SEED = 123){
-  set.seed(SEED)
-  p <- nrow(CONSTRAINT_MAT);
-  q <- ncol(CONSTRAINT_MAT)
+gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123){
+  if(!is.matrix(CONSTRMAT))stop('CONSTRMAT must be a matrix')
 
-  out <-  CONSTRAINT_MAT
+  set.seed(SEED)
+  p <- nrow(CONSTRMAT);
+  q <- ncol(CONSTRMAT)
+
+  out <-  CONSTRMAT
   for (j in 1:p) {
     for (h in 1:q) {
       if(out[j,h] != 0) out[j,h] <- runif(1, 0,1)
@@ -92,8 +100,6 @@ gen_loadings <- function(FIXED = NULL, CONSTRAINT_MAT = NULL, SEED = 123){
 
   return(out)
 }
-
-
 
 #'@export
 gen_URV_data <- function(SAMPLE_SIZE, LOADINGS, THRESHOLDS, LATENT_COV, SEED = 123){

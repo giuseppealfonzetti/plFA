@@ -4,7 +4,7 @@
 \alias{get_theta}
 \title{Get full parameter vector}
 \usage{
-get_theta(TAU, LOADINGS, LATENT_COV, CAT, A)
+get_theta(TAU, LOADINGS, LATENT_COV, CAT, CONSTRMAT)
 }
 \arguments{
 \item{TAU}{Numerical vector of thresholds parameters.
