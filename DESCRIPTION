@@ -24,3 +24,5 @@ Imports:
     RcppEigen,
     RcppParallel,
     RcppClock
+URL: https://github.com/giuseppealfonzetti/plFA
+BugReports: https://github.com/giuseppealfonzetti/plFA/issues
