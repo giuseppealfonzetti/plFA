@@ -101,8 +101,18 @@ gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123){
   return(out)
 }
 
+#' Simulate new data
+#'
+#' Simulate data given the values of the parameters for thresholds, loadings and latent correlations
+#'
+#' @param SAMPLE_SIZE Number of observations to simulate.
+#' @param LOADINGS Matrix of loadings, with dimensions \eqn{p*q}.
+#' @param THRESHOLDS Vector of thresholds.
+#' @param LATENT_COV Latent correlation matrix. Dimension \eqn{q*q}.
+#' @param SEED Numeric seed for random generation.
+#'
 #'@export
-gen_URV_data <- function(SAMPLE_SIZE, LOADINGS, THRESHOLDS, LATENT_COV, SEED = 123){
+sim_data <- function(SAMPLE_SIZE, LOADINGS, THRESHOLDS, LATENT_COV, SEED = 123){
 
   set.seed(SEED)
 
