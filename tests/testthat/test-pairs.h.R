@@ -46,7 +46,7 @@ test_that("check pair gradient ",{
       SILENTFLAG = 1,
       GRADFLAG = 0
     )
-    out <- pair$ll
+    out <- pair$ll/n
     return(out)
   }
   pair_ngr <- function(par_vec){
@@ -61,7 +61,7 @@ test_that("check pair gradient ",{
       SILENTFLAG = 1,
       GRADFLAG = 1
     )
-    out <- pair$ngradient
+    out <- pair$ngradient/n
     return(out)
   }
 

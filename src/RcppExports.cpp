@@ -46,6 +46,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// multiThread_completePairwise
+Rcpp::List multiThread_completePairwise(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> TAU, Eigen::Map<Eigen::VectorXd> LAMBDA, Eigen::Map<Eigen::VectorXd> TRANSFORMED_RHOS, Eigen::Map<Eigen::MatrixXd> FREQ, int CORRFLAG, int GRFLAG, int SILENTFLAG);
+RcppExport SEXP _plFA_multiThread_completePairwise(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP TAUSEXP, SEXP LAMBDASEXP, SEXP TRANSFORMED_RHOSSEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type TAU(TAUSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type LAMBDA(LAMBDASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type TRANSFORMED_RHOS(TRANSFORMED_RHOSSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< int >::type CORRFLAG(CORRFLAGSEXP);
+    Rcpp::traits::input_parameter< int >::type GRFLAG(GRFLAGSEXP);
+    Rcpp::traits::input_parameter< int >::type SILENTFLAG(SILENTFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(multiThread_completePairwise(Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sampling_step
+std::vector<int> sampling_step(std::vector<int>& FULL_POOL, const unsigned int METHODFLAG, const double PROB, const int PAIRS_PER_ITERATION, const unsigned int N_ITEMS, const unsigned int SEED, const int SILENTFLAG, const unsigned int ITER);
+RcppExport SEXP _plFA_sampling_step(SEXP FULL_POOLSEXP, SEXP METHODFLAGSEXP, SEXP PROBSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP N_ITEMSSEXP, SEXP SEEDSEXP, SEXP SILENTFLAGSEXP, SEXP ITERSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::vector<int>& >::type FULL_POOL(FULL_POOLSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type METHODFLAG(METHODFLAGSEXP);
+    Rcpp::traits::input_parameter< const double >::type PROB(PROBSEXP);
+    Rcpp::traits::input_parameter< const int >::type PAIRS_PER_ITERATION(PAIRS_PER_ITERATIONSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type N_ITEMS(N_ITEMSSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
+    Rcpp::traits::input_parameter< const int >::type SILENTFLAG(SILENTFLAGSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type ITER(ITERSEXP);
+    rcpp_result_gen = Rcpp::wrap(sampling_step(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_pair
 Rcpp::List compute_pair(Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::VectorXd THETA, const int CORRFLAG, const unsigned int k, const unsigned int l, Eigen::MatrixXd PAIRS_TABLE, const unsigned int SILENTFLAG, const unsigned int GRADFLAG);
 RcppExport SEXP _plFA_compute_pair(SEXP ASEXP, SEXP C_VECSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP kSEXP, SEXP lSEXP, SEXP PAIRS_TABLESEXP, SEXP SILENTFLAGSEXP, SEXP GRADFLAGSEXP) {
@@ -70,6 +108,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
     {"_plFA_get_S", (DL_FUNC) &_plFA_get_S, 2},
     {"_plFA_get_par_from_S", (DL_FUNC) &_plFA_get_par_from_S, 1},
+    {"_plFA_multiThread_completePairwise", (DL_FUNC) &_plFA_multiThread_completePairwise, 10},
+    {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
     {"_plFA_compute_pair", (DL_FUNC) &_plFA_compute_pair, 9},
     {NULL, NULL, 0}
 };

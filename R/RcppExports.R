@@ -54,6 +54,17 @@ get_par_from_S <- function(S) {
     .Call(`_plFA_get_par_from_S`, S)
 }
 
+#' Complete pairiwse iteration with multithreading option//'
+#' Used by external optimisers
+multiThread_completePairwise <- function(Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG) {
+    .Call(`_plFA_multiThread_completePairwise`, Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
+}
+
+#' @export
+sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER) {
+    .Call(`_plFA_sampling_step`, FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER)
+}
+
 #' Single pair contribution
 #'
 #' Wrapper of pair_contribution() used for unit tests
