@@ -107,12 +107,24 @@ gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123){
 #'
 #' @param SAMPLE_SIZE Number of observations to simulate.
 #' @param LOADINGS Matrix of loadings, with dimensions \eqn{p*q}.
-#' @param THRESHOLDS Vector of thresholds.
+#' @param THRESHOLDS Vector of thresholds fo a single item.
+#' It is assumed to be the same for all the items.
 #' @param LATENT_COV Latent correlation matrix. Dimension \eqn{q*q}.
 #' @param SEED Numeric seed for random generation.
 #'
 #'@export
 sim_data <- function(SAMPLE_SIZE, LOADINGS, THRESHOLDS, LATENT_COV, SEED = 123){
+  if(!is.finite(SAMPLE_SIZE) | length(SAMPLE_SIZE)!=1 )stop('SAMPLE_SIZE must be a positive integer.')
+  if(SAMPLE_SIZE<=0 | round(SAMPLE_SIZE)!=SAMPLE_SIZE )stop('SAMPLE_SIZE must be a positive integer.')
+  if(sum(!is.finite(LOADINGS))!=0 | !is.matrix(LOADINGS))stop('LOADINGS is not a numeric matrix.')
+  if(sum(!is.finite(THRESHOLDS))!=0 | !is.vector(THRESHOLDS))stop('THRESHOLDS is not a numeric vector.')
+  if(sum(!is.finite(LATENT_COV))!=0 | !is.matrix(LATENT_COV))stop('LATENT_COV is not a numeric matrix.')
+
+  if(!isSymmetric.matrix(LATENT_COV))stop('LATENT_COV not symmetric.')
+  if(!matrixcalc::is.positive.definite(LATENT_COV))stop('LATENT_COV not positive definite.')
+  if(is.unsorted(THRESHOLDS))stop('THRESHOLDS must be sorted.')
+  if(!(sum(round(diag(LATENT_COV))==1)==ncol(LATENT_COV)))stop('LATENT_COV not a correlation matrix.')
+  if(ncol(LOADINGS)!=ncol(LATENT_COV))stop('LOADINGS and LATENT_COV dimensions not compatible.')
 
   set.seed(SEED)
 
@@ -126,7 +138,6 @@ sim_data <- function(SAMPLE_SIZE, LOADINGS, THRESHOLDS, LATENT_COV, SEED = 123){
 
   out <- matrix(0, SAMPLE_SIZE, p)
   for(i in 1:length(THRESHOLDS)){
-    # out <- purrr::modify2(out, URV, ~ifelse(.y > THRESHOLDS[i], .x + 1, .x))
     out[URV>THRESHOLDS[i]] <- i
   }
 

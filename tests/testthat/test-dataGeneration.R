@@ -69,3 +69,128 @@ test_that("gen_loadings() errors", {
   expect_error(Load <- gen_loadings(CONSTRMAT = NA), 'CONSTRMAT must be a matrix')
 
 })
+
+#### Test sim_data() ####
+test_that("sim_data() errors", {
+  set.seed(123)
+  p <- 10; q <- 5; n <- 50
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  Load <- gen_loadings(CONSTRMAT = A)
+  thr <- c(-1, 0, 1)
+  S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
+  expect_error(sim_data(
+    SAMPLE_SIZE = 'n',
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S
+  ), 'SAMPLE_SIZE must be a positive integer.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = -1,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S
+  ), 'SAMPLE_SIZE must be a positive integer.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = NA,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S
+  ), 'SAMPLE_SIZE must be a positive integer.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = 3.5,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S
+  ), 'SAMPLE_SIZE must be a positive integer.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = NA,
+    THRESHOLDS = thr,
+    LATENT_COV = S
+  ), 'LOADINGS is not a numeric matrix.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = 3,
+    THRESHOLDS = thr,
+    LATENT_COV = S
+  ), 'LOADINGS is not a numeric matrix.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = NA,
+    LATENT_COV = S
+  ), 'THRESHOLDS is not a numeric vector.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = c(2,1),
+    LATENT_COV = S
+  ), 'THRESHOLDS must be sorted.')
+
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = 1
+  ), 'LATENT_COV is not a numeric matrix.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = NA
+  ), 'LATENT_COV is not a numeric matrix.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = rep(1,2)
+  ), 'LATENT_COV is not a numeric matrix.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = matrix(1:9,3,3)
+  ), 'LATENT_COV not symmetric.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = (matrix(1:9,3,3)+t(matrix(1:9,3,3)))
+  ), 'LATENT_COV not positive definite.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = diag(3, q, q)
+  ), 'LATENT_COV not a correlation matrix.')
+  expect_error(sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = diag(1, 2, 2)
+  ), 'LOADINGS and LATENT_COV dimensions not compatible.')
+}
+)
+
+test_that("sim_data() output", {
+  set.seed(123)
+  p <- 10L; q <- 5L; n <- 50L
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  Load <- gen_loadings(CONSTRMAT = A)
+  thr <- c(-1, 0, 1)
+  S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
+  D <- sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S)
+  expect_identical(ncol(D), p)
+  expect_identical(nrow(D), n)
+  expect_identical(round(D), D)
+  expect_identical(D<=length(thr), matrix(TRUE, n, p))
+  expect_identical(D>=0, matrix(TRUE, n, p))
+
+
+
+}
+)

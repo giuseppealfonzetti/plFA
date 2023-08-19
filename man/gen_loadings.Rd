@@ -4,7 +4,7 @@
 \alias{gen_loadings}
 \title{Construct loading matrix}
 \usage{
-gen_loadings(FIXED = NULL, CONSTRMAT = NULL, SEED = 123)
+gen_loadings(FIXED = NULL, CONSTRMAT, SEED = 123)
 }
 \arguments{
 \item{FIXED}{Fixed value to assign to all free loadings. If 'NULL' it draws

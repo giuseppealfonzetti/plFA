@@ -91,3 +91,4 @@ test_that("get_theta() basic output checks", {
   expect_identical(sum(theta[1:(sum(cat)-p)]-tau), 0)
   expect_identical(sum(!(theta[(sum(cat)-p+1):(q*(q-1)/2)]%in%load)), 0L)
 })
+
