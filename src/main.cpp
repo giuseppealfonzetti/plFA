@@ -10,4 +10,5 @@
 // [[Rcpp::depends(RcppEigen, RcppParallel, RcppClock)]]
 #include "genericUtils.h"
 #include "frequencies.h"
+#include "pairs.h"
 

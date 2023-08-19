@@ -54,3 +54,10 @@ get_par_from_S <- function(S) {
     .Call(`_plFA_get_par_from_S`, S)
 }
 
+#' Single pair contribution
+#'
+#' Wrapper of pair_contribution() used for unit tests
+compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG) {
+    .Call(`_plFA_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG)
+}
+

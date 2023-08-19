@@ -189,7 +189,7 @@ Eigen::VectorXd get_par_from_S(const Eigen::MatrixXd &S){
 /* LATENT COVARIANCE */
 // Get latent correlation matrix from theta using
 // Lewandowski-Kurowicka-Joe (2009) transform
-Eigen::MatrixXd grad_Sigma_u(Eigen::Map<Eigen::MatrixXd> A,
+Eigen::MatrixXd grad_S(Eigen::Map<Eigen::MatrixXd> A,
                               const Eigen::VectorXd &THETA,
                               const unsigned int IDX
  ){
