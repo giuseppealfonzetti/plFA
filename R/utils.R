@@ -94,19 +94,6 @@ get_theta <- function(TAU, LOADINGS, LATENT_COV, CAT, CONSTRMAT){
   return(theta)
 }
 
-# Internal function to check arguments in fit_plFA
-check_args <- function(ARGS, N){
-
-  out <- ARGS
-
-  if(is.null(ARGS$MAXT)) out$MAXT <- round(N^1.1,0)
-  if(is.null(ARGS$BURN)) out$BURN <- 0
-  if(is.null(ARGS$ETA)) out$ETA <- 1e-3
-  if(is.null(ARGS$SEED)) out$SEED <- 123
-  if(is.null(ARGS$PAIRS_PER_ITERATION)) out$PAIRS_PER_ITERATION <- 1
-  if(is.null(ARGS$PROB)) out$PROB <- .1
-  return(out)
-}
 
 #' Extract estimation trajectories
 #'

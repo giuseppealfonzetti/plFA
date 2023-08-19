@@ -91,6 +91,22 @@ void stabilise_loadings(
     THETA.segment(c-p, d-c+p-q*(q-1)/2) = norm_lambda;
   }
 }
+
+std::vector<int> hyper_sampling(const unsigned int K, const unsigned int SEED){
+  std::mt19937 randomizer(SEED);
+  std::vector<int> pool(K);
+  std::iota (std::begin(pool), std::end(pool), 0);
+  std::shuffle(pool.begin(), pool.end(), randomizer);
+  return(pool);
+}
+
+std::vector<int> bernoulli_sampling(const unsigned int K, const double PROB){
+  std::vector<int> pool;
+  for( int iterator = 0; iterator < K; iterator++){
+    if(R::runif(0,1) < PROB ) pool.push_back(iterator);
+  }
+  return(pool);
+}
 #endif
 
 

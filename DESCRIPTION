@@ -23,6 +23,9 @@ Imports:
     Rcpp,
     RcppEigen,
     RcppParallel,
-    RcppClock
+    RcppClock,
+    mvtnorm,
+    matrixcalc,
+    purrr
 URL: https://github.com/giuseppealfonzetti/plFA
 BugReports: https://github.com/giuseppealfonzetti/plFA/issues
