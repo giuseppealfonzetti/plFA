@@ -71,27 +71,22 @@ Rcpp::List multiThread_completePairwise(
   std::iota (std::begin(vector_pairs), std::end(vector_pairs), 0);
 
   double iter_ll = 0;
-  Eigen::VectorXd iter_gradient(d); iter_gradient.fill(0.0);
-  Eigen::VectorXd iter_gradient2(d); iter_gradient2.fill(0.0);
+  Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
   SubsetWorker iteration_subset(A, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, gradFLAG, theta, vector_pairs);
   RcppParallel::parallelReduce(0, R, iteration_subset);
   iter_ll = iteration_subset.subset_ll;
   iter_gradient = iteration_subset.subset_gradient;
-  iter_gradient2 = iteration_subset.subset_gradient2;
-  Eigen::MatrixXd H_approx = iter_gradient2.asDiagonal();
   // output list
   Rcpp::List output =
     Rcpp::List::create(
       Rcpp::Named("iter_nll") = -iter_ll,
-      Rcpp::Named("iter_ngradient") = -iter_gradient,
-      Rcpp::Named("H_approx") = -H_approx
+      Rcpp::Named("iter_ngradient") = -iter_gradient
     );
   return(output);
 }
 
 /* MAIN FUNCTION  for STOCHASTIC OPTIMIZATION*/
-//' @export
 // [[Rcpp::export]]
 Rcpp::List plFA(
     Eigen::Map<Eigen::MatrixXd> DATA,                    // Manifest data
@@ -100,12 +95,11 @@ Rcpp::List plFA(
     Eigen::Map<Eigen::VectorXd> THETA_INIT,                  // Initial values for thresholds parameters
     const unsigned int CORRFLAG,
     unsigned int METHODFLAG,
-    const unsigned int PAIRS_PER_ITERATION = 1,                                          // Pairs drawn Per Iteration
-    double ETA = 1e-5,                                       // Proposed stepsize
-    const unsigned int BURN = 200,
-    const unsigned int MAXT = 1000,                                      // Maximum number of iterations during the stochastic optimization
-    const unsigned int TOLCOUNT = 10,                                 // How may consecutive iterations need to satisfy the convergence check in order to declare convergence
-    const unsigned int SEED = 123 ,                                  // Random seed for sampling reproducibility
+    const unsigned int PAIRS_PER_ITERATION,                                          // Pairs drawn Per Iteration
+    double ETA,                                       // Proposed stepsize
+    const unsigned int BURN,
+    const unsigned int MAXT,                                      // Maximum number of iterations during the stochastic optimization
+    const unsigned int TOLCOUNT = 50,                                 // How may consecutive iterations need to satisfy the convergence check in order to declare convergence
     const unsigned int SILENTFLAG = 1,
     const bool CHECKCONVERGENCE = false,
     const double TOL = 1e-6,
@@ -115,7 +109,9 @@ Rcpp::List plFA(
     const double PAR2 = 1,
     const double PAR3 = .75,
     const unsigned int SAMPLING_WINDOW = 1,
-    const unsigned int STEPSIZEFLAG = 0
+    const unsigned int STEPSIZEFLAG = 0,
+    const unsigned int SEED = 123                                 // Random seed for sampling reproducibility
+
 ){
 
   // Set up clock monitor to export to R session trough RcppClock
@@ -211,31 +207,6 @@ Rcpp::List plFA(
       // Stochastic sampling
       iter_chosen_pairs = sampling_step(full_pool, METHODFLAG, prob, PAIRS_PER_ITERATION, p, SEED, SILENTFLAG, iter);
     }
-
-    // if(PAIRS_PER_ITERATION>=P) METHODFLAG = 99;
-    // switch(METHODFLAG){
-    //   case 99:
-    //     {// Complete pairwise likelihood
-    //     iter_chosen_pairs = full_pool;
-    //     break;}
-    //   case 0:
-    //     {std::vector<int> tmp = hyper_sampling(P, SEED + iter);
-    //      iter_chosen_pairs = {tmp.begin(), tmp.begin()+int(PAIRS_PER_ITERATION)};
-    //      break;}
-    //   case 1:
-    //     {iter_chosen_pairs = bernoulli_sampling(P, prob);
-    //      break;}
-    //   case 2:
-    //     {if(sampling_window_iterator == 0){
-    //       outloop_pool = hyper_sampling(P, SEED + iter);
-    //     }
-    //
-    //     int tmp_ind = sampling_window_iterator*PAIRS_PER_ITERATION;
-    //     iter_chosen_pairs = {outloop_pool.begin() + tmp_ind, outloop_pool.begin() + tmp_ind + int(PAIRS_PER_ITERATION)};
-    //     sampling_window_iterator++;
-    //     if(sampling_window_iterator==SAMPLING_WINDOW) sampling_window_iterator = 0;
-    //     break;}
-    // }
 
     if(iter % EACHCLOCK == 0) clock.tock("Sampling_step");
 

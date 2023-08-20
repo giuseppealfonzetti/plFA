@@ -105,8 +105,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // plFA
-Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> DATA, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SEED, const unsigned int SILENTFLAG, const bool CHECKCONVERGENCE, const double TOL, const int TOLCOUNTER, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int STEPSIZEFLAG);
-RcppExport SEXP _plFA_plFA(SEXP DATASEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SEEDSEXP, SEXP SILENTFLAGSEXP, SEXP CHECKCONVERGENCESEXP, SEXP TOLSEXP, SEXP TOLCOUNTERSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP) {
+Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> DATA, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SILENTFLAG, const bool CHECKCONVERGENCE, const double TOL, const int TOLCOUNTER, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int STEPSIZEFLAG, const unsigned int SEED);
+RcppExport SEXP _plFA_plFA(SEXP DATASEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SILENTFLAGSEXP, SEXP CHECKCONVERGENCESEXP, SEXP TOLSEXP, SEXP TOLCOUNTERSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP, SEXP SEEDSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -121,7 +121,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const unsigned int >::type BURN(BURNSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type MAXT(MAXTSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type TOLCOUNT(TOLCOUNTSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SILENTFLAG(SILENTFLAGSEXP);
     Rcpp::traits::input_parameter< const bool >::type CHECKCONVERGENCE(CHECKCONVERGENCESEXP);
     Rcpp::traits::input_parameter< const double >::type TOL(TOLSEXP);
@@ -132,7 +131,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type PAR3(PAR3SEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SAMPLING_WINDOW(SAMPLING_WINDOWSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(plFA(DATA, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SEED, SILENTFLAG, CHECKCONVERGENCE, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG));
+    Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
+    rcpp_result_gen = Rcpp::wrap(plFA(DATA, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, CHECKCONVERGENCE, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, SEED));
     return rcpp_result_gen;
 END_RCPP
 }
