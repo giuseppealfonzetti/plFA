@@ -30,10 +30,6 @@ test_that("check pair gradient ",{
 
   par_init <- c(lambda0_init, lambda_init, transformed_rhos_init)
 
-
-
-
-  k <- 4; l <- 5
   pair_nll <- function(par_vec){
     pair <- compute_pair(
       A = A,
@@ -65,7 +61,12 @@ test_that("check pair gradient ",{
     return(out)
   }
 
-  expect_equal(pair_ngr(theta), numDeriv::grad(pair_nll, theta))
-  expect_equal(pair_ngr(par_init), numDeriv::grad(pair_nll, par_init))
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      expect_identical(sum(abs(pair_ngr(theta) - numDeriv::grad(pair_nll, theta))>1e-4), 0L)
+      expect_equal(sum(abs(pair_ngr(par_init) - numDeriv::grad(pair_nll, par_init)) >1e-4), 0L)
+    }
+  }
+
 
 })
