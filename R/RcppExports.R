@@ -54,7 +54,6 @@ get_par_from_S <- function(S) {
     .Call(`_plFA_get_par_from_S`, S)
 }
 
-#' @export
 grad_S <- function(A, THETA, IDX) {
     .Call(`_plFA_grad_S`, A, THETA, IDX)
 }
@@ -64,24 +63,21 @@ get_S2 <- function(THETA, Q) {
     .Call(`_plFA_get_S2`, THETA, Q)
 }
 
-#' @export
+#' Get latent correlation matrix from theta
+#'
+#' get_Sigma_u() extracts the latent correlation matrix from theta assuming
+#' theta elements to be reparametrised following the
+#' Lewandowski-Kurowicka-Joe (2009) transform.
+#'
+#' @param THETA Numerical vector of parameters.
+#' @param Q Number of latent variables.
+#'
 grad_S2 <- function(A, THETA, IDX) {
     .Call(`_plFA_grad_S2`, A, THETA, IDX)
 }
 
-#' @export
-get_U <- function(THETA, Q) {
-    .Call(`_plFA_get_U`, THETA, Q)
-}
-
-#' @export
-get_U2 <- function(THETA, Q) {
-    .Call(`_plFA_get_U2`, THETA, Q)
-}
-
 #' Complete pairiwse iteration with multithreading option//'
 #' Used by external optimisers
-#' @export
 multiThread_completePairwise <- function(Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG) {
     .Call(`_plFA_multiThread_completePairwise`, Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
 }

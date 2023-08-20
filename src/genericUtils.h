@@ -189,7 +189,6 @@ Eigen::VectorXd get_par_from_S(const Eigen::MatrixXd &S){
 /* LATENT COVARIANCE */
 // Get latent correlation matrix from theta using
 // Lewandowski-Kurowicka-Joe (2009) transform
-//' @export
  // [[Rcpp::export]]
 Eigen::MatrixXd grad_S(Eigen::Map<Eigen::MatrixXd> A,
                               const Eigen::VectorXd &THETA,
@@ -357,9 +356,17 @@ Eigen::MatrixXd get_S2(const Eigen::VectorXd &THETA,
   return S;
 }
 
-//' @export
- // [[Rcpp::export]]
- Eigen::MatrixXd grad_S2(Eigen::Map<Eigen::MatrixXd> A,
+//' Get latent correlation matrix from theta
+//'
+//' get_Sigma_u() extracts the latent correlation matrix from theta assuming
+//' theta elements to be reparametrised following the
+//' Lewandowski-Kurowicka-Joe (2009) transform.
+//'
+//' @param THETA Numerical vector of parameters.
+//' @param Q Number of latent variables.
+//'
+// [[Rcpp::export]]
+Eigen::MatrixXd grad_S2(Eigen::Map<Eigen::MatrixXd> A,
                         const Eigen::VectorXd &THETA,
                         const unsigned int IDX
  ){
@@ -485,144 +492,5 @@ Eigen::MatrixXd get_S2(const Eigen::VectorXd &THETA,
 
    return dS;
  }
-//' @export
- // [[Rcpp::export]]
- Eigen::MatrixXd get_U(const Eigen::VectorXd &THETA,
-                       const unsigned int Q
- ){
-   unsigned int d = THETA.size(); // number of parameters
 
-   // extract uncostrained parameters related to latent correlations
-   Eigen::VectorXd transformed_rhos = THETA.segment(d-Q*(Q-1)/2, Q*(Q-1)/2);
-
-   // inverse of Fisher's transformation
-   Eigen::VectorXd tanh_entries = ((Eigen::VectorXd(2*transformed_rhos)).array().exp() - 1)/
-     ((Eigen::VectorXd(2*transformed_rhos)).array().exp() + 1);
-
-   // place tanh_entries in upper triangular matrix
-   // with unit diagonal
-   Eigen::MatrixXd Z(Q,Q); Z.setIdentity();
-   unsigned int iterator = 0;
-   for(unsigned int col = 1; col < Q; col ++){
-     for(unsigned int row = 0; row < col; row++){
-       Z(row, col) = tanh_entries(iterator);
-       iterator ++;
-     }
-   }
-
-   // construct upper Cholesky from Z
-   Eigen::MatrixXd U(Q,Q);
-
-   for(unsigned int col = 0; col < Q; col++){
-     for(unsigned int row = 0; row < Q; row++){
-       if(row > col) U(row, col) = 0;
-       else if(row == col & row == 0) U(row, col) = 1;
-       else if(row > 0 & row == col) {
-         double prod = 1;
-         for(unsigned int row1 = 0; row1 < row; row1++){
-           prod *= pow(1-pow(Z(row1, col), 2),.5);
-         }
-         U(row, col) = prod;
-       }
-       else if(row == 0 & row < col) U(row, col) = Z(row, col);
-       else if(row > 0 & row < col) {
-         double prod = Z(row, col);
-         for(unsigned int row1 = 0; row1 < row; row1++){
-           prod *= pow(1-pow(Z(row1, col), 2),.5);
-         }
-         U(row, col) = prod;
-
-       }
-     }
-   }
-   // latent variable covariance matrix
-
-   return U;
- }
-//' @export
- // [[Rcpp::export]]
- Eigen::MatrixXd get_U2(const Eigen::VectorXd &THETA,
-                        const unsigned int Q
- ){
-   unsigned int d = THETA.size(); // number of parameters
-
-   // extract uncostrained parameters related to latent correlations
-   Eigen::VectorXd transformed_rhos = THETA.segment(d-Q*(Q-1)/2, Q*(Q-1)/2);
-
-   // inverse of Fisher's transformation
-   Eigen::VectorXd tanh_entries = ((Eigen::VectorXd(2*transformed_rhos)).array().exp() - 1)/
-     ((Eigen::VectorXd(2*transformed_rhos)).array().exp() + 1);
-
-   // place tanh_entries in upper triangular matrix
-   // with unit diagonal
-   Eigen::MatrixXd Z(Q,Q); Z.setIdentity();
-   unsigned int iterator = 0;
-   for(unsigned int col = 1; col < Q; col ++){
-     for(unsigned int row = 0; row < col; row++){
-       Z(row, col) = tanh_entries(iterator);
-       iterator ++;
-     }
-   }
-
-   // construct upper Cholesky from Z
-   Eigen::MatrixXd U(Q,Q);
-   // for(unsigned int row = 0; row < Q; row++){
-   //     for(unsigned int col = 0; col < Q; col++){
-   //         if(row > col) U(row, col) = 0;
-   //         else if(row == col & row == 0) U(row, col) = 1;
-   //         else if(row == 0 & row < col) U(row, col) = Z(row, col);
-   //         // else if(row > 0 & row <= col) U(row, col) = Z(row, col)/Z(row-1, col)*U(row-1, col)*pow(1-pow(Z(row-1, col),2), .5);
-   //
-   //         else if(row > 0 & row <= col) {
-   //             if(Z(row-1, col)==0 & row == col){
-   //                 U(row, col) = U(row-1, col);
-   //             }else if(Z(row-1, col)==0 & row < col){
-   //                 U(row, col) = Z(row, col)/Z(row-1, col)*U(row-1, col)*pow(1-pow(Z(row-1, col),2), .5);
-   //
-   //             }
-   //
-   //         }
-   //     }
-   // }
-   for(unsigned int col = 0; col < Q; col++){
-     for(unsigned int row = 0; row < Q; row++){
-
-       if(row > col) U(row, col) = 0;
-       else if(row == col & row == 0) U(row, col) = 1;
-       else if(row == 0 & row < col) U(row, col) = Z(row, col);
-       else if(row > 0 & row < col) {
-         U(row, col) = Z(row, col)/Z(row-1, col)*U(row-1, col)*pow(1-pow(Z(row-1, col),2), .5);
-       }
-       else if(row > 0 & row == col) {
-         U(row, col) = U(row-1, col)*pow(1-pow(Z(row-1, col),2), .5)/Z(row-1, col);
-       }
-
-     }
-   }
-   // for(unsigned int col = 0; col < Q; col++){
-   //   for(unsigned int row = 0; row < Q; row++){
-   //     if(row > col) U(row, col) = 0;
-   //     else if(row == col & row == 0) U(row, col) = 1;
-   //     else if(row > 0 & row == col) {
-   //       double prod = 1;
-   //       for(unsigned int row1 = 0; row1 < row; row1++){
-   //         prod *= pow(1-pow(Z(row1, col), 2),.5);
-   //       }
-   //       U(row, col) = prod;
-   //     }
-   //     else if(row == 0 & row < col) U(row, col) = Z(row, col);
-   //     else if(row > 0 & row < col) {
-   //       double prod = Z(row, col);
-   //       for(unsigned int row1 = 0; row1 < row; row1++){
-   //         prod *= pow(1-pow(Z(row1, col), 2),.5);
-   //       }
-   //       U(row, col) = prod;
-   //
-   //     }
-   //   }
-   // }
-   // latent variable covariance matrix
-
-   return U;
- }
 #endif

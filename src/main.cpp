@@ -17,7 +17,6 @@
 
 //' Complete pairiwse iteration with multithreading option//'
 //' Used by external optimisers
-//' @export
 // [[Rcpp::export]]
 Rcpp::List multiThread_completePairwise(
     Eigen::Map<Eigen::MatrixXd> Y,                    // Manifest data
