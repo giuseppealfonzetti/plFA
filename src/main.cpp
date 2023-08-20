@@ -12,6 +12,8 @@
 #include "frequencies.h"
 #include "pairs.h"
 #include "optimisationUtils.h"
+#include "variance.h"
+
 
 //' Complete pairiwse iteration with multithreading option//'
 //' Used by external optimisers

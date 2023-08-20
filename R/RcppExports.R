@@ -104,3 +104,23 @@ compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLA
     .Call(`_plFA_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG)
 }
 
+#' Estimate of H
+#'
+#' Compute a sample estimate of the expected negative Hessian by taking
+#' advantage of the second Bartlett's identity at the single pair level
+#'
+#' @export
+estimate_H <- function(C_VEC, A, THETA, FREQ, N, CORRFLAG) {
+    .Call(`_plFA_estimate_H`, C_VEC, A, THETA, FREQ, N, CORRFLAG)
+}
+
+#' Estimate of J
+#'
+#' Compute a sample estimate of the variability matrix via the sample average outer product
+#' of the composite score
+#'
+#' @export
+estimate_J <- function(Y, C_VEC, A, THETA, FREQ, CORRFLAG) {
+    .Call(`_plFA_estimate_J`, Y, C_VEC, A, THETA, FREQ, CORRFLAG)
+}
+

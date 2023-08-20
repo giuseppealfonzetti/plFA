@@ -237,7 +237,7 @@ Eigen::VectorXd compute_pi_grad(Eigen::Map<Eigen::MatrixXd> A,
     // }
     for(unsigned int thro_idx = 0; thro_idx < ncorr; thro_idx ++){
 
-      Eigen::MatrixXd dSigma = grad_S(A, transformed_rhos, thro_idx);
+      Eigen::MatrixXd dSigma = grad_S2(A, transformed_rhos, thro_idx);
       // Rcpp::Rcout << "dsigma wrt corr idx " << thro_idx << ":\n"<< dSigma << "\n";
 
       double d_rho_kl = lambdak.transpose() * dSigma * lambdal;

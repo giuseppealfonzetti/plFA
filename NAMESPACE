@@ -3,6 +3,8 @@
 export(build_constrMat)
 export(compute_frequencies)
 export(compute_pair)
+export(estimate_H)
+export(estimate_J)
 export(fit_plFA)
 export(gen_loadings)
 export(get_S)

@@ -197,6 +197,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// estimate_H
+Rcpp::List estimate_H(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::VectorXd& THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG);
+RcppExport SEXP _plFA_estimate_H(SEXP C_VECSEXP, SEXP ASEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type CORRFLAG(CORRFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(estimate_H(C_VEC, A, THETA, FREQ, N, CORRFLAG));
+    return rcpp_result_gen;
+END_RCPP
+}
+// estimate_J
+Rcpp::List estimate_J(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::VectorXd& THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int CORRFLAG);
+RcppExport SEXP _plFA_estimate_J(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< int >::type CORRFLAG(CORRFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(estimate_J(Y, C_VEC, A, THETA, FREQ, CORRFLAG));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
@@ -211,6 +243,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 22},
     {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
     {"_plFA_compute_pair", (DL_FUNC) &_plFA_compute_pair, 9},
+    {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 6},
+    {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 6},
     {NULL, NULL, 0}
 };
 
