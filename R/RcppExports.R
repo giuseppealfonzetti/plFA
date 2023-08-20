@@ -54,8 +54,34 @@ get_par_from_S <- function(S) {
     .Call(`_plFA_get_par_from_S`, S)
 }
 
+#' @export
+grad_S <- function(A, THETA, IDX) {
+    .Call(`_plFA_grad_S`, A, THETA, IDX)
+}
+
+#' @export
+get_S2 <- function(THETA, Q) {
+    .Call(`_plFA_get_S2`, THETA, Q)
+}
+
+#' @export
+grad_S2 <- function(A, THETA, IDX) {
+    .Call(`_plFA_grad_S2`, A, THETA, IDX)
+}
+
+#' @export
+get_U <- function(THETA, Q) {
+    .Call(`_plFA_get_U`, THETA, Q)
+}
+
+#' @export
+get_U2 <- function(THETA, Q) {
+    .Call(`_plFA_get_U2`, THETA, Q)
+}
+
 #' Complete pairiwse iteration with multithreading option//'
 #' Used by external optimisers
+#' @export
 multiThread_completePairwise <- function(Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG) {
     .Call(`_plFA_multiThread_completePairwise`, Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
 }
@@ -73,6 +99,7 @@ sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_IT
 #' Single pair contribution
 #'
 #' Wrapper of pair_contribution() used for unit tests
+#' @export
 compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG) {
     .Call(`_plFA_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG)
 }

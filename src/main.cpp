@@ -15,6 +15,7 @@
 
 //' Complete pairiwse iteration with multithreading option//'
 //' Used by external optimisers
+//' @export
 // [[Rcpp::export]]
 Rcpp::List multiThread_completePairwise(
     Eigen::Map<Eigen::MatrixXd> Y,                    // Manifest data
@@ -202,40 +203,38 @@ Rcpp::List plFA(
     /////////////////////
     if(iter % EACHCLOCK == 0) clock.tick("Sampling_step");
     std::vector<int> iter_chosen_pairs;
-    // if(PAIRS_PER_ITERATION>=P){
-    //   // Complete pairwise likelihood
-    //   iter_chosen_pairs = full_pool;
-    // }else{
-    //   // Stochastic sampling
-    //   iter_chosen_pairs = sampling_step(full_pool, METHODFLAG, prob, PAIRS_PER_ITERATION, p, SEED, SILENTFLAG, iter);
-    // }
-
-    if(PAIRS_PER_ITERATION>=P) METHODFLAG = 99;
-    switch(METHODFLAG){
-      case 99:
-        {// Complete pairwise likelihood
-        iter_chosen_pairs = full_pool;
-        break;}
-      case 0:
-        {std::vector<int> tmp = hyper_sampling(P, SEED + iter);
-         iter_chosen_pairs = {tmp.begin(), tmp.begin()+int(PAIRS_PER_ITERATION)};
-         break;}
-      case 1:
-        {iter_chosen_pairs = bernoulli_sampling(P, prob);
-         break;}
-      case 2:
-        {if(sampling_window_iterator == 0){
-          outloop_pool = hyper_sampling(P, SEED + iter);
-        }
-
-        int tmp_ind = sampling_window_iterator*PAIRS_PER_ITERATION;
-        iter_chosen_pairs = {outloop_pool.begin() + tmp_ind, outloop_pool.begin() + tmp_ind + int(PAIRS_PER_ITERATION)};
-        sampling_window_iterator++;
-        if(sampling_window_iterator==SAMPLING_WINDOW) sampling_window_iterator = 0;
-        break;}
-
-
+    if(PAIRS_PER_ITERATION>=P){
+      // Complete pairwise likelihood
+      iter_chosen_pairs = full_pool;
+    }else{
+      // Stochastic sampling
+      iter_chosen_pairs = sampling_step(full_pool, METHODFLAG, prob, PAIRS_PER_ITERATION, p, SEED, SILENTFLAG, iter);
     }
+
+    // if(PAIRS_PER_ITERATION>=P) METHODFLAG = 99;
+    // switch(METHODFLAG){
+    //   case 99:
+    //     {// Complete pairwise likelihood
+    //     iter_chosen_pairs = full_pool;
+    //     break;}
+    //   case 0:
+    //     {std::vector<int> tmp = hyper_sampling(P, SEED + iter);
+    //      iter_chosen_pairs = {tmp.begin(), tmp.begin()+int(PAIRS_PER_ITERATION)};
+    //      break;}
+    //   case 1:
+    //     {iter_chosen_pairs = bernoulli_sampling(P, prob);
+    //      break;}
+    //   case 2:
+    //     {if(sampling_window_iterator == 0){
+    //       outloop_pool = hyper_sampling(P, SEED + iter);
+    //     }
+    //
+    //     int tmp_ind = sampling_window_iterator*PAIRS_PER_ITERATION;
+    //     iter_chosen_pairs = {outloop_pool.begin() + tmp_ind, outloop_pool.begin() + tmp_ind + int(PAIRS_PER_ITERATION)};
+    //     sampling_window_iterator++;
+    //     if(sampling_window_iterator==SAMPLING_WINDOW) sampling_window_iterator = 0;
+    //     break;}
+    // }
 
     if(iter % EACHCLOCK == 0) clock.tock("Sampling_step");
 

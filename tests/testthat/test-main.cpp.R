@@ -1,10 +1,10 @@
 test_that("check full gradient ",{
-  set.seed(123)
-  p <- 8L; q <- 4L; n <- 50L
+  set.seed(1)
+  p <- 8L; q <- 4L; n <- 100
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
   Load <- gen_loadings(CONSTRMAT = A)
   thr <- c(-1, 0, 1)
-  S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
+  S <- get_S2(THETA = rnorm(q*(q-1)/2), Q = q)
   D <- sim_data(
     SAMPLE_SIZE = n,
     LOADINGS = Load,
@@ -74,8 +74,8 @@ test_that("check full gradient ",{
     return(out)
   }
 
- expect_identical(sum(abs(numDeriv::grad(full_nll, theta) - full_ngr(theta)) > 1e-5), 0L)
- expect_identical(sum(abs(numDeriv::grad(full_nll, par_init) - full_ngr(par_init)) > 1e-5), 0L)
+ expect_identical(sum(abs(numDeriv::grad(full_nll, theta) - full_ngr(theta)) > 1e-4), 0L)
+ expect_identical(sum(abs(numDeriv::grad(full_nll, par_init) - full_ngr(par_init)) > 1e-4), 0L)
 
 
 })

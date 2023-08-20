@@ -46,6 +46,68 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// grad_S
+Eigen::MatrixXd grad_S(Eigen::Map<Eigen::MatrixXd> A, const Eigen::VectorXd& THETA, const unsigned int IDX);
+RcppExport SEXP _plFA_grad_S(SEXP ASEXP, SEXP THETASEXP, SEXP IDXSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type IDX(IDXSEXP);
+    rcpp_result_gen = Rcpp::wrap(grad_S(A, THETA, IDX));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_S2
+Eigen::MatrixXd get_S2(const Eigen::VectorXd& THETA, const unsigned int Q);
+RcppExport SEXP _plFA_get_S2(SEXP THETASEXP, SEXP QSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type Q(QSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_S2(THETA, Q));
+    return rcpp_result_gen;
+END_RCPP
+}
+// grad_S2
+Eigen::MatrixXd grad_S2(Eigen::Map<Eigen::MatrixXd> A, const Eigen::VectorXd& THETA, const unsigned int IDX);
+RcppExport SEXP _plFA_grad_S2(SEXP ASEXP, SEXP THETASEXP, SEXP IDXSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type IDX(IDXSEXP);
+    rcpp_result_gen = Rcpp::wrap(grad_S2(A, THETA, IDX));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_U
+Eigen::MatrixXd get_U(const Eigen::VectorXd& THETA, const unsigned int Q);
+RcppExport SEXP _plFA_get_U(SEXP THETASEXP, SEXP QSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type Q(QSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_U(THETA, Q));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_U2
+Eigen::MatrixXd get_U2(const Eigen::VectorXd& THETA, const unsigned int Q);
+RcppExport SEXP _plFA_get_U2(SEXP THETASEXP, SEXP QSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type Q(QSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_U2(THETA, Q));
+    return rcpp_result_gen;
+END_RCPP
+}
 // multiThread_completePairwise
 Rcpp::List multiThread_completePairwise(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> TAU, Eigen::Map<Eigen::VectorXd> LAMBDA, Eigen::Map<Eigen::VectorXd> TRANSFORMED_RHOS, Eigen::Map<Eigen::MatrixXd> FREQ, const unsigned int CORRFLAG, const unsigned int GRFLAG, const unsigned int SILENTFLAG);
 RcppExport SEXP _plFA_multiThread_completePairwise(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP TAUSEXP, SEXP LAMBDASEXP, SEXP TRANSFORMED_RHOSSEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
@@ -140,6 +202,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
     {"_plFA_get_S", (DL_FUNC) &_plFA_get_S, 2},
     {"_plFA_get_par_from_S", (DL_FUNC) &_plFA_get_par_from_S, 1},
+    {"_plFA_grad_S", (DL_FUNC) &_plFA_grad_S, 3},
+    {"_plFA_get_S2", (DL_FUNC) &_plFA_get_S2, 2},
+    {"_plFA_grad_S2", (DL_FUNC) &_plFA_grad_S2, 3},
+    {"_plFA_get_U", (DL_FUNC) &_plFA_get_U, 2},
+    {"_plFA_get_U2", (DL_FUNC) &_plFA_get_U2, 2},
     {"_plFA_multiThread_completePairwise", (DL_FUNC) &_plFA_multiThread_completePairwise, 10},
     {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 22},
     {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
