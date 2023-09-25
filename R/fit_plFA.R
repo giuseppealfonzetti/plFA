@@ -18,7 +18,7 @@ check_args <- function(ARGS, N){
 #'
 #'
 #' @export
-fit_plFA <- function(
+fit_plFA2 <- function(
     DATA_LIST = list('DATA', 'CONSTRMAT', 'CORRFLAG'),
     METHOD = 'ucminf',
     CPP_CONTROL = list(),
@@ -43,7 +43,6 @@ fit_plFA <- function(
   if(is.null(DATA_LIST$CONSTRMAT)){
     stop('CONSTRMAT not declared')
   }else if(nrow(DATA_LIST$CONSTRMAT)!=ncol(DATA_LIST$DATA) || ncol(DATA_LIST$CONSTRMAT)>=nrow(DATA_LIST$CONSTRMAT)){
-
     stop('CONSTRMAT dimensions not acceptable. Check Items x Factors.')
   }
   out$constraints <- DATA_LIST$CONSTRMAT
@@ -216,4 +215,102 @@ fit_plFA <- function(
     return(out)
   }
 
+}
+
+#' Fit factor models for ordinal data with pairwise likelihood methods
+#'
+#' fit_plFA() allows to fit models both numerically and stochastically
+#'
+#' @param DATA Integer data matrix of dimension \eqn{n*p}. Categories must be coded starting from zero.
+#' @param CONSTR_LIST List of constraints. It must contain \tabular{ll}{
+#'    \code{CONSTRMAT} \tab \eqn{p*q} binary matrix. Elements set to 1 refers to free loding paameters. Elements set to 0 refer to null loadings. \cr
+#'    \tab \cr
+#'    \code{CORRFLAG} \tab Binary indicator. Set it to 0 if the latent variables are assumed to be independent. Set it 1 otherwise. \cr
+#' }
+#' @param METHOD Label for the method chosen. Possible values are: \tabular{ll}{
+#'    \code{ucminf} \tab for estimation via the numerical optimiser from the \code{ucminf} package. \cr
+#'    \tab \cr
+#'    \code{bernoulli} \tab for stochastic estimation with weights following a Bernoulli distribution. \cr
+#'     \tab \cr
+#'    \code{hyper} \tab for stochastic estimation with weights following a multivariate hypergeometric distribution. \cr
+#' }
+#' @param NCORES Integer value setting the number of threads to carry out the estimation.
+#'
+#'
+#' @export
+fit_plFA <- function(
+    DATA,
+    CONSTR_LIST,
+    METHOD = 'ucminf',
+    CPP_CONTROL,
+    UCMINF_CONTROL = list('ctrl' = list(), 'hessian' = 0 ),
+    INIT = NULL,
+    ITERATIONS_SUBSET = NULL,
+    VERBOSEFLAG = 0,
+    NCORES = 1
+){
+
+  out <- list()
+  start_time <- Sys.time()
+
+  if(sum(!is.finite(DATA))>0 | !is.matrix(DATA)) stop('DATA is not a numeric matrix.')
+  if(sum(!is.finite(CONSTR_LIST$CONSTRMAT))>0 | !is.matrix(CONSTR_LIST$CONSTRMAT) | sum(!(CONSTR_LIST$CONSTRMAT %in% c(0,1)))!=0) stop('CONSTRMAT must be a binary matrix')
+  if(nrow(CONSTR_LIST$CONSTRMAT)!=ncol(DATA) | ncol(CONSTR_LIST$CONSTRMAT)>=nrow(CONSTR_LIST$CONSTRMAT)) stop('CONSTRMAT dimensions not allowed. Check Items x Factors.')
+  if(is.null(CONSTR_LIST$CORRFLAG) | sum(is.finite(CONSTR_LIST$CORRFLAG))==0 | !(CONSTR_LIST$CORRFLAG %in% c(0,1))) stop('CORRFLAG must be 0 or 1')
+  if(!(METHOD %in% c('ucminf','bernoulli', 'hyper'))) stop('Method not available.')
+  # Identify model dimensions
+  p <- ncol(DATA)
+  n <- nrow(DATA)
+  q <- ncol(CONSTR_LIST$CONSTRMAT)
+  categories <- apply(DATA, 2, max, na.rm = T) + 1
+  d = sum(categories)-p + sum(CONSTR_LIST$CONSTRMAT) + q*(q-1)/2
+
+  # Check Initialisation
+  if(is.vector(INIT)){
+    if(length(INIT)!=d)
+      stop(paste0('init vector has length ', length(INIT), ' instead of ', d ,'.'))
+    else if((sum(!is.finite(INIT))==0)){
+      message('1. Initialising at INIT vector.')
+      out$theta_init <-  INIT
+    }else{
+      message('1. Initialising at default values')
+      lambda0_init <- c()
+      s <- 0
+
+      for (i in 1:length(categories)) {
+        vec <- 1:(categories[i]-1)
+        vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
+        lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
+        s <- s + categories[i] - 1
+      }
+      lambda_init = rep(0.5, sum(CONSTR_LIST$CONSTRMAT))
+      transformed_rhos_init = rep(0, q*(q-1)/2)
+      out$theta_init <-  c(lambda0_init, lambda_init, transformed_rhos_init)
+    }
+  }
+
+  if(!is.vector(INIT)){
+    message('1. Initialising at default values')
+    lambda0_init <- c()
+    s <- 0
+
+    for (i in 1:length(categories)) {
+      vec <- 1:(categories[i]-1)
+      vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
+      lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
+      s <- s + categories[i] - 1
+    }
+    lambda_init = rep(0.5, sum(CONSTR_LIST$CONSTRMAT))
+    transformed_rhos_init = rep(0, q*(q-1)/2)
+    out$theta_init <-  c(lambda0_init, lambda_init, transformed_rhos_init)
+  }
+
+  out$categories <- categories
+  out$constraints <- CONSTR_LIST$CONSTRMAT
+  out$method <- METHOD
+  RcppParallel::setThreadOptions(numThreads = NCORES)
+
+
+
+  return(out)
 }

@@ -5,15 +5,35 @@
 \title{Fit factor models for ordinal data with pairwise likelihood methods}
 \usage{
 fit_plFA(
-  DATA_LIST = list("DATA", "CONSTRMAT", "CORRFLAG"),
+  DATA,
+  CONSTR_LIST = list("CONSTRMAT", "CORRFLAG"),
   METHOD = "ucminf",
-  CPP_CONTROL = list(),
+  CPP_CONTROL,
   UCMINF_CONTROL = list(ctrl = list(), hessian = 0),
   INIT = NULL,
   ITERATIONS_SUBSET = NULL,
   VERBOSEFLAG = 0,
   NCORES = 1
 )
+}
+\arguments{
+\item{DATA}{Integer data matrix of dimension \eqn{n*p}. Categories must be coded starting from zero.}
+
+\item{CONSTR_LIST}{List of constraints. It must contain \tabular{ll}{
+\code{CONSTRMAT} \tab \eqn{p*q} binary matrix. Elements set to 1 refers to free loding paameters. Elements set to 0 refer to null loadings. \cr
+\tab \cr
+\code{CORRFLAG} \tab Binary indicator. Set it to 0 if the latent variables are assumed to be independent. Set it 1 otherwise. \cr
+}}
+
+\item{METHOD}{Label for the method chosen. Possible values are: \tabular{ll}{
+\code{ucminf} \tab for estimation via the numerical optimiser from the \code{ucminf} package. \cr
+\tab \cr
+\code{bernoulli} \tab for stochastic estimation with weights following a Bernoulli distribution. \cr
+\tab \cr
+\code{hyper} \tab for stochastic estimation with weights following a multivariate hypergeometric distribution. \cr
+}}
+
+\item{NCORES}{Integer value setting the number of threads to carry out the estimation.}
 }
 \description{
 fit_plFA() allows to fit models both numerically and stochastically
