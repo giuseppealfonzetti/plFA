@@ -6,10 +6,9 @@
 \usage{
 fit_plFA(
   DATA,
-  CONSTR_LIST = list("CONSTRMAT", "CORRFLAG"),
+  CONSTR_LIST,
   METHOD = "ucminf",
-  CPP_CONTROL,
-  UCMINF_CONTROL = list(ctrl = list(), hessian = 0),
+  CONTROL = list(),
   INIT = NULL,
   ITERATIONS_SUBSET = NULL,
   VERBOSEFLAG = 0,

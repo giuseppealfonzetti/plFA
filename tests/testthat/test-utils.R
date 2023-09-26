@@ -25,7 +25,7 @@ test_that("Extracted correlation range", {
   expect_equal(sum(corr > -1 & corr < 1), q*(q-1)/2)
 })
 
-test_that("Extracted correlation positive difiniteness", {
+test_that("Extracted correlation positive definiteness", {
   set.seed(123)
   q <- 10; corr <- get_corr(THETA = rnorm(q*(q-1)/2), Q = q)
   R <- diag(1, q, q); R[upper.tri(R)] <- corr; R <- R + t(R)
