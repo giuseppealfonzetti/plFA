@@ -25,7 +25,7 @@ get_corr <- function(THETA, Q){
 #' get_lambda() extracts the vector of free loadings
 #' from the parameter vector
 #'
-#' @param THETA Numerical vector of parameters.
+#' @param THETA Raw vector of parameters.
 #' @param C Sum of the number of categories for each item.
 #' @param P Number if items
 #' @param Q Number of latent variables

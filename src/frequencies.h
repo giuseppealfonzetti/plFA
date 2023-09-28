@@ -13,6 +13,7 @@
 //' \eqn{\{0, 1, 2\}}.
 //' @param C_VEC Integer vector indicating how many possible categories are associated to
 //' each item in 'Y'.
+//' @export
 // [[Rcpp::export]]
  Eigen::MatrixXd pairs_freq(
      Eigen::Map<Eigen::MatrixXd> Y,

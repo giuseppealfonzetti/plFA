@@ -34,7 +34,7 @@ Rcpp::List estimate_H(
 
   // rearrange parameters
   Eigen::MatrixXd Lam            = get_Lam(A, c, THETA);
-  Eigen::MatrixXd Sigma_u        = get_S2(THETA, q);
+  Eigen::MatrixXd Sigma_u        = get_S(THETA, q);
   Eigen::VectorXd tau            = THETA.segment(0,c-p);
 
   double ll = 0;
@@ -124,7 +124,6 @@ Rcpp::List estimate_J(
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
     Eigen::Map<Eigen::MatrixXd> A,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
     Eigen::VectorXd &THETA,
-    Eigen::Map<Eigen::MatrixXd> FREQ,
     int CORRFLAG
 ){
   unsigned int p = A.rows();                                             // number of items
@@ -138,14 +137,9 @@ Rcpp::List estimate_J(
   unsigned int n = Y.rows();
 
 
-  // Copy frequencies, and build pair dictionary
-  Eigen::MatrixXd pairs_table = FREQ;
-  pairs_table.conservativeResize(pairs_table.rows() + 1, Eigen::NoChange_t() );
-
-
   // rearrange parameters
   Eigen::MatrixXd Lam            = get_Lam(A, c, THETA);
-  Eigen::MatrixXd Sigma_u        = get_S2(THETA, q);
+  Eigen::MatrixXd Sigma_u        = get_S(THETA, q);
   Eigen::VectorXd tau            = THETA.segment(0,c-p);
 
   double ll = 0;

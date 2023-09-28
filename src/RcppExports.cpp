@@ -23,6 +23,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_par_from_S
+Eigen::VectorXd get_par_from_S(const Eigen::MatrixXd& S);
+RcppExport SEXP _plFA_get_par_from_S(SEXP SSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type S(SSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_par_from_S(S));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_S
 Eigen::MatrixXd get_S(const Eigen::VectorXd& THETA, const unsigned int Q);
 RcppExport SEXP _plFA_get_S(SEXP THETASEXP, SEXP QSEXP) {
@@ -32,17 +43,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type Q(QSEXP);
     rcpp_result_gen = Rcpp::wrap(get_S(THETA, Q));
-    return rcpp_result_gen;
-END_RCPP
-}
-// get_par_from_S
-Eigen::VectorXd get_par_from_S(const Eigen::MatrixXd& S);
-RcppExport SEXP _plFA_get_par_from_S(SEXP SSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_par_from_S(S));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -56,31 +56,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type IDX(IDXSEXP);
     rcpp_result_gen = Rcpp::wrap(grad_S(A, THETA, IDX));
-    return rcpp_result_gen;
-END_RCPP
-}
-// get_S2
-Eigen::MatrixXd get_S2(const Eigen::VectorXd& THETA, const unsigned int Q);
-RcppExport SEXP _plFA_get_S2(SEXP THETASEXP, SEXP QSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type Q(QSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_S2(THETA, Q));
-    return rcpp_result_gen;
-END_RCPP
-}
-// grad_S2
-Eigen::MatrixXd grad_S2(Eigen::Map<Eigen::MatrixXd> A, const Eigen::VectorXd& THETA, const unsigned int IDX);
-RcppExport SEXP _plFA_grad_S2(SEXP ASEXP, SEXP THETASEXP, SEXP IDXSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type IDX(IDXSEXP);
-    rcpp_result_gen = Rcpp::wrap(grad_S2(A, THETA, IDX));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -105,12 +80,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // plFA
-Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> DATA, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SILENTFLAG, const bool CHECKCONVERGENCE, const double TOL, const int TOLCOUNTER, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int STEPSIZEFLAG, const unsigned int SEED);
-RcppExport SEXP _plFA_plFA(SEXP DATASEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SILENTFLAGSEXP, SEXP CHECKCONVERGENCESEXP, SEXP TOLSEXP, SEXP TOLCOUNTERSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP, SEXP SEEDSEXP) {
+Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> FREQ, const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SILENTFLAG, const bool CHECKCONVERGENCE, const double TOL, const int TOLCOUNTER, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int STEPSIZEFLAG, const unsigned int SEED);
+RcppExport SEXP _plFA_plFA(SEXP FREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SILENTFLAGSEXP, SEXP CHECKCONVERGENCESEXP, SEXP TOLSEXP, SEXP TOLCOUNTERSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP, SEXP SEEDSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA_INIT(THETA_INITSEXP);
@@ -132,7 +108,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const unsigned int >::type SAMPLING_WINDOW(SAMPLING_WINDOWSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
-    rcpp_result_gen = Rcpp::wrap(plFA(DATA, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, CHECKCONVERGENCE, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, SEED));
+    rcpp_result_gen = Rcpp::wrap(plFA(FREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, CHECKCONVERGENCE, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, SEED));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -190,8 +166,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // estimate_J
-Rcpp::List estimate_J(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::VectorXd& THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int CORRFLAG);
-RcppExport SEXP _plFA_estimate_J(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP) {
+Rcpp::List estimate_J(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::VectorXd& THETA, int CORRFLAG);
+RcppExport SEXP _plFA_estimate_J(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -199,26 +175,23 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd& >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
     Rcpp::traits::input_parameter< int >::type CORRFLAG(CORRFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(estimate_J(Y, C_VEC, A, THETA, FREQ, CORRFLAG));
+    rcpp_result_gen = Rcpp::wrap(estimate_J(Y, C_VEC, A, THETA, CORRFLAG));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
-    {"_plFA_get_S", (DL_FUNC) &_plFA_get_S, 2},
     {"_plFA_get_par_from_S", (DL_FUNC) &_plFA_get_par_from_S, 1},
+    {"_plFA_get_S", (DL_FUNC) &_plFA_get_S, 2},
     {"_plFA_grad_S", (DL_FUNC) &_plFA_grad_S, 3},
-    {"_plFA_get_S2", (DL_FUNC) &_plFA_get_S2, 2},
-    {"_plFA_grad_S2", (DL_FUNC) &_plFA_grad_S2, 3},
     {"_plFA_multiThread_completePairwise", (DL_FUNC) &_plFA_multiThread_completePairwise, 10},
-    {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 22},
+    {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 23},
     {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
     {"_plFA_compute_pair", (DL_FUNC) &_plFA_compute_pair, 9},
     {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 6},
-    {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 6},
+    {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 5},
     {NULL, NULL, 0}
 };
 

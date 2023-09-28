@@ -89,7 +89,8 @@ Rcpp::List multiThread_completePairwise(
 /* MAIN FUNCTION  for STOCHASTIC OPTIMIZATION*/
 // [[Rcpp::export]]
 Rcpp::List plFA(
-    Eigen::Map<Eigen::MatrixXd> DATA,                    // Manifest data
+    Eigen::Map<Eigen::MatrixXd> FREQ,                    // Frequency table
+    const unsigned int N,                    // Sample size
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
     Eigen::Map<Eigen::VectorXd> THETA_INIT,                  // Initial values for thresholds parameters
@@ -121,7 +122,7 @@ Rcpp::List plFA(
   if(SILENTFLAG == 0)Rcpp::Rcout << "Started!\n";
 
   const unsigned int d = THETA_INIT.size();
-  const unsigned int n = DATA.rows();                                             // number of units
+  const unsigned int n = N;                                             // number of units
   const unsigned int p = CONSTRMAT.rows();                                             // number of items
   const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
   const unsigned int c = C_VEC.sum();                                          // total number of categories
@@ -137,10 +138,23 @@ Rcpp::List plFA(
   unsigned int tolObj_counter = 0;
 
   // Compute frequencies, items_pairs and items_pools
-  Eigen::MatrixXd pairs_table(5,1);
+  // Eigen::MatrixXd pairs_table(5,1);
   Eigen::MatrixXd items_pairs(2,P);
-  std::vector<std::vector<int>> items_pools(p);
-  pairs_freq_cpp(DATA, C_VEC, pairs_table, items_pairs, items_pools);
+  // std::vector<std::vector<int>> items_pools(p);
+  // pairs_freq_cpp(DATA, C_VEC, pairs_table, items_pairs, items_pools);
+
+  unsigned int idx = 0;
+  for(unsigned int k = 1; k < p; k++){
+    const unsigned int ck = C_VEC(k);
+    for(unsigned int l = 0; l < k; l ++){
+
+      items_pairs(0, idx) = k;
+      items_pairs(1, idx) = l;
+      idx++;
+    }
+  }
+
+  Eigen::MatrixXd pairs_table = FREQ;
 
   // Rearrange parameters
   Eigen::VectorXd theta = THETA_INIT;
@@ -150,7 +164,7 @@ Rcpp::List plFA(
 
   // Initialize vector of indexes for entries in pairs_table
   std::vector<int> outloop_pool;
-  std::vector<int> full_pool(items_pairs.cols()) ;
+  std::vector<int> full_pool(P) ;
   std::iota (std::begin(full_pool), std::end(full_pool), 0);
   std::vector<int> chosen_pairs;                                              // Vector recording pairs chosen at each iteration
 

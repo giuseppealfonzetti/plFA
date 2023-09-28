@@ -13,6 +13,7 @@
 #' \eqn{\{0, 1, 2\}}.
 #' @param C_VEC Integer vector indicating how many possible categories are associated to
 #' each item in 'Y'.
+#' @export
 pairs_freq <- function(Y, C_VEC) {
     .Call(`_plFA_pairs_freq`, Y, C_VEC)
 }
@@ -29,20 +30,6 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param C Sum of the number of categories for each item.
 NULL
 
-#' Get latent correlation matrix from theta
-#'
-#' get_Sigma_u() extracts the latent correlation matrix from theta assuming
-#' theta elements to be reparametrised following the
-#' Lewandowski-Kurowicka-Joe (2009) transform.
-#'
-#' @param THETA Numerical vector of parameters.
-#' @param Q Number of latent variables.
-#'
-#' @export
-get_S <- function(THETA, Q) {
-    .Call(`_plFA_get_S`, THETA, Q)
-}
-
 #' Get transformed parameters from latent correlation matrix
 #'
 #' Use Lewandowski-Kurowicka-Joe (2009) transformation on latent correlations
@@ -54,26 +41,22 @@ get_par_from_S <- function(S) {
     .Call(`_plFA_get_par_from_S`, S)
 }
 
-grad_S <- function(A, THETA, IDX) {
-    .Call(`_plFA_grad_S`, A, THETA, IDX)
-}
-
-#' @export
-get_S2 <- function(THETA, Q) {
-    .Call(`_plFA_get_S2`, THETA, Q)
-}
-
 #' Get latent correlation matrix from theta
 #'
-#' get_Sigma_u() extracts the latent correlation matrix from theta assuming
+#' get_S() extracts the latent correlation matrix from theta assuming
 #' theta elements to be reparametrised following the
 #' Lewandowski-Kurowicka-Joe (2009) transform.
 #'
 #' @param THETA Numerical vector of parameters.
 #' @param Q Number of latent variables.
 #'
-grad_S2 <- function(A, THETA, IDX) {
-    .Call(`_plFA_grad_S2`, A, THETA, IDX)
+#' @export
+get_S <- function(THETA, Q) {
+    .Call(`_plFA_get_S`, THETA, Q)
+}
+
+grad_S <- function(A, THETA, IDX) {
+    .Call(`_plFA_grad_S`, A, THETA, IDX)
 }
 
 #' Complete pairiwse iteration with multithreading option//'
@@ -82,8 +65,8 @@ multiThread_completePairwise <- function(Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_R
     .Call(`_plFA_multiThread_completePairwise`, Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
 }
 
-plFA <- function(DATA, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT = 50L, SILENTFLAG = 1L, CHECKCONVERGENCE = FALSE, TOL = 1e-6, TOLCOUNTER = 10L, EACHCLOCK = 100L, PAR1 = 1, PAR2 = 1, PAR3 = .75, SAMPLING_WINDOW = 1L, STEPSIZEFLAG = 0L, SEED = 123L) {
-    .Call(`_plFA_plFA`, DATA, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, CHECKCONVERGENCE, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, SEED)
+plFA <- function(FREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT = 50L, SILENTFLAG = 1L, CHECKCONVERGENCE = FALSE, TOL = 1e-6, TOLCOUNTER = 10L, EACHCLOCK = 100L, PAR1 = 1, PAR2 = 1, PAR3 = .75, SAMPLING_WINDOW = 1L, STEPSIZEFLAG = 0L, SEED = 123L) {
+    .Call(`_plFA_plFA`, FREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, CHECKCONVERGENCE, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, SEED)
 }
 
 #' @export
@@ -115,7 +98,7 @@ estimate_H <- function(C_VEC, A, THETA, FREQ, N, CORRFLAG) {
 #' of the composite score
 #'
 #' @export
-estimate_J <- function(Y, C_VEC, A, THETA, FREQ, CORRFLAG) {
-    .Call(`_plFA_estimate_J`, Y, C_VEC, A, THETA, FREQ, CORRFLAG)
+estimate_J <- function(Y, C_VEC, A, THETA, CORRFLAG) {
+    .Call(`_plFA_estimate_J`, Y, C_VEC, A, THETA, CORRFLAG)
 }
 

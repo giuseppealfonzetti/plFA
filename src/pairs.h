@@ -40,7 +40,7 @@ void pair_contribution(
 
   // rearrange parameters
   Eigen::MatrixXd Lam            = get_Lam(A, c, THETA);
-  Eigen::MatrixXd Sigma_u        = get_S2(THETA, q);
+  Eigen::MatrixXd Sigma_u        = get_S(THETA, q);
   Eigen::VectorXd tau            = THETA.segment(0,c-p);
   Eigen::VectorXd transformed_rhos=THETA.segment(nthr+nload, ncorr);
 
@@ -305,7 +305,7 @@ void pair_contribution(
     if(CORRFLAG == 1){
 
       for(int thro_idx = 0; thro_idx < ncorr; thro_idx ++){
-        const Eigen::MatrixXd dSigma = grad_S2(A, transformed_rhos, thro_idx);
+        const Eigen::MatrixXd dSigma = grad_S(A, transformed_rhos, thro_idx);
         const double d_rho_kl = lambdak.transpose() * dSigma * lambdal;
         tmp_gradient(iter) += tmp_kl * d_rho_kl;
         iter++;

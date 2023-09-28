@@ -4,7 +4,7 @@ test_that("check pair gradient ",{
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
   Load <- gen_loadings(CONSTRMAT = A)
   thr <- c(-1, 0, 1)
-  S <- get_S2(THETA = rnorm(q*(q-1)/2), Q = q)
+  S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
   D <- sim_data(
     SAMPLE_SIZE = n,
     LOADINGS = Load,

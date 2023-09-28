@@ -26,6 +26,7 @@ Imports:
     RcppClock,
     mvtnorm,
     matrixcalc,
-    purrr
+    purrr,
+    dplyr
 URL: https://github.com/giuseppealfonzetti/plFA
 BugReports: https://github.com/giuseppealfonzetti/plFA/issues

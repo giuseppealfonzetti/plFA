@@ -4,7 +4,7 @@
 \alias{estimate_J}
 \title{Estimate of J}
 \usage{
-estimate_J(Y, C_VEC, A, THETA, FREQ, CORRFLAG)
+estimate_J(Y, C_VEC, A, THETA, CORRFLAG)
 }
 \description{
 Compute a sample estimate of the variability matrix via the sample average outer product

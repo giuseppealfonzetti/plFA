@@ -12,10 +12,13 @@ setClass('StoFit', slots = c(
   pathAvTheta = 'matrix',
   pathGrad = 'matrix',
   control = 'list',
+  lastIter = 'numeric',
   cppTime = 'ANY'
 ))
+
 # Object returned by fit_plFA
 setClass('PlFaFit', slots = c(
+  freq = 'matrix',
   cnstr = 'Constraints',
   dims = 'Dimensions',
   method = 'character',

@@ -25,12 +25,42 @@ fit_plFA(
 }}
 
 \item{METHOD}{Label for the method chosen. Possible values are: \tabular{ll}{
-\code{ucminf} \tab for estimation via the numerical optimiser from the \code{ucminf} package. \cr
+\code{'ucminf'} \tab for estimation via the numerical optimiser from the \code{ucminf} package. \cr
 \tab \cr
-\code{bernoulli} \tab for stochastic estimation with weights following a Bernoulli distribution. \cr
+\code{'bernoulli'} \tab for stochastic estimation with weights following a Bernoulli distribution. \cr
 \tab \cr
-\code{hyper} \tab for stochastic estimation with weights following a multivariate hypergeometric distribution. \cr
+\code{'hyper'} \tab for stochastic estimation with weights following a multivariate hypergeometric distribution. \cr
 }}
+
+\item{CONTROL}{List of control options to pass to the optimiser: \tabular{ll}{
+\code{control} \tab  See \code{ucminf} documentation \cr
+\tab \cr
+\code{hessian} \tab  See \code{ucminf} documentation \cr
+\tab \cr
+\code{PAIRS_PER_ITERATION} \tab  (Average) number of pairs to draw stochastically at each iteration with method (\code{'bernoulli'}) \code{'hyper'}.   \cr
+\tab \cr
+\code{MAXT} \tab  Maximum number of iterations.\cr
+\tab \cr
+\code{BURN} \tab  Length of the burning period.\cr
+\tab \cr
+\code{ETA} \tab  Initial stepsize.\cr
+\tab \cr
+\code{PAR1} \tab Hyperparameter for stepsize scheduling by Xu (2011): Scaling. \cr
+\tab \cr
+\code{PAR2} \tab Hyperparameter for stepsize scheduling by Xu (2011): Smallest Hessian eigenvalue. \cr
+\tab \cr
+\code{PAR1} \tab Hyperparameter for stepsize scheduling by Xu (2011): Decay rate. \cr
+\tab \cr
+\code{STEPSIZEFLAG} \tab Choose stepsize scheduling: Set 0 for Polyak and Juditsky (1992), 1 for Xu (2011). \cr
+\tab \cr
+\code{EACHCLOCK} \tab How often (in terms of iterations) to measure single iteration computational times (using \code{RcppClock}. \cr
+\tab \cr
+
+}}
+
+\item{INIT}{Initialising vector. If not provided, optiisation starts at the zero vector.}
+
+\item{ITERATIONS_SUBSET}{Vector with the indexes of iterations used to store trajectories.}
 
 \item{NCORES}{Integer value setting the number of threads to carry out the estimation.}
 }

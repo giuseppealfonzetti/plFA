@@ -12,7 +12,7 @@ get_S(THETA, Q)
 \item{Q}{Number of latent variables.}
 }
 \description{
-get_Sigma_u() extracts the latent correlation matrix from theta assuming
+get_S() extracts the latent correlation matrix from theta assuming
 theta elements to be reparametrised following the
 Lewandowski-Kurowicka-Joe (2009) transform.
 }

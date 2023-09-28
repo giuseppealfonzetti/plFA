@@ -7,7 +7,7 @@
 get_lambda(THETA, C, P, Q)
 }
 \arguments{
-\item{THETA}{Numerical vector of parameters.}
+\item{THETA}{Raw vector of parameters.}
 
 \item{C}{Sum of the number of categories for each item.}
 
