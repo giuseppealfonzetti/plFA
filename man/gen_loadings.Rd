@@ -4,7 +4,7 @@
 \alias{gen_loadings}
 \title{Construct loading matrix}
 \usage{
-gen_loadings(FIXED = NULL, CONSTRMAT, SEED = 123)
+gen_loadings(FIXED = NULL, CONSTRMAT, SEED = 123, LB = 0, UB = 1)
 }
 \arguments{
 \item{FIXED}{Fixed value to assign to all free loadings. If 'NULL' it draws
@@ -16,6 +16,10 @@ A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 to \eqn{0}.}
 
 \item{SEED}{Random seed.}
+
+\item{LB}{Lower bound for uniform random generator. Default set to 0.}
+
+\item{UB}{Upper bound for uniform random generator. Default set to 1.}
 }
 \description{
 gen_loadings() construct a (possibly) random loading matrix following the

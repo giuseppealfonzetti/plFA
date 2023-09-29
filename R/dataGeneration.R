@@ -28,13 +28,14 @@ compute_frequencies <- function(Y, C_VEC){
 #' @param P Number of items.
 #' @param Q Number of latent vaiables.
 #' @param STRUCT Label for the constraint structure chosen. Only two possible values:
-#' 'triangular' and 'simple'.
+#' 'triangular', 'simple' and 'crossed'.
+#' @param CROSS Integer referring to the number of items latent i shares with latent i+1
 #'
 #' @export
-build_constrMat <- function(P, Q, STRUCT = 'triangular'){
+build_constrMat <- function(P, Q, STRUCT = 'triangular', CROSS = NULL){
   if(!is.finite(P))stop('P not numeric.')
   if(!is.finite(Q))stop('Q not numeric.')
-  if(!(STRUCT %in% c('simple', 'triangular')))stop('STRUCT not available.')
+  if(!(STRUCT %in% c('simple', 'triangular', 'crossed')))stop('STRUCT not available.')
   if(STRUCT == 'triangular'){
     # Build lower trinagular matrix
     constrMat <- matrix(1, nrow = P, ncol = Q)
@@ -55,6 +56,19 @@ build_constrMat <- function(P, Q, STRUCT = 'triangular'){
     }
     h <- Q
     constrMat[ (loadings_per_factor*(h-1)+1) : (loadings_per_factor*(h-1) + loadings_per_factor + remaining_loadings), h] <- rep(1,loadings_per_factor + remaining_loadings)
+  } else if( STRUCT == 'crossed'){
+    if(is.null(CROSS)) CROSS <- 1
+
+    # Each item to one factor
+    loadings_per_factor <- P %/% Q
+    remaining_loadings <- P %% Q
+
+    constrMat <- matrix(0, nrow = P, ncol = Q)
+    for (h in 1:(Q-1)) {
+      constrMat[ max(1, (loadings_per_factor*(h-1) + 1 - CROSS)) : (loadings_per_factor*(h-1) + loadings_per_factor), h] <- 1
+    }
+    h <- Q
+    constrMat[ max(1, (loadings_per_factor*(h-1) + 1 - CROSS)) : (loadings_per_factor*(h-1) + loadings_per_factor + remaining_loadings), h] <- 1
 
   }
   return(constrMat)
@@ -73,10 +87,11 @@ build_constrMat <- function(P, Q, STRUCT = 'triangular'){
 #' A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 #' to \eqn{0}.
 #' @param SEED Random seed.
-#'
+#' @param LB Lower bound for uniform random generator. Default set to 0.
+#' @param UB Upper bound for uniform random generator. Default set to 1.
 #' @export
 # generate the matrix of loadings [pxq] drawing from normal rv
-gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123){
+gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123, LB = 0, UB = 1){
   if(!is.matrix(CONSTRMAT))stop('CONSTRMAT must be a matrix')
 
   set.seed(SEED)
@@ -86,7 +101,7 @@ gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123){
   out <-  CONSTRMAT
   for (j in 1:p) {
     for (h in 1:q) {
-      if(out[j,h] != 0) out[j,h] <- runif(1, 0,1)
+      if(out[j,h] != 0) out[j,h] <- runif(1, LB, UB)
     }
   }
 

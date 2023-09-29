@@ -4,7 +4,7 @@
 \alias{build_constrMat}
 \title{Automatic construction of simple constraints matrices}
 \usage{
-build_constrMat(P, Q, STRUCT = "triangular")
+build_constrMat(P, Q, STRUCT = "triangular", CROSS = NULL)
 }
 \arguments{
 \item{P}{Number of items.}
@@ -12,7 +12,9 @@ build_constrMat(P, Q, STRUCT = "triangular")
 \item{Q}{Number of latent vaiables.}
 
 \item{STRUCT}{Label for the constraint structure chosen. Only two possible values:
-'triangular' and 'simple'.}
+'triangular', 'simple' and 'crossed'.}
+
+\item{CROSS}{Integer referring to the number of items latent i shares with latent i+1}
 }
 \description{
 build_constrMat() creates a binary matrix with entries equal to 1
