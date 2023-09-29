@@ -11,12 +11,13 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
 <!-- badges: end -->
 
-The plFA allows the estimation of confirmatory factor models for ordinal
-data using stochastic and numeric pairwise likelihood optimisation.
+The plFA package allows the estimation of confirmatory factor models for
+ordinal data using stochastic and numeric pairwise likelihood
+optimisation.
 
 ## Installation
 
-You can install the development version of plFA from
+You can install the development version of plFAfrom
 [GitHub](https://github.com/) with:
 
 ``` r
@@ -61,7 +62,7 @@ cat <- apply(D, 2, max) + 1
 theta <- getPar(get_theta(rep(thr, p), Load, S, cat, A), C = sum(cat), P = p, Q = q, CONSTRMAT = A)
 ```
 
-Estimate the model
+Estimate the model with the stochastic optimiser
 
 ``` r
 
@@ -83,13 +84,15 @@ stFit <- fit_plFA(
 #> 2. Optimising with hyper...
 #> 
 #> 3. Rearranging output...
-#> 4. Done! (0.87 secs)
+#> 4. Done! (0.9 secs)
 
 # extract estimated parameter vector
 stPar <- getPar(stFit)
 
 # extract list of parameter estimates
 stParList <- getPar(stFit, OPTION = 'list')
+matrixcalc::is.positive.definite(stParList$latent_correlations)
+#> [1] TRUE
 
 # mean square error
 mean((stPar-theta)^2)
@@ -105,7 +108,7 @@ numFit <- fit_plFA(
   METHOD = 'ucminf')
 #> 1. Initialising at default values
 #> 2. Optimising with ucminf...
-#> 3. Done! (20.13 secs)
+#> 3. Done! (20.63 secs)
 
 # extract estimated parameter vector
 numPar <- getPar(numFit)

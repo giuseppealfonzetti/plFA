@@ -20,11 +20,11 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
 <!-- badges: end -->
 
-The plFA allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
+The plFA package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
 
 ## Installation
 
-You can install the development version of plFA from [GitHub](https://github.com/) with:
+You can install the development version of plFAfrom [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -68,7 +68,7 @@ cat <- apply(D, 2, max) + 1
 theta <- getPar(get_theta(rep(thr, p), Load, S, cat, A), C = sum(cat), P = p, Q = q, CONSTRMAT = A)
 ```
 
-Estimate the model
+Estimate the model with the stochastic optimiser
 
 ```{r}
 
