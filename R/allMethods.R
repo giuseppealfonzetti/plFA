@@ -54,9 +54,9 @@ extract_theta_path <- function(OBJ, LAB = 'pathAvTheta'){
 #'    \code{'list'} \tab List containing the ordered thresholds vector, the loading matrix and the latent correlation matrix. \cr
 #' }
 #' @export
-setGeneric('getPar', function(OBJ, OPTION, ...) standardGeneric('getPar'))
-setMethod('getPar', 'PlFaFit', function(OBJ, OPTION) extract_par(THETA = OBJ@theta, OPTION, C = sum(OBJ@dims@cat), P = OBJ@dims@p, Q = OBJ@dims@q, CONSTRMAT = OBJ@cnstr@loadings))
-setMethod('getPar', 'vector', function(OBJ, OPTION, C, P, Q, CONSTRMAT) extract_par(THETA = OBJ, OPTION, C, P, Q, CONSTRMAT))
+setGeneric('getPar', function(OBJ, ...) standardGeneric('getPar'))
+setMethod('getPar', 'PlFaFit', function(OBJ, ...) extract_par(THETA = OBJ@theta, C = sum(OBJ@dims@cat), P = OBJ@dims@p, Q = OBJ@dims@q, CONSTRMAT = OBJ@cnstr@loadings, ...))
+setMethod('getPar', 'vector', function(OBJ, ...) extract_par(THETA = OBJ, ...))
 
 #' Extract parameters
 #'
@@ -72,7 +72,7 @@ setMethod('getPar', 'vector', function(OBJ, OPTION, C, P, Q, CONSTRMAT) extract_
 #' @param P Number if items
 #' @param Q Number of latent variables
 #' @param CONSTRMAT Matrix of dimension \eqn{p * q} with binary loading constraints. 1 for free loadings, 0 otherwise.
-extract_par <- function(THETA, OPTION, C, P, Q, CONSTRMAT){
+extract_par <- function(THETA, OPTION = 'transformed', C, P, Q, CONSTRMAT){
   if(!(OPTION %in% c('raw', 'transformed', 'list'))) stop('The OPTION chosen is not implemented')
 
 

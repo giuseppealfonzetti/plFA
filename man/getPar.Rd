@@ -4,7 +4,7 @@
 \alias{getPar}
 \title{Extract parameters}
 \usage{
-getPar(OBJ, OPTION, ...)
+getPar(OBJ, ...)
 }
 \arguments{
 \item{OBJ}{Object of class StoFit, PlFaFit. Also usable on raw theta vector to extract \code{'transformed'} and \code{'list'}.}

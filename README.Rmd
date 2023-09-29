@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
 <!-- badges: end -->
 
-The goal of plFA is to ...
+The plFA allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
 
 ## Installation
 
@@ -28,30 +28,91 @@ You can install the development version of plFA from [GitHub](https://github.com
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("giuseppealfonzetti/gammaFrailty2")
+devtools::install_github("giuseppealfonzetti/plFA")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+First, generate a synthetic dataset
 
 ```{r example}
 library(plFA)
-## basic example code
+set.seed(123)
+
+# p = number of items, q = number of latent variables, n = number of observations
+p <- 30; q <- 5; n <- 5000L
+
+# Simple loading matrix constraints
+A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+
+# Draw some random loadings according to constraints
+Load <- gen_loadings(CONSTRMAT = A)
+
+# Thresholds vector for each item
+thr <- c(-1.5, 0, 1.5)
+
+# Generate random latent correlation matrix
+S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
+
+# simulate the data
+D <- sim_data(
+  SAMPLE_SIZE = n,
+  LOADINGS = Load,
+  THRESHOLDS = thr,
+  LATENT_COV = S)
+
+# categories per item
+cat <- apply(D, 2, max) + 1
+
+# store true parameter vector (raw parameterisation)
+theta <- getPar(get_theta(rep(thr, p), Load, S, cat, A), C = sum(cat), P = p, Q = q, CONSTRMAT = A)
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+Estimate the model
 
-```{r cars}
-summary(cars)
+```{r}
+
+# Set options for cpp stochastic optimiser
+cpp_ctrl <- list(
+  MAXT = 1000,
+  PAIRS_PER_ITERATION = 8
+)
+
+# Fit the model with stochastic optimiser
+stFit <- fit_plFA(
+  DATA = D,
+  CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'= 1),
+  METHOD = 'hyper',
+  CONTROL = cpp_ctrl,
+  ITERATIONS_SUBSET = seq(0, cpp_ctrl$MAXT, 100)
+)
+
+# extract estimated parameter vector
+stPar <- getPar(stFit)
+
+# extract list of parameter estimates
+stParList <- getPar(stFit, OPTION = 'list')
+
+# mean square error
+mean((stPar-theta)^2)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+Numerical estimation as comparison
+```{r}
+numFit <- fit_plFA(
+  DATA = D,
+  CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'=1),
+  METHOD = 'ucminf')
 
-You can also embed plots, for example:
+# extract estimated parameter vector
+numPar <- getPar(numFit)
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+# extract list of parameter estimates
+numParList <- getPar(numFit, OPTION = 'list')
+
+# mean square error
+mean((numPar-theta)^2)
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+
+
