@@ -202,7 +202,7 @@ Rcpp::List plFA(
   for(unsigned int iter = 1; iter <= MAXT; iter++){
     // check user interruption
     Rcpp::checkUserInterrupt();
-    Rcpp::Rcout << "\rIteration:" << iter << " ";
+    if(SILENTFLAG == 0) Rcpp::Rcout << "\rIteration:" << iter << " ";
     if(iter % EACHCLOCK == 0) clock.tick("Iteration");
 
     // Initialize empty contributions for iteration iter
@@ -236,8 +236,6 @@ Rcpp::List plFA(
     iter_nll *= scale; iter_gradient *= scale;
     if(iter % EACHCLOCK == 0) clock.tock("Stochastic_gradient");
 
-    if(SILENTFLAG == 0){Rcpp::Rcout <<" |_ iter_nll:"<<iter_nll<<"\n";}
-
     ///////////////////////////
     /*   PARAMETERS UPDATE  */
     ///////////////////////////
@@ -259,7 +257,6 @@ Rcpp::List plFA(
     if(iter % EACHCLOCK == 0) clock.tock("Update");
 
     // 4. Post update loadings normalisation, if needed
-    if(SILENTFLAG == 0)Rcpp::Rcout <<" |_ post-";
     bool checkevent = false;
     stabilise_loadings(CONSTRMAT, C_VEC, theta, checkevent);
     if(checkevent)post_index.push_back(iter);
