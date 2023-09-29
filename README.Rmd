@@ -92,6 +92,7 @@ stPar <- getPar(stFit)
 
 # extract list of parameter estimates
 stParList <- getPar(stFit, OPTION = 'list')
+matrixcalc::is.positive.definite(stParList$latent_correlations)
 
 # mean square error
 mean((stPar-theta)^2)
