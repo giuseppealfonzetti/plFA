@@ -64,7 +64,7 @@ D <- sim_data(
 # categories per item
 cat <- apply(D, 2, max) + 1
 
-# store true parameter vector (raw parameterisation)
+# store true parameter vector (interpretable parameterisation)
 theta <- getPar(get_theta(rep(thr, p), Load, S, cat, A), C = sum(cat), P = p, Q = q, CONSTRMAT = A)
 ```
 
