@@ -20,11 +20,12 @@ LinkingTo:
     RcppParallel,
     RcppClock
 Imports: 
-    Rcpp,
-    RcppEigen,
-    RcppParallel,
-    RcppClock,
+    Rcpp (>= 1.0.11),
+    RcppEigen  (>= 0.3.3.9.3),
+    RcppParallel  (>= 5.1.7),
+    RcppClock  (>= 1.1),
     mvtnorm,
+    ucminf,
     matrixcalc,
     purrr,
     dplyr
