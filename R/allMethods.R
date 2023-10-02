@@ -176,7 +176,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
     asy_var <- diag(sandwich/N)
     a1 <- PAIRS*(PAIRS - PPI)/(PPI*(PAIRS-1))
     a2 <- (PAIRS-PPI)/(PPI*(PAIRS-1))
-    opt_noise <- diag((a1*Hhat - a2*Jhat)/(N*IT))
+    opt_noise <- diag(Hinv%*%(a1*Hhat - a2*Jhat)%*%Hinv/(N*IT))
 
   }
   message('Done!')
