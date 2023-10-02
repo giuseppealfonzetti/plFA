@@ -2,17 +2,17 @@
 % Please edit documentation in R/allMethods.R
 \name{extract_theta_path}
 \alias{extract_theta_path}
-\title{Extract parameters trajectory along the optimisation from
-object of class StoFit}
+\title{Extract parameters trajectory along the optimisation}
 \usage{
-extract_theta_path(OBJ, LAB = "pathAvTheta")
+extract_theta_path(OBJ, LAB = "pathAvTheta", OPTION = "transformed")
 }
 \arguments{
-\item{OBJ}{Object of class StoFit}
+\item{OBJ}{Object of class FitPlFa}
 
 \item{LAB}{Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.}
+
+\item{OPTION}{Parameterisation option.}
 }
 \description{
-Extract parameters trajectory along the optimisation from
-object of class StoFit
+Extract parameters trajectory along the optimisation
 }

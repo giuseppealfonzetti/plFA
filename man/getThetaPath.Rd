@@ -4,12 +4,14 @@
 \alias{getThetaPath}
 \title{Extract parameters trajectory along the optimisation}
 \usage{
-getThetaPath(OBJ, LAB)
+getThetaPath(...)
 }
 \arguments{
-\item{OBJ}{Object of class StoFit or PlFaFit}
+\item{OBJ}{Object of class StoFit}
 
-\item{LAB}{Can take values \code{'pathTheta'} for raw trajectories or \code{'pathAvTheta'} for averaged ones. Set by default at \code{pathAvTheta}.}
+\item{LAB}{Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.}
+
+\item{OPTION}{Parameterisation option.}
 }
 \description{
 Extract parameters trajectory along the optimisation

@@ -18,27 +18,37 @@ setMethod('show', 'PlFaFit', function(object){
 
 #' Extract parameters trajectory along the optimisation
 #'
-#' @param OBJ Object of class StoFit or PlFaFit
-#' @param LAB Can take values \code{'pathTheta'} for raw trajectories or \code{'pathAvTheta'} for averaged ones. Set by default at \code{pathAvTheta}.
-#'
-#' @export
-setGeneric('getThetaPath', function(OBJ, LAB) standardGeneric('getThetaPath'))
-setMethod('getThetaPath', 'PlFaFit', function(OBJ, LAB) getThetaPath(OBJ = OBJ@stoFit, LAB))
-setMethod('getThetaPath', 'StoFit', function(OBJ, LAB) extract_theta_path(OBJ, LAB))
-
-#' Extract parameters trajectory along the optimisation from
-#' object of class StoFit
-#'
 #' @param OBJ Object of class StoFit
 #' @param LAB Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.
-extract_theta_path <- function(OBJ, LAB = 'pathAvTheta'){
+#' @param OPTION Parameterisation option.
+
+#' @export
+setGeneric('getThetaPath', function(...) standardGeneric('getThetaPath'))
+setMethod('getThetaPath', 'PlFaFit', function(...) extract_theta_path(...))
+
+#' Extract parameters trajectory along the optimisation
+#'
+#' @param OBJ Object of class FitPlFa
+#' @param LAB Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.
+#' @param OPTION Parameterisation option.
+extract_theta_path <- function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed'){
   if(!(LAB%in%c('pathTheta', 'pathAvTheta'))) stop('The extraction of this path is not implemented.')
-  iters <- OBJ@trajSubset
-  path  <- slot(OBJ, LAB)
+  if(!(OPTION%in%c('raw', 'transformed'))) stop('OPTION choice not implemented.')
+
+  # out <- list()
+  iters <- OBJ@stoFit@trajSubset
+  path  <- slot(OBJ@stoFit, LAB)
 
   out <- dplyr::tibble(iter = iters)
-  out$par <- split(t(path), rep(1:nrow(path), each = ncol(path)))
+  parList <- split(t(path), rep(1:nrow(path), each = ncol(path)))
+  newParList <- lapply(parList, function(x) extract_par(THETA= x,
+                                            OPTION = OPTION,
+                                            C = sum(OBJ@dims@cat),
+                                            P = OBJ@dims@p,
+                                            Q = OBJ@dims@q,
+                                            CONSTRMAT = OBJ@cnstr@loadings))
 
+  out$par <- newParList
   return(out)
 }
 
