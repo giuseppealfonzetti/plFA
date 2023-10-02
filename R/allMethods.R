@@ -23,8 +23,8 @@ setMethod('show', 'PlFaFit', function(object){
 #' @param OPTION Parameterisation option.
 
 #' @export
-setGeneric('getThetaPath', function(...) standardGeneric('getThetaPath'))
-setMethod('getThetaPath', 'PlFaFit', function(...) extract_theta_path(...))
+setGeneric('getThetaPath', function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed') standardGeneric('getThetaPath'))
+setMethod('getThetaPath', 'PlFaFit', function(OBJ, LAB, OPTION) extract_theta_path(OBJ, LAB, OPTION))
 
 #' Extract parameters trajectory along the optimisation
 #'
