@@ -164,7 +164,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
     CORRFLAG = CORRFLAG
   )$est_J
 
-  if(!(det(H)>0)) stop('H not invertible.')
+  if(!(det(Hhat)>0)) stop('H not invertible.')
   message('3. Inverting H...')
   invH <- solve(Hhat)
   sandwich <- invH %*% Jhat %*% invH
