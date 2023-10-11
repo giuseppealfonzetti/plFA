@@ -19,28 +19,37 @@
 //' Used by external optimisers
 // [[Rcpp::export]]
 Rcpp::List multiThread_completePairwise(
-    Eigen::Map<Eigen::MatrixXd> Y,                    // Manifest data
+    const unsigned int N,
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
-    Eigen::Map<Eigen::MatrixXd> A,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
-    Eigen::Map<Eigen::VectorXd> TAU,                  // Initial values for thresholds parameters
-    Eigen::Map<Eigen::VectorXd> LAMBDA,               // Initial values for loadings parameters
-    Eigen::Map<Eigen::VectorXd> TRANSFORMED_RHOS,     // Initial values for latent correlations reparameterized trough Fisher's transformation
+    Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
+    Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
     const unsigned int CORRFLAG,
     const unsigned int GRFLAG,
     const unsigned int SILENTFLAG
 ){
+  // Eigen::Map<Eigen::VectorXd> TAU,                  // Initial values for thresholds parameters
+  // Eigen::Map<Eigen::VectorXd> LAMBDA,               // Initial values for loadings parameters
+  // Eigen::Map<Eigen::VectorXd> TRANSFORMED_RHOS,     // Initial values for latent correlations reparameterized trough Fisher's transformation
 
 
-  Eigen::VectorXd rep_tau = TAU;
-  unsigned int n = Y.rows();                                             // number of units
-  unsigned int p = A.rows();                                             // number of items
-  unsigned int q = A.cols();                                             // number of latents
-  unsigned int ncorr = TRANSFORMED_RHOS.size();                          // number of correlations
-  unsigned int nthr = TAU.size();                                        // number of thresholds
-  unsigned int nload = LAMBDA.size();                                    // number of loadings
-  unsigned int d = nload + nthr + ncorr;                                 // number of parameters
-  unsigned int c = C_VEC.sum();                                          // total number of categories
+  const unsigned int d = THETA.size();
+  const unsigned int n = N;                                             // number of units
+  const unsigned int p = CONSTRMAT.rows();                                             // number of items
+  const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
+  const unsigned int c = C_VEC.sum();                                          // total number of categories
+  const unsigned int nthr = c-p;                                        // number of thresholds
+  const unsigned int ncorr = q*(q-1)/2;                          // number of correlations
+  const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
+
+  // unsigned int n = N;                                             // number of units
+  // unsigned int p = A.rows();                                             // number of items
+  // unsigned int q = A.cols();                                             // number of latents
+  // unsigned int ncorr = TRANSFORMED_RHOS.size();                          // number of correlations
+  // unsigned int nthr = TAU.size();                                        // number of thresholds
+  // unsigned int nload = LAMBDA.size();                                    // number of loadings
+  // unsigned int d = nload + nthr + ncorr;                                 // number of parameters
+  // unsigned int c = C_VEC.sum();                                          // total number of categories
   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
   unsigned int DFLAG, gradFLAG = 0;
 
@@ -64,7 +73,7 @@ Rcpp::List multiThread_completePairwise(
 
   // Rearrange parameters
   Eigen::VectorXd theta(d);
-  theta << rep_tau, LAMBDA, TRANSFORMED_RHOS;                                 // Complete parameters vector
+  theta << THETA;                                 // Complete parameters vector
 
   // Initialize vector of indeces for entries in pairs_table
   std::vector<int> vector_pairs(items_pairs.cols()) ;
@@ -73,7 +82,7 @@ Rcpp::List multiThread_completePairwise(
   double iter_ll = 0;
   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
-  SubsetWorker iteration_subset(A, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, gradFLAG, theta, vector_pairs);
+  SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, gradFLAG, theta, vector_pairs);
   RcppParallel::parallelReduce(0, R, iteration_subset);
   iter_ll = iteration_subset.subset_ll;
   iter_gradient = iteration_subset.subset_gradient;
@@ -86,10 +95,67 @@ Rcpp::List multiThread_completePairwise(
   return(output);
 }
 
+//' Complete pairiwse iteration with multithreading option//'
+ //' Used by external optimisers
+ // [[Rcpp::export]]
+double multiThread_completePairwise_nll(
+     const unsigned int N,
+     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
+     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
+     Eigen::VectorXd THETA,
+     Eigen::Map<Eigen::MatrixXd> FREQ,
+     const unsigned int CORRFLAG,
+     const unsigned int SILENTFLAG
+ ){
+
+   const unsigned int d = THETA.size();
+   const unsigned int n = N;                                             // number of units
+   const unsigned int p = CONSTRMAT.rows();                                             // number of items
+   const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
+   const unsigned int c = C_VEC.sum();                                          // total number of categories
+   const unsigned int nthr = c-p;                                        // number of thresholds
+   const unsigned int ncorr = q*(q-1)/2;                          // number of correlations
+   const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
+
+   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
+   unsigned int DFLAG, gradFLAG = 0;
+
+   // Copy frequencies, and build pair dictionary
+   Eigen::MatrixXd pairs_table = FREQ;
+   Eigen::MatrixXd items_pairs(2,R);
+   unsigned int r = 0;
+   for(unsigned int k = 1; k < p; k ++){
+     for(unsigned int l = 0; l < k; l++){
+       items_pairs(0, r) = k;
+       items_pairs(1, r) = l;
+       r++;
+     }
+   }
+
+   // Rearrange parameters
+   Eigen::VectorXd theta(d);
+   theta << THETA;                                 // Complete parameters vector
+
+   // Initialize vector of indeces for entries in pairs_table
+   std::vector<int> vector_pairs(items_pairs.cols()) ;
+   std::iota (std::begin(vector_pairs), std::end(vector_pairs), 0);
+
+   double iter_ll = 0;
+   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
+
+   SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 0, theta, vector_pairs);
+   RcppParallel::parallelReduce(0, R, iteration_subset);
+   iter_ll = -iteration_subset.subset_ll;
+
+   return(iter_ll/n);
+ }
+
+
 /* MAIN FUNCTION  for STOCHASTIC OPTIMIZATION*/
 // [[Rcpp::export]]
 Rcpp::List plFA(
     Eigen::Map<Eigen::MatrixXd> FREQ,                    // Frequency table
+    Eigen::Map<Eigen::MatrixXd> VALFREQ,                 // Frequency table
     const unsigned int N,                    // Sample size
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
@@ -102,7 +168,6 @@ Rcpp::List plFA(
     const unsigned int MAXT,                                      // Maximum number of iterations during the stochastic optimization
     const unsigned int TOLCOUNT = 50,                                 // How may consecutive iterations need to satisfy the convergence check in order to declare convergence
     const unsigned int SILENTFLAG = 1,
-    const bool CHECKCONVERGENCE = false,
     const double TOL = 1e-6,
     const int TOLCOUNTER = 10,
     const int EACHCLOCK= 100,
@@ -111,8 +176,9 @@ Rcpp::List plFA(
     const double PAR3 = .75,
     const unsigned int SAMPLING_WINDOW = 1,
     const unsigned int STEPSIZEFLAG = 0,
+    const unsigned int CHECKCONV = 0,
+    const unsigned int EACHCHECK = 100,
     const unsigned int SEED = 123                                 // Random seed for sampling reproducibility
-
 ){
 
   // Set up clock monitor to export to R session trough RcppClock
@@ -182,7 +248,9 @@ Rcpp::List plFA(
 
   // std::vector<double> checkGrad;
   std::vector<double> checkPar;
-  // std::vector<double> checkObj;
+  std::vector<double> check_val_nll;
+  std::vector<double> check_val_iter;
+
 
   // Compute scaling constant
   double scale;
@@ -198,6 +266,8 @@ Rcpp::List plFA(
   ///////////////////////
   /* OPTIMISATION LOOP */
   ///////////////////////
+  unsigned int conv_incr_counter = 0;
+  unsigned int conv_check_iterator = 1;
   unsigned int sampling_window_iterator = 0;
   for(unsigned int iter = 1; iter <= MAXT; iter++){
     // check user interruption
@@ -279,22 +349,72 @@ Rcpp::List plFA(
     /////////////////////////////////
     /*      CHECK CONVERGENCE      */
     /////////////////////////////////
-    if((iter > BURN) & CHECKCONVERGENCE){
+    // if((iter > BURN) & CHECKCONVERGENCE){
+    //
+    //   // check norm diff parameter vector
+    //   {
+    //     const double parNorm = (path_av_theta.row(iter)-path_av_theta.row(iter-1)).norm()/(path_av_theta.row(iter-1)).norm();
+    //     if(parNorm < TOL ){tolPar_counter ++; }else{tolPar_counter = 0;}
+    //     checkPar.push_back(parNorm);
+    //     if(tolPar_counter == TOLCOUNTER){last_iter = iter; convergence = 1; break;}
+    //   }
+    //
+    //
+    //
+    //
+    // }
 
-      // check norm diff parameter vector
-      {
-        const double parNorm = (path_av_theta.row(iter)-path_av_theta.row(iter-1)).norm()/(path_av_theta.row(iter-1)).norm();
-        if(parNorm < TOL ){tolPar_counter ++; }else{tolPar_counter = 0;}
-        checkPar.push_back(parNorm);
-        if(tolPar_counter == TOLCOUNTER){last_iter = iter; convergence = 1; break;}
+
+    if(iter % EACHCLOCK == 0) clock.tock("Iteration");
+    if(CHECKCONV == 1){
+      if(iter == BURN){
+        Eigen::VectorXd check_theta = path_av_theta.row(iter);
+        double val_nll = multiThread_completePairwise_nll(n, C_VEC, CONSTRMAT, check_theta, VALFREQ, CORRFLAG, SILENTFLAG);
+        check_val_nll.push_back(val_nll);
+        check_val_iter.push_back(iter);
+      }else if(iter > BURN){
+        if(conv_check_iterator == EACHCHECK){
+          Eigen::VectorXd check_theta = path_av_theta.row(iter);
+
+          double prev_check_nll = check_val_nll.back();
+          int prev_check_iter = check_val_iter.back();
+
+          double val_nll = multiThread_completePairwise_nll(n, C_VEC, CONSTRMAT, check_theta, VALFREQ, CORRFLAG, SILENTFLAG);
+          check_val_nll.push_back(val_nll);
+          check_val_iter.push_back(iter);
+
+          // If validation nll keeps decreasing then check tolerance
+          if(val_nll < prev_check_nll){
+            if((prev_check_nll - val_nll) < TOL){
+              convergence = 1;
+              last_iter = iter;
+              theta = path_av_theta.row(last_iter);
+              convergence = 1;
+              break;
+            }
+          }else{
+            // If validation nll increases
+            conv_incr_counter ++;
+            if(conv_incr_counter == TOLCOUNT){
+              auto minit = std::distance(std::begin(check_val_nll), std::min_element(std::begin(check_val_nll), std::end(check_val_nll)));
+              last_iter = check_val_iter.at(minit);
+              theta = path_av_theta.row(last_iter);
+              convergence = 2;
+              break;
+            }
+
+          }
+
+
+
+          conv_check_iterator = 1;
+
+        }else{
+          conv_check_iterator ++;
+        }
       }
 
-
-
-
     }
-    if(iter % EACHCLOCK == 0) clock.tock("Iteration");
-
   }
 
 
@@ -313,7 +433,8 @@ Rcpp::List plFA(
       Rcpp::Named("path_theta") = path_theta,
       Rcpp::Named("path_av_theta") = path_av_theta,
       Rcpp::Named("path_grad") = path_grad,
-      Rcpp::Named("checkPar") = checkPar,
+      Rcpp::Named("check_val_nll") = check_val_nll,
+      Rcpp::Named("check_val_iter") = check_val_iter,
       Rcpp::Named("path_nll") = path_nll,
       Rcpp::Named("post_index") = post_index,
       Rcpp::Named("last_iter") = last_iter,

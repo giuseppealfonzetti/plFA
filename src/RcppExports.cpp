@@ -60,32 +60,48 @@ BEGIN_RCPP
 END_RCPP
 }
 // multiThread_completePairwise
-Rcpp::List multiThread_completePairwise(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> TAU, Eigen::Map<Eigen::VectorXd> LAMBDA, Eigen::Map<Eigen::VectorXd> TRANSFORMED_RHOS, Eigen::Map<Eigen::MatrixXd> FREQ, const unsigned int CORRFLAG, const unsigned int GRFLAG, const unsigned int SILENTFLAG);
-RcppExport SEXP _plFA_multiThread_completePairwise(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP TAUSEXP, SEXP LAMBDASEXP, SEXP TRANSFORMED_RHOSSEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
+Rcpp::List multiThread_completePairwise(const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, const unsigned int CORRFLAG, const unsigned int GRFLAG, const unsigned int SILENTFLAG);
+RcppExport SEXP _plFA_multiThread_completePairwise(SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type TAU(TAUSEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type LAMBDA(LAMBDASEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type TRANSFORMED_RHOS(TRANSFORMED_RHOSSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type CORRFLAG(CORRFLAGSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type GRFLAG(GRFLAGSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SILENTFLAG(SILENTFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(multiThread_completePairwise(Y, C_VEC, A, TAU, LAMBDA, TRANSFORMED_RHOS, FREQ, CORRFLAG, GRFLAG, SILENTFLAG));
+    rcpp_result_gen = Rcpp::wrap(multiThread_completePairwise(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG, SILENTFLAG));
+    return rcpp_result_gen;
+END_RCPP
+}
+// multiThread_completePairwise_nll
+double multiThread_completePairwise_nll(const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::VectorXd THETA, Eigen::Map<Eigen::MatrixXd> FREQ, const unsigned int CORRFLAG, const unsigned int SILENTFLAG);
+RcppExport SEXP _plFA_multiThread_completePairwise_nll(SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP SILENTFLAGSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type CORRFLAG(CORRFLAGSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SILENTFLAG(SILENTFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(multiThread_completePairwise_nll(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, SILENTFLAG));
     return rcpp_result_gen;
 END_RCPP
 }
 // plFA
-Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> FREQ, const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SILENTFLAG, const bool CHECKCONVERGENCE, const double TOL, const int TOLCOUNTER, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int STEPSIZEFLAG, const unsigned int SEED);
-RcppExport SEXP _plFA_plFA(SEXP FREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SILENTFLAGSEXP, SEXP CHECKCONVERGENCESEXP, SEXP TOLSEXP, SEXP TOLCOUNTERSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP, SEXP SEEDSEXP) {
+Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SILENTFLAG, const double TOL, const int TOLCOUNTER, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int STEPSIZEFLAG, const unsigned int CHECKCONV, const unsigned int EACHCHECK, const unsigned int SEED);
+RcppExport SEXP _plFA_plFA(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SILENTFLAGSEXP, SEXP TOLSEXP, SEXP TOLCOUNTERSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP, SEXP CHECKCONVSEXP, SEXP EACHCHECKSEXP, SEXP SEEDSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type VALFREQ(VALFREQSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type N(NSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
@@ -98,7 +114,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const unsigned int >::type MAXT(MAXTSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type TOLCOUNT(TOLCOUNTSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SILENTFLAG(SILENTFLAGSEXP);
-    Rcpp::traits::input_parameter< const bool >::type CHECKCONVERGENCE(CHECKCONVERGENCESEXP);
     Rcpp::traits::input_parameter< const double >::type TOL(TOLSEXP);
     Rcpp::traits::input_parameter< const int >::type TOLCOUNTER(TOLCOUNTERSEXP);
     Rcpp::traits::input_parameter< const int >::type EACHCLOCK(EACHCLOCKSEXP);
@@ -107,8 +122,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type PAR3(PAR3SEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SAMPLING_WINDOW(SAMPLING_WINDOWSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type CHECKCONV(CHECKCONVSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type EACHCHECK(EACHCHECKSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
-    rcpp_result_gen = Rcpp::wrap(plFA(FREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, CHECKCONVERGENCE, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, SEED));
+    rcpp_result_gen = Rcpp::wrap(plFA(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, CHECKCONV, EACHCHECK, SEED));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -186,8 +203,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_get_par_from_S", (DL_FUNC) &_plFA_get_par_from_S, 1},
     {"_plFA_get_S", (DL_FUNC) &_plFA_get_S, 2},
     {"_plFA_grad_S", (DL_FUNC) &_plFA_grad_S, 3},
-    {"_plFA_multiThread_completePairwise", (DL_FUNC) &_plFA_multiThread_completePairwise, 10},
-    {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 23},
+    {"_plFA_multiThread_completePairwise", (DL_FUNC) &_plFA_multiThread_completePairwise, 8},
+    {"_plFA_multiThread_completePairwise_nll", (DL_FUNC) &_plFA_multiThread_completePairwise_nll, 7},
+    {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 25},
     {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
     {"_plFA_compute_pair", (DL_FUNC) &_plFA_compute_pair, 9},
     {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 6},

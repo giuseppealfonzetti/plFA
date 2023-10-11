@@ -81,10 +81,9 @@ stFit <- fit_plFA(
   ITERATIONS_SUBSET = seq(0, cpp_ctrl$MAXT, 100)
 )
 #> 1. Initialising at default values
-#> 2. Optimising with hyper...
-#> 
-#> 3. Rearranging output...
-#> 4. Done! (0.9 secs)
+#> 2. Computing frequencies...
+#> 3. Optimising with hyper...
+#> 4. Done! (0.98 secs)
 
 # extract estimated parameter vector
 stPar <- getPar(stFit)
@@ -107,8 +106,9 @@ numFit <- fit_plFA(
   CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'=1),
   METHOD = 'ucminf')
 #> 1. Initialising at default values
-#> 2. Optimising with ucminf...
-#> 3. Done! (20.63 secs)
+#> 2. Computing frequencies...
+#> 3. Optimising with ucminf...
+#> 4. Done! (15.07 secs)
 
 # extract estimated parameter vector
 numPar <- getPar(numFit)
@@ -118,5 +118,46 @@ numParList <- getPar(numFit, OPTION = 'list')
 
 # mean square error
 mean((numPar-theta)^2)
-#> [1] 0.0005450474
+#> [1] 0.0005232169
+```
+
+``` r
+sessionInfo()
+#> R version 4.1.2 (2021-11-01)
+#> Platform: x86_64-pc-linux-gnu (64-bit)
+#> Running under: Ubuntu 22.04.3 LTS
+#> 
+#> Matrix products: default
+#> BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0
+#> LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+#> 
+#> locale:
+#>  [1] LC_CTYPE=it_IT.UTF-8       LC_NUMERIC=C              
+#>  [3] LC_TIME=it_IT.UTF-8        LC_COLLATE=it_IT.UTF-8    
+#>  [5] LC_MONETARY=it_IT.UTF-8    LC_MESSAGES=it_IT.UTF-8   
+#>  [7] LC_PAPER=it_IT.UTF-8       LC_NAME=C                 
+#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+#> [11] LC_MEASUREMENT=it_IT.UTF-8 LC_IDENTIFICATION=C       
+#> 
+#> attached base packages:
+#> [1] stats     graphics  grDevices utils     datasets  methods   base     
+#> 
+#> other attached packages:
+#> [1] plFA_0.0.0.9000
+#> 
+#> loaded via a namespace (and not attached):
+#>  [1] Rcpp_1.0.11         pillar_1.9.0        compiler_4.1.2     
+#>  [4] tools_4.1.2         digest_0.6.33       evaluate_0.21      
+#>  [7] lifecycle_1.0.3     tibble_3.2.1        gtable_0.3.4       
+#> [10] lattice_0.20-45     ucminf_1.2.0        pkgconfig_2.0.3    
+#> [13] rlang_1.1.1         Matrix_1.6-1        cli_3.6.1          
+#> [16] rstudioapi_0.15.0   RcppClock_1.1       yaml_2.3.7         
+#> [19] mvtnorm_1.2-3       xfun_0.40           fastmap_1.1.1      
+#> [22] dplyr_1.1.3         knitr_1.43          generics_0.1.3     
+#> [25] vctrs_0.6.3         grid_4.1.2          tidyselect_1.2.0   
+#> [28] glue_1.6.2          R6_2.5.1            fansi_1.0.4        
+#> [31] rmarkdown_2.24      ggplot2_3.4.3       magrittr_2.0.3     
+#> [34] scales_1.2.1        htmltools_0.5.6     matrixcalc_1.0-6   
+#> [37] colorspace_2.1-0    utf8_1.2.3          RcppParallel_5.1.7 
+#> [40] munsell_0.5.0       RcppEigen_0.3.3.9.3
 ```

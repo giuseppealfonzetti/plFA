@@ -14,6 +14,8 @@ stoc_args <- function(ARGS, P){
   tmp$PAR3 <- ifelse(!is.numeric(ARGS$PAR3), 3/4, ARGS$PAR3)
   tmp$STEPSIZEFLAG <- ifelse(!is.numeric(ARGS$STEPSIZEFLAG), 1, max(1, round(abs(ARGS$STEPSIZEFLAG),0)))
   tmp$EACHCLOCK <- ifelse(!is.numeric(ARGS$EACHCLOCK), round(tmp$MAXT/10,0), round(ARGS$EACHCLOCK,0))
+  tmp$CHECKCONV <- ifelse(!is.numeric(ARGS$CHECKCONV), 0, ARGS$CHECKCONV)
+
 
   out <- tmp
 
@@ -30,6 +32,7 @@ stoc_args <- function(ARGS, P){
 #'    \tab \cr
 #'    \code{CORRFLAG} \tab Binary indicator. Set it to 0 if the latent variables are assumed to be independent. Set it 1 otherwise. \cr
 #' }
+#' @param VALDATA Data matrix used as validation set to check for convergence.
 #' @param METHOD Label for the method chosen. Possible values are: \tabular{ll}{
 #'    \code{'ucminf'} \tab for estimation via the numerical optimiser from the \code{ucminf} package. \cr
 #'    \tab \cr
@@ -63,12 +66,21 @@ stoc_args <- function(ARGS, P){
 #'    \tab \cr
 #'    \code{EACHCLOCK} \tab How often (in terms of iterations) to measure single iteration computational times (using \code{RcppClock}. \cr
 #'    \tab \cr
+#'    \code{CHECKCONV} \tab Flag to check for convergence using complete pairwise likelihood on the validation set. \cr
+#'    \tab \cr
+#'    \code{EACHCHECK} \tab How often (in terms of iterations) to check for convergence}. \cr
+#'    \tab \cr
+#'    \code{TOL} \tab Tolerance between consecutive evaluations of the validation composite likelihood}. \cr
+#'    \tab \cr
+#'    \code{TOLCOUNT} \tab How many checks the algorithm is allowed to accept if the validation negative composite likelihood starts increasing}. \cr
+#'    \tab \cr
 #'
 #' }
 #' @export
 fit_plFA <- function(
     DATA,
     CONSTR_LIST,
+    VALDATA = NULL,
     METHOD = 'ucminf',
     CONTROL = list(),
     INIT = NULL,
@@ -80,6 +92,7 @@ fit_plFA <- function(
   start_time <- Sys.time()
 
   if(sum(!is.finite(DATA))>0 | !is.matrix(DATA)) stop('DATA is not a numeric matrix.')
+  if(sum(!is.finite(VALDATA))>0 | !is.matrix(VALDATA)) VALDATA <- DATA
   if(sum(!is.finite(CONSTR_LIST$CONSTRMAT))>0 | !is.matrix(CONSTR_LIST$CONSTRMAT) | sum(!(CONSTR_LIST$CONSTRMAT %in% c(0,1)))!=0) stop('CONSTRMAT must be a binary matrix')
   if(nrow(CONSTR_LIST$CONSTRMAT)!=ncol(DATA) | ncol(CONSTR_LIST$CONSTRMAT)>=nrow(CONSTR_LIST$CONSTRMAT)) stop('CONSTRMAT dimensions not allowed. Check Items x Factors.')
   if(is.null(CONSTR_LIST$CORRFLAG) | sum(is.finite(CONSTR_LIST$CORRFLAG))==0 | !(CONSTR_LIST$CORRFLAG %in% c(0,1))) stop('CORRFLAG must be 0 or 1')
@@ -140,57 +153,62 @@ fit_plFA <- function(
 
 
 
-  freq_tab <- pairs_freq(DATA, categories)
-  tmp@freq <- freq_tab
+  # freq_tab <- pairs_freq(DATA, categories)
+  # val_freq_tab <- pairs_freq(VALDATA, categories)
+  message('2. Computing frequencies...')
+  tmp@freq <- pairs_freq(DATA, categories)
+  tmp@valfreq <- pairs_freq(VALDATA, categories)
   RcppParallel::setThreadOptions(numThreads = NCORES)
 
 
   # Numerical optimisation
   if(METHOD == 'ucminf'){
 
-    message('2. Optimising with ucminf...')
+    message('3. Optimising with ucminf...')
 
     # Compute frequency table bivariate patterns
 
     Rwr_ncl <- function(par_vec){
-      lambda0_ <- par_vec[1:(sum(categories)-p)]
-      lambda_ <- par_vec[(sum(categories)-p+1):(sum(categories)-p+sum(CONSTR_LIST$CONSTRMAT))]
-      transformed_rhos_ <- par_vec[(sum(categories)-p+1+sum(CONSTR_LIST$CONSTRMAT)):length(par_vec)]
-      mod <-multiThread_completePairwise(
-        Y = DATA,
+      # lambda0_ <- par_vec[1:(sum(categories)-p)]
+      # lambda_ <- par_vec[(sum(categories)-p+1):(sum(categories)-p+sum(CONSTR_LIST$CONSTRMAT))]
+      # transformed_rhos_ <- par_vec[(sum(categories)-p+1+sum(CONSTR_LIST$CONSTRMAT)):length(par_vec)]
+      out <-multiThread_completePairwise_nll(
+        N = n,
         C_VEC = categories,
-        A = CONSTR_LIST$CONSTRMAT,
-        FREQ = freq_tab,
-        TAU = lambda0_,
-        LAMBDA = lambda_,
-        TRANSFORMED_RHOS = transformed_rhos_,
+        CONSTRMAT = CONSTR_LIST$CONSTRMAT,
+        FREQ = tmp@freq,
+        # TAU = lambda0_,
+        # LAMBDA = lambda_,
+        # TRANSFORMED_RHOS = transformed_rhos_,
+        THETA = par_vec,
         CORRFLAG = CONSTR_LIST$CORRFLAG,
-        GRFLAG = 0,
+        # GRFLAG = 0,
         SILENTFLAG = 1
       )
-      out <- mod$iter_nll
+      # out <- mod$iter_nll
       return(out)
     }
 
     # function for gradient
     Rwr_ngr <- function(par_vec){
-      lambda0_ <- par_vec[1:(sum(categories)-p)]
-      lambda_ <- par_vec[(sum(categories)-p+1):(sum(categories)-p+sum(CONSTR_LIST$CONSTRMAT))]
-      transformed_rhos_ <- par_vec[(sum(categories)-p+1+sum(CONSTR_LIST$CONSTRMAT)):length(par_vec)]
+      # lambda0_ <- par_vec[1:(sum(categories)-p)]
+      # lambda_ <- par_vec[(sum(categories)-p+1):(sum(categories)-p+sum(CONSTR_LIST$CONSTRMAT))]
+      # transformed_rhos_ <- par_vec[(sum(categories)-p+1+sum(CONSTR_LIST$CONSTRMAT)):length(par_vec)]
       mod <-multiThread_completePairwise(
-        Y = DATA,
+        N = n,
         C_VEC = categories,
-        A = CONSTR_LIST$CONSTRMAT,
-        FREQ = freq_tab,
-        TAU = lambda0_,
-        LAMBDA = lambda_,
-        TRANSFORMED_RHOS = transformed_rhos_,
+        CONSTRMAT = CONSTR_LIST$CONSTRMAT,
+        FREQ = tmp@freq,
+        # TAU = lambda0_,
+        # LAMBDA = lambda_,
+        # TRANSFORMED_RHOS = transformed_rhos_,
+        THETA = par_vec,
         CORRFLAG = CONSTR_LIST$CORRFLAG,
         GRFLAG = 1,
         SILENTFLAG = 1
       )
 
-      out <- mod$iter_ngradient
+      out <- mod$iter_ngradient/n
       return(out)
     }
 
@@ -213,7 +231,7 @@ fit_plFA <- function(
     tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
 
 
-    message('3. Done! (', round(tmp@RTime,2),' secs)')
+    message('4. Done! (', round(tmp@RTime,2),' secs)')
     return(tmp)
   }
 
@@ -221,7 +239,7 @@ fit_plFA <- function(
   if(METHOD == 'bernoulli' | METHOD == 'hyper'){
 
     stoFit <- new('StoFit')
-    message(paste0('2. Optimising with ', METHOD, '...'))
+    message(paste0('3. Optimising with ', METHOD, '...'))
 
     # Check stochastic control parameters
     cpp_ctrl <- stoc_args(CONTROL, P = p)
@@ -240,7 +258,8 @@ fit_plFA <- function(
 
     # Collect and rearrange arguments to pass to cpp function
     args <- append(
-      list( 'FREQ' = freq_tab,
+      list( 'FREQ' = tmp@freq,
+            'VALFREQ' = tmp@valfreq,
             'N' = tmp@dims@n,
             'THETA_INIT' = tmp@init,
             'C_VEC' = tmp@dims@cat
@@ -249,8 +268,6 @@ fit_plFA <- function(
 
     args$METHODFLAG <- ifelse(METHOD == 'hyper', 0, 1)
     fit <- do.call(plFA, args)
-    message('\n3. Rearranging output...')
-
 
     end_time <- Sys.time()
     tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
@@ -261,6 +278,8 @@ fit_plFA <- function(
     stoFit@pathGrad <- fit$path_grad[stoFit@trajSubset,]
     stoFit@control <- cpp_ctrl
     stoFit@lastIter <- fit$last_iter
+    stoFit@pathValNll <- cbind(fit$check_val_iter, fit$check_val_nll)
+    stoFit@convergence <- fit$convergence
     tmp@theta <- stoFit@pathAvTheta[nrow(stoFit@pathAvTheta),]
     stoFit@cppTime <- summary(clock, units = 's')
     tmp@stoFit <- stoFit
