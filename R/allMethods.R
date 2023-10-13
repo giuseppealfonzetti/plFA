@@ -111,9 +111,9 @@ extract_par <- function(THETA, OPTION = 'transformed', C, P, Q, CONSTRMAT){
 
 #' Compute estimates' variance
 #' @export
-setGeneric('computeVar', function(OBJ, DATA) standardGeneric('computeVar'), signature = 'OBJ')
+setGeneric('computeVar', function(OBJ, DATA, NUMDERIV = F) standardGeneric('computeVar'), signature = 'OBJ')
 setMethod('computeVar', 'PlFaFit',
-          function(OBJ, DATA){ if(OBJ@method == 'ucminf'){
+          function(OBJ, DATA, NUMDERIV){ if(OBJ@method == 'ucminf'){
             compute_var(THETA     = OBJ@theta,
                        C_VEC     = OBJ@dims@cat,
                        N         = OBJ@dims@n,
@@ -124,7 +124,8 @@ setMethod('computeVar', 'PlFaFit',
                        CORRFLAG  = OBJ@cnstr@corrflag,
                        FREQ      = OBJ@freq,
                        DATA      = DATA,
-                       METHOD    = OBJ@method)
+                       METHOD    = OBJ@method,
+                       NUMDERIV  = NUMDERIV)
           }else{
             compute_var(THETA     = OBJ@theta,
                        C_VEC     = OBJ@dims@cat,
@@ -136,24 +137,48 @@ setMethod('computeVar', 'PlFaFit',
                        CORRFLAG  = OBJ@cnstr@corrflag,
                        FREQ      = OBJ@freq,
                        DATA      = DATA,
-                       METHOD    = OBJ@method)
+                       METHOD    = OBJ@method,
+                       NUMDERIV  = NUMDERIV)
           }}
 )
 
 #setMethod('computeVar', 'vector', function(OBJ, DATA, ...) compute_var(OBJ, DATA, ...))
 #' @export
-compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD){
+compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD, NUMDERIV = F){
 
   opt_noise <- NA
-  message('1. Estimating H...')
-  Hhat <- estimate_H(
-    C_VEC = C_VEC,
-    A = CONSTRMAT,
-    THETA = THETA,
-    FREQ = FREQ,
-    N = N,
-    CORRFLAG = CORRFLAG
-  )$est_H
+  Hhat <- NA
+  if(NUMDERIV){
+    message('1. Computing H numerically...')
+    # function for gradient
+    Rwr_ngr <- function(par_vec){
+      mod <-multiThread_completePairwise(
+        N = N,
+        C_VEC = C_VEC,
+        CONSTRMAT = CONSTRMAT,
+        FREQ = FREQ,
+        THETA = par_vec,
+        CORRFLAG = CORRFLAG,
+        GRFLAG = 1,
+        SILENTFLAG = 1
+      )
+
+      out <- mod$iter_ngradient/N
+      return(out)
+    }
+
+    Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
+  }else{
+    message('1. Estimating H...')
+    Hhat <- estimate_H(
+      C_VEC = C_VEC,
+      A = CONSTRMAT,
+      THETA = THETA,
+      FREQ = FREQ,
+      N = N,
+      CORRFLAG = CORRFLAG
+    )$est_H
+  }
 
   message('2. Estimating J...')
   Jhat <- estimate_J(
@@ -183,8 +208,11 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
 
   return(
     list(
+      H = Hhat,
+      J = Jhat,
       asymptotic_variance = asy_var,
       optimisation_noise = opt_noise
+
     )
   )
 
