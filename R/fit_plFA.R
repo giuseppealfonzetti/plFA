@@ -156,8 +156,13 @@ fit_plFA <- function(
   # freq_tab <- pairs_freq(DATA, categories)
   # val_freq_tab <- pairs_freq(VALDATA, categories)
   message('2. Computing frequencies...')
+  freq_start_time <- Sys.time()
   tmp@freq <- pairs_freq(DATA, categories)
   tmp@valfreq <- pairs_freq(VALDATA, categories)
+  freq_end_time <- Sys.time()
+
+  tmp@freqTime <- as.numeric(difftime(freq_end_time, freq_start_time, units = 'secs')[1])
+
   RcppParallel::setThreadOptions(numThreads = NCORES)
 
 
@@ -271,6 +276,7 @@ fit_plFA <- function(
 
     end_time <- Sys.time()
     tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+
     stoFit@projIters <- fit$post_index
     stoFit@trajSubset <- c(stoFit@trajSubset[stoFit@trajSubset<=fit$last_iter], fit$last_iter)
     stoFit@pathTheta <- fit$path_theta[stoFit@trajSubset + 1,]

@@ -2,14 +2,21 @@
 setMethod('show', 'PlFaFit', function(object){
   if(object@method == 'ucminf'){
     cat(
-      "Numerical estimate obtained via ucminf.\n"
+      "- Numerical estimate obtained via ucminf.\n",
+      "\n  Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
+
+      "\n- Use getPar() to extract parameter estimates."
+
     )
   }else{
     cat(
       "- Stochastic estimate\n\n",
-      "    Sampling scheme: ", object@method, "\n",
-      "    Pairs per iteration: ", object@stoFit@control$PAIRS_PER_ITERATION, " out of ", object@dims@pairs, "\n",
-      "    Iterations: ", object@stoFit@lastIter, "\n",
+      "    Sampling scheme:", object@method, "\n",
+      "    Pairs per iteration:", object@stoFit@control$PAIRS_PER_ITERATION, " out of ", object@dims@pairs, "\n",
+      "    Iterations:", object@stoFit@lastIter, "\n",
+      "    Convergence:", object@stoFit@convergence, "\n",
+      "    Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
+
       "\n- Use getPar() to extract parameter estimates."
     )
   }

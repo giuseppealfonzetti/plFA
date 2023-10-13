@@ -20,14 +20,15 @@ setClass('StoFit', slots = c(
 
 # Object returned by fit_plFA
 setClass('PlFaFit', slots = c(
-  freq = 'matrix',
-  valfreq = 'matrix',
-  cnstr = 'Constraints',
-  dims = 'Dimensions',
-  method = 'character',
-  init = 'vector',
-  numFit = 'ANY',
-  stoFit = 'StoFit',
-  theta = 'vector',
-  RTime = 'numeric'))
+  freq     = 'matrix',
+  valfreq  = 'matrix',
+  freqTime = 'numeric',
+  cnstr    = 'Constraints',
+  dims     = 'Dimensions',
+  method   = 'character',
+  init     = 'vector',
+  numFit   = 'ANY',
+  stoFit   = 'StoFit',
+  theta    = 'vector',
+  RTime    = 'numeric'))
 
