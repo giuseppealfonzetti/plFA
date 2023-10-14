@@ -163,6 +163,7 @@ fit_plFA <- function(
 
   tmp@freqTime <- as.numeric(difftime(freq_end_time, freq_start_time, units = 'secs')[1])
 
+  tmp@cores <- NCORES
   RcppParallel::setThreadOptions(numThreads = NCORES)
 
 

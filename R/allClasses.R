@@ -30,5 +30,6 @@ setClass('PlFaFit', slots = c(
   numFit   = 'ANY',
   stoFit   = 'StoFit',
   theta    = 'vector',
-  RTime    = 'numeric'))
+  RTime    = 'numeric',
+  cores    = 'numeric'))
 

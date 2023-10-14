@@ -2,8 +2,9 @@
 setMethod('show', 'PlFaFit', function(object){
   if(object@method == 'ucminf'){
     cat(
-      "- Numerical estimate obtained via ucminf.\n",
-      "\n  Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
+      "- Numerical estimate obtained via ucminf.\n\n",
+      "   Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
+      "   Cores used:", object@cores, "\n",
 
       "\n- Use getPar() to extract parameter estimates."
 
@@ -16,6 +17,8 @@ setMethod('show', 'PlFaFit', function(object){
       "    Iterations:", object@stoFit@lastIter, "\n",
       "    Convergence:", object@stoFit@convergence, "\n",
       "    Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
+      "    Cores used:", object@cores, "\n",
+
 
       "\n- Use getPar() to extract parameter estimates."
     )
