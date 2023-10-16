@@ -121,9 +121,9 @@ extract_par <- function(THETA, OPTION = 'transformed', C, P, Q, CONSTRMAT){
 
 #' Compute estimates' variance
 #' @export
-setGeneric('computeVar', function(OBJ, DATA, NUMDERIV = F) standardGeneric('computeVar'), signature = 'OBJ')
+setGeneric('computeVar', function(OBJ, DATA, NUMDERIV = F, OPTION = 'raw') standardGeneric('computeVar'), signature = 'OBJ')
 setMethod('computeVar', 'PlFaFit',
-          function(OBJ, DATA, NUMDERIV){ if(OBJ@method == 'ucminf'){
+          function(OBJ, DATA, NUMDERIV, OPTION){ if(OBJ@method == 'ucminf'){
             compute_var(THETA     = OBJ@theta,
                        C_VEC     = OBJ@dims@cat,
                        N         = OBJ@dims@n,
@@ -135,7 +135,8 @@ setMethod('computeVar', 'PlFaFit',
                        FREQ      = OBJ@freq,
                        DATA      = DATA,
                        METHOD    = OBJ@method,
-                       NUMDERIV  = NUMDERIV)
+                       NUMDERIV  = NUMDERIV,
+                       OPTION    = OPTION)
           }else{
             compute_var(THETA     = OBJ@theta,
                        C_VEC     = OBJ@dims@cat,
@@ -148,14 +149,24 @@ setMethod('computeVar', 'PlFaFit',
                        FREQ      = OBJ@freq,
                        DATA      = DATA,
                        METHOD    = OBJ@method,
-                       NUMDERIV  = NUMDERIV)
+                       NUMDERIV  = NUMDERIV,
+                       OPTION    = OPTION)
           }}
 )
 
 #setMethod('computeVar', 'vector', function(OBJ, DATA, ...) compute_var(OBJ, DATA, ...))
 #' @export
-compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD, NUMDERIV = F){
+compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD, NUMDERIV = F, OPTION = 'raw'){
 
+  Rwr_getPar <- function(par_vec){
+    getPar(par_vec, OPTION = OPTION, C = sum(C_VEC),
+           P = nrow(CONSTRMAT),
+           Q = ncol(CONSTRMAT),
+           CONSTRMAT = CONSTRMAT)
+  }
+  trJacob <- numDeriv::jacobian(Rwr_getPar, THETA)
+
+  # trJacob <- diag(1, length(THETA), length(THETA))
   opt_noise <- NA
   Hhat <- NA
   if(NUMDERIV){
@@ -206,12 +217,12 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
 
   message('3. Computing the variances...')
   if(METHOD =='ucminf'){
-    asy_var <- diag(sandwich/N)
+    asy_var <- diag((trJacob%*% sandwich %*% t(trJacob))/N)
   }else{
-    asy_var <- diag(sandwich/N)
+    asy_var <- diag((trJacob%*% sandwich %*% t(trJacob))/N)
     a1 <- PAIRS*(PAIRS - PPI)/(PPI*(PAIRS-1))
     a2 <- (PAIRS-PPI)/(PPI*(PAIRS-1))
-    opt_noise <- diag(invH%*%(a1*Hhat - a2*Jhat)%*%invH/(N*IT))
+    opt_noise <- diag( trJacob %*% (invH%*%(a1*Hhat - a2*Jhat)%*%invH/(N*IT) ) %*% t(trJacob) )
 
   }
   message('Done!')
