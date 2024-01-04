@@ -23,6 +23,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_Lam
+Eigen::MatrixXd get_Lam(Eigen::Map<Eigen::MatrixXd> A, const unsigned int C, const Eigen::VectorXd& THETA);
+RcppExport SEXP _plFA_get_Lam(SEXP ASEXP, SEXP CSEXP, SEXP THETASEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type C(CSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
+    rcpp_result_gen = Rcpp::wrap(get_Lam(A, C, THETA));
+    return rcpp_result_gen;
+END_RCPP
+}
 // get_par_from_S
 Eigen::VectorXd get_par_from_S(const Eigen::MatrixXd& S);
 RcppExport SEXP _plFA_get_par_from_S(SEXP SSEXP) {
@@ -198,6 +211,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
+    {"_plFA_get_Lam", (DL_FUNC) &_plFA_get_Lam, 3},
     {"_plFA_get_par_from_S", (DL_FUNC) &_plFA_get_par_from_S, 1},
     {"_plFA_get_S", (DL_FUNC) &_plFA_get_S, 2},
     {"_plFA_grad_S", (DL_FUNC) &_plFA_grad_S, 3},

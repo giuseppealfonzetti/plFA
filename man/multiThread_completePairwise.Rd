@@ -2,8 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{multiThread_completePairwise}
 \alias{multiThread_completePairwise}
-\title{Complete pairiwse iteration with multithreading option//'
-Used by external optimisers}
+\title{Full pairwise iteration}
 \usage{
 multiThread_completePairwise(
   N,
@@ -16,7 +15,24 @@ multiThread_completePairwise(
   SILENTFLAG = 1L
 )
 }
+\arguments{
+\item{N}{Number of observations}
+
+\item{C_VEC}{Vector containing the number of categories for each item}
+
+\item{CONSTRMAT}{Constraint matrix. Loadings free to be estimated are identified by a 1.}
+
+\item{THETA}{Parameter vector}
+
+\item{FREQ}{Frequency table}
+
+\item{CORRFLAG}{1 to estimate latent correlations. 0 for orthogonal latent factors.}
+
+\item{GRFLAG}{0 to only compute the likelihood. 1 to also compute the gradient.}
+
+\item{SILENTFLAG}{optional for verbose output}
+}
 \description{
-Complete pairiwse iteration with multithreading option//'
-Used by external optimisers
+Evaluate negative loglikelihood or gradient of the complete pool of pairs.
+Used by external optimisers. Multithreading options via \code{RcppParallel}.
 }

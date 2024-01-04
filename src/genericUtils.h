@@ -11,6 +11,7 @@
 //' \eqn{1} refer to free loadings, while entries equal to \eqn{0} indicate
 //' loadings constrained to be null.
 //' @param C Sum of the number of categories for each item.
+// [[Rcpp::export]]
 Eigen::MatrixXd get_Lam(Eigen::Map<Eigen::MatrixXd> A,
                         const unsigned int C,
                         const Eigen::VectorXd &THETA

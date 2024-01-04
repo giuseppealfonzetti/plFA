@@ -28,7 +28,9 @@ pairs_freq <- function(Y, C_VEC) {
 #' \eqn{1} refer to free loadings, while entries equal to \eqn{0} indicate
 #' loadings constrained to be null.
 #' @param C Sum of the number of categories for each item.
-NULL
+get_Lam <- function(A, C, THETA) {
+    .Call(`_plFA_get_Lam`, A, C, THETA)
+}
 
 #' Get transformed parameters from latent correlation matrix
 #'

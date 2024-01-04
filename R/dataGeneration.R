@@ -90,7 +90,6 @@ build_constrMat <- function(P, Q, STRUCT = 'triangular', CROSS = NULL){
 #' @param LB Lower bound for uniform random generator. Default set to 0.
 #' @param UB Upper bound for uniform random generator. Default set to 1.
 #' @export
-# generate the matrix of loadings [pxq] drawing from normal rv
 gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123, LB = 0, UB = 1){
   if(!is.matrix(CONSTRMAT))stop('CONSTRMAT must be a matrix')
 
