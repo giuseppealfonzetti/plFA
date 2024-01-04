@@ -12,7 +12,9 @@ test_that("check stoc_args() cleaning",{
                      PAR2 = .002,
                      PAR3 = .75,
                      STEPSIZEFLAG = 1,
-                     EACHCLOCK = round(ctrl$MAXT/10, 0))
+                     EACHCLOCK = round(ctrl$MAXT/10, 0),
+                     CHECKCONV = 0)
+
                    )
 })
 
@@ -137,6 +139,6 @@ for (lab in c('ucminf', 'bernoulli', 'hyper')) {
     CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'= 1),
     METHOD = lab,
     INIT = NULL),
-    paste0('2. Optimising with ', lab, '...'))
+    paste0('3. Optimising with ', lab, '...'))
 }
 })
