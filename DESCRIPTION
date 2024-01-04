@@ -24,7 +24,7 @@ Imports:
     RcppEigen  (>= 0.3.3.9.3),
     RcppParallel  (>= 5.1.7),
     RcppClock  (>= 1.1),
-    mvtnorm,
+    magrittr,
     ucminf,
     matrixcalc,
     purrr,
