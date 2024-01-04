@@ -32,19 +32,13 @@ test_that("check full gradient ",{
 
   # function for nll
   full_nll <- function(par_vec){
-    lambda0_ <- par_vec[1:length(lambda0_init)]
-    lambda_ <- par_vec[(length(lambda0_init)+1):(length(lambda0_init)+length(lambda_init))]
-    transformed_rhos_ <- par_vec[(length(lambda0_init)+1+length(lambda_init)):length(par_vec)]
-    mod <-multiThread_completePairwise(
-      Y = D,
+    mod <- multiThread_completePairwise(
+      N = n,
       C_VEC = cat,
-      A = A,
+      CONSTRMAT = A,
       FREQ = f,
-      TAU = lambda0_,
-      LAMBDA = lambda_,
-      TRANSFORMED_RHOS = transformed_rhos_,
+      THETA = par_vec,
       CORRFLAG = 1,
-      GRFLAG = 0,
       SILENTFLAG = 1
     )
     out <- mod$iter_nll/n
@@ -54,21 +48,15 @@ test_that("check full gradient ",{
 
   # function for gradient
  full_ngr <- function(par_vec){
-    lambda0_ <- par_vec[1:length(lambda0_init)]
-    lambda_ <- par_vec[(length(lambda0_init)+1):(length(lambda0_init)+length(lambda_init))]
-    transformed_rhos_ <- par_vec[(length(lambda0_init)+1+length(lambda_init)):length(par_vec)]
-    mod <-multiThread_completePairwise(
-      Y = D,
-      C_VEC = cat,
-      A = A,
-      FREQ = f,
-      TAU = lambda0_,
-      LAMBDA = lambda_,
-      TRANSFORMED_RHOS = transformed_rhos_,
-      CORRFLAG = 1,
-      GRFLAG = 1,
-      SILENTFLAG = 1
-    )
+   mod <- multiThread_completePairwise(
+     N = n,
+     C_VEC = cat,
+     CONSTRMAT = A,
+     FREQ = f,
+     THETA = par_vec,
+     CORRFLAG = 1,
+     SILENTFLAG = 1
+   )
 
     out <- mod$iter_ngradient/n
     return(out)
