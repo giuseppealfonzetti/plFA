@@ -1,5 +1,5 @@
 Package: plFA
-Title: Fast pairiwse likelihood estimation of factor models for ordinal data.
+Title: Fast pairiwse likelihood estimation of factor models for ordinal data
 Version: 0.0.0.9000
 Authors@R: 
     person("Giuseppe", "Alfonzetti", 
@@ -28,6 +28,7 @@ Imports:
     ucminf,
     matrixcalc,
     purrr,
-    dplyr
+    dplyr,
+    numDeriv
 URL: https://github.com/giuseppealfonzetti/plFA
 BugReports: https://github.com/giuseppealfonzetti/plFA/issues

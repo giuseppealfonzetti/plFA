@@ -14,24 +14,32 @@
 #include "optimisationUtils.h"
 #include "variance.h"
 
-
-//' Complete pairiwse iteration with multithreading option//'
-//' Used by external optimisers
+//' Full pairwise iteration
+//'
+//' @description
+//' Evaluate negative loglikelihood or gradient of the complete pool of pairs.
+//' Used by external optimisers. Multithreading options via `RcppParallel`.
+//'
+//' @param N Number of observations
+//' @param C_VEC Vector containing the number of categories for each item
+//' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
+//' @param THETA Parameter vector
+//' @param FREQ Frequency table
+//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
+//' @param SILENTFLAG optional for verbose output
+//'
 // [[Rcpp::export]]
 Rcpp::List multiThread_completePairwise(
     const unsigned int N,
-    Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
+    Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
     const unsigned int CORRFLAG,
-    const unsigned int GRFLAG,
-    const unsigned int SILENTFLAG
+    const unsigned int GRFLAG = 1,
+    const unsigned int SILENTFLAG = 1
 ){
-  // Eigen::Map<Eigen::VectorXd> TAU,                  // Initial values for thresholds parameters
-  // Eigen::Map<Eigen::VectorXd> LAMBDA,               // Initial values for loadings parameters
-  // Eigen::Map<Eigen::VectorXd> TRANSFORMED_RHOS,     // Initial values for latent correlations reparameterized trough Fisher's transformation
-
 
   const unsigned int d = THETA.size();
   const unsigned int n = N;                                             // number of units
@@ -42,22 +50,7 @@ Rcpp::List multiThread_completePairwise(
   const unsigned int ncorr = q*(q-1)/2;                          // number of correlations
   const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
 
-  // unsigned int n = N;                                             // number of units
-  // unsigned int p = A.rows();                                             // number of items
-  // unsigned int q = A.cols();                                             // number of latents
-  // unsigned int ncorr = TRANSFORMED_RHOS.size();                          // number of correlations
-  // unsigned int nthr = TAU.size();                                        // number of thresholds
-  // unsigned int nload = LAMBDA.size();                                    // number of loadings
-  // unsigned int d = nload + nthr + ncorr;                                 // number of parameters
-  // unsigned int c = C_VEC.sum();                                          // total number of categories
   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
-  unsigned int DFLAG, gradFLAG = 0;
-
-  if(GRFLAG == 1){
-    gradFLAG = 1; DFLAG = 0;
-  }else if(GRFLAG==2){
-    gradFLAG = 1; DFLAG = 1;
-  }
 
   // Copy frequencies, and build pair dictionary
   Eigen::MatrixXd pairs_table = FREQ;
@@ -82,7 +75,7 @@ Rcpp::List multiThread_completePairwise(
   double iter_ll = 0;
   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
-  SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, gradFLAG, theta, vector_pairs);
+  SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, GRFLAG, theta, vector_pairs);
   RcppParallel::parallelReduce(0, R, iteration_subset);
   iter_ll = iteration_subset.subset_ll;
   iter_gradient = iteration_subset.subset_gradient;
@@ -95,71 +88,110 @@ Rcpp::List multiThread_completePairwise(
   return(output);
 }
 
-//' Complete pairiwse iteration with multithreading option//'
- //' Used by external optimisers
- // [[Rcpp::export]]
-double multiThread_completePairwise_nll(
-     const unsigned int N,
-     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
-     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
-     Eigen::VectorXd THETA,
-     Eigen::Map<Eigen::MatrixXd> FREQ,
-     const unsigned int CORRFLAG,
-     const unsigned int SILENTFLAG
- ){
-
-   const unsigned int d = THETA.size();
-   const unsigned int n = N;                                             // number of units
-   const unsigned int p = CONSTRMAT.rows();                                             // number of items
-   const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
-   const unsigned int c = C_VEC.sum();                                          // total number of categories
-   const unsigned int nthr = c-p;                                        // number of thresholds
-   const unsigned int ncorr = q*(q-1)/2;                          // number of correlations
-   const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
-
-   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
-   unsigned int DFLAG, gradFLAG = 0;
-
-   // Copy frequencies, and build pair dictionary
-   Eigen::MatrixXd pairs_table = FREQ;
-   Eigen::MatrixXd items_pairs(2,R);
-   unsigned int r = 0;
-   for(unsigned int k = 1; k < p; k ++){
-     for(unsigned int l = 0; l < k; l++){
-       items_pairs(0, r) = k;
-       items_pairs(1, r) = l;
-       r++;
-     }
-   }
-
-   // Rearrange parameters
-   Eigen::VectorXd theta(d);
-   theta << THETA;                                 // Complete parameters vector
-
-   // Initialize vector of indeces for entries in pairs_table
-   std::vector<int> vector_pairs(items_pairs.cols()) ;
-   std::iota (std::begin(vector_pairs), std::end(vector_pairs), 0);
-
-   double iter_ll = 0;
-   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
-
-   SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 0, theta, vector_pairs);
-   RcppParallel::parallelReduce(0, R, iteration_subset);
-   iter_ll = -iteration_subset.subset_ll;
-
-   return(iter_ll/n);
- }
-
-
-/* MAIN FUNCTION  for STOCHASTIC OPTIMIZATION*/
+//' Full pairwise likelihood
+//'
+//' @description
+//' Evaluate negative loglikelihood. Same structure of `multiThread_completePairwise`.
+//' Used to monitor validation log-likelihood. Multithreading options via `RcppParallel`.
+//'
+//' @param N Number of observations
+//' @param C_VEC Vector containing the number of categories for each item
+//' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
+//' @param THETA Parameter vector
+//' @param FREQ Frequency table
+//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param SILENTFLAG optional for verbose output
+//'
 // [[Rcpp::export]]
-Rcpp::List plFA(
-    Eigen::Map<Eigen::MatrixXd> FREQ,                    // Frequency table
-    Eigen::Map<Eigen::MatrixXd> VALFREQ,                 // Frequency table
-    const unsigned int N,                    // Sample size
+double multiThread_completePairwise_nll(
+    const unsigned int N,
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
-    Eigen::Map<Eigen::VectorXd> THETA_INIT,                  // Initial values for thresholds parameters
+    Eigen::VectorXd THETA,
+    Eigen::Map<Eigen::MatrixXd> FREQ,
+    const unsigned int CORRFLAG,
+    const unsigned int SILENTFLAG
+){
+
+  const unsigned int d = THETA.size();
+  const unsigned int n = N;                                             // number of units
+  const unsigned int p = CONSTRMAT.rows();                                             // number of items
+  const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
+  const unsigned int c = C_VEC.sum();                                          // total number of categories
+  const unsigned int nthr = c-p;                                        // number of thresholds
+  const unsigned int ncorr = q*(q-1)/2;                          // number of correlations
+  const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
+
+  unsigned int R = p*(p-1)/2;                                            // number of pairs of items
+  unsigned int DFLAG, gradFLAG = 0;
+
+  // Copy frequencies, and build pair dictionary
+  Eigen::MatrixXd pairs_table = FREQ;
+  Eigen::MatrixXd items_pairs(2,R);
+  unsigned int r = 0;
+  for(unsigned int k = 1; k < p; k ++){
+    for(unsigned int l = 0; l < k; l++){
+      items_pairs(0, r) = k;
+      items_pairs(1, r) = l;
+      r++;
+    }
+  }
+
+  // Rearrange parameters
+  Eigen::VectorXd theta(d);
+  theta << THETA;                                 // Complete parameters vector
+
+  // Initialize vector of indeces for entries in pairs_table
+  std::vector<int> vector_pairs(items_pairs.cols()) ;
+  std::iota (std::begin(vector_pairs), std::end(vector_pairs), 0);
+
+  double iter_ll = 0;
+  Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
+
+  SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 0, theta, vector_pairs);
+  RcppParallel::parallelReduce(0, R, iteration_subset);
+  iter_ll = -iteration_subset.subset_ll;
+
+  return(iter_ll/n);
+}
+
+//' Stochastic optimiser
+//'
+//' @description
+//' Core function to evaluate stochastic estimators
+//'
+//' @param FREQ Frequency table.
+//' @param VALFREQ Frequency table validation data.
+//' @param N Number of observations.
+//' @param C_VEC Vector containing the number of categories for each item.
+//' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
+//' @param THETA_INIT Initial parameter vector
+//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param METHODFLAG 0 for hypergeometric, 1 for Bernoulli.
+//' @param PAIRS_PER_ITERATION Number of pairs to draw per iteration.
+//' @param ETA Initial stepsize.
+//' @param BURN Initial burn-in period.
+//' @param MAXT Maximum number of iterations.
+//' @param TOLCOUNT Tolerance count for convergence with validation nll.
+//' @param SILENTFLAG Silent output.
+//' @param TOL Tolerance level.
+//' @param EACHCLOCK How often (in terms of iterations) to measure single iteration computational times (using \code{RcppClock}..
+//' @param PAR1 Hyperparameter for stepsize scheduling by Xu (2011): Scaling.
+//' @param PAR2 Hyperparameter for stepsize scheduling by Xu (2011): Smallest Hessian eigenvalue.
+//' @param PAR3 Hyperparameter for stepsize scheduling by Xu (2011): Decay rate.
+//' @param STEPSIZEFLAG Choose stepsize scheduling: Set 0 for Polyak and Juditsky (1992), 1 for Xu (2011).
+//' @param CHECKCONV Flag to check for convergence using complete pairwise likelihood on the validation set.
+//' @param EACHCHECK  How often (in terms of iterations) to check for convergence.
+//' @param SEED Randomising seed.
+//'
+// [[Rcpp::export]]
+Rcpp::List plFA(
+    Eigen::Map<Eigen::MatrixXd> FREQ,
+    Eigen::Map<Eigen::MatrixXd> VALFREQ,
+    const unsigned int N,
+    Eigen::Map<Eigen::VectorXd> C_VEC,
+    Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+    Eigen::Map<Eigen::VectorXd> THETA_INIT,
     const unsigned int CORRFLAG,
     unsigned int METHODFLAG,
     const unsigned int PAIRS_PER_ITERATION,                                          // Pairs drawn Per Iteration
@@ -169,12 +201,10 @@ Rcpp::List plFA(
     const unsigned int TOLCOUNT = 50,                                 // How may consecutive iterations need to satisfy the convergence check in order to declare convergence
     const unsigned int SILENTFLAG = 1,
     const double TOL = 1e-6,
-    const int TOLCOUNTER = 10,
     const int EACHCLOCK= 100,
     const double PAR1 = 1,
     const double PAR2 = 1,
     const double PAR3 = .75,
-    const unsigned int SAMPLING_WINDOW = 1,
     const unsigned int STEPSIZEFLAG = 0,
     const unsigned int CHECKCONV = 0,
     const unsigned int EACHCHECK = 100,
@@ -346,24 +376,6 @@ Rcpp::List plFA(
     }else{
       path_av_theta.row(iter) = ( (iter - BURN - 1) * path_av_theta.row(iter - 1) + path_theta.row(iter) ) / (iter - BURN);
     }
-    /////////////////////////////////
-    /*      CHECK CONVERGENCE      */
-    /////////////////////////////////
-    // if((iter > BURN) & CHECKCONVERGENCE){
-    //
-    //   // check norm diff parameter vector
-    //   {
-    //     const double parNorm = (path_av_theta.row(iter)-path_av_theta.row(iter-1)).norm()/(path_av_theta.row(iter-1)).norm();
-    //     if(parNorm < TOL ){tolPar_counter ++; }else{tolPar_counter = 0;}
-    //     checkPar.push_back(parNorm);
-    //     if(tolPar_counter == TOLCOUNTER){last_iter = iter; convergence = 1; break;}
-    //   }
-    //
-    //
-    //
-    //
-    // }
-
 
     if(iter % EACHCLOCK == 0) clock.tock("Iteration");
     if(CHECKCONV == 1){
@@ -443,3 +455,7 @@ Rcpp::List plFA(
     );
   return(output);
 }
+
+
+
+

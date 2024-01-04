@@ -6,16 +6,14 @@
 Used by external optimisers}
 \usage{
 multiThread_completePairwise(
-  Y,
+  N,
   C_VEC,
-  A,
-  TAU,
-  LAMBDA,
-  TRANSFORMED_RHOS,
+  CONSTRMAT,
+  THETA,
   FREQ,
   CORRFLAG,
-  GRFLAG,
-  SILENTFLAG
+  GRFLAG = 1L,
+  SILENTFLAG = 1L
 )
 }
 \description{
