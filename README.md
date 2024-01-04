@@ -34,7 +34,7 @@ library(plFA)
 set.seed(123)
 
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 30; q <- 5; n <- 5000L
+p <- 40; q <- 8; n <- 5000L
 
 # Simple loading matrix constraints
 A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
@@ -68,7 +68,7 @@ Estimate the model with the stochastic optimiser
 
 # Set options for cpp stochastic optimiser
 cpp_ctrl <- list(
-  MAXT = 1000,
+  MAXT = 10000,
   PAIRS_PER_ITERATION = 8
 )
 
@@ -83,7 +83,7 @@ stFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with hyper...
-#> 4. Done! (0.98 secs)
+#> 4. Done! (16.66 secs)
 
 # extract estimated parameter vector
 stPar <- getPar(stFit)
@@ -95,7 +95,7 @@ matrixcalc::is.positive.definite(stParList$latent_correlations)
 
 # mean square error
 mean((stPar-theta)^2)
-#> [1] 0.0006180528
+#> [1] 0.0004594636
 ```
 
 Numerical estimation as comparison
@@ -108,7 +108,7 @@ numFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with ucminf...
-#> 4. Done! (15.07 secs)
+#> 4. Done! (117.39 secs)
 
 # extract estimated parameter vector
 numPar <- getPar(numFit)
@@ -118,7 +118,7 @@ numParList <- getPar(numFit, OPTION = 'list')
 
 # mean square error
 mean((numPar-theta)^2)
-#> [1] 0.0005232169
+#> [1] 0.0004215948
 ```
 
 ``` r
@@ -148,16 +148,16 @@ sessionInfo()
 #> loaded via a namespace (and not attached):
 #>  [1] Rcpp_1.0.11         pillar_1.9.0        compiler_4.1.2     
 #>  [4] tools_4.1.2         digest_0.6.33       evaluate_0.21      
-#>  [7] lifecycle_1.0.3     tibble_3.2.1        gtable_0.3.4       
+#>  [7] lifecycle_1.0.4     tibble_3.2.1        gtable_0.3.4       
 #> [10] lattice_0.20-45     ucminf_1.2.0        pkgconfig_2.0.3    
-#> [13] rlang_1.1.1         Matrix_1.6-1        cli_3.6.1          
+#> [13] rlang_1.1.2         Matrix_1.6-1        cli_3.6.1          
 #> [16] rstudioapi_0.15.0   RcppClock_1.1       yaml_2.3.7         
 #> [19] mvtnorm_1.2-3       xfun_0.40           fastmap_1.1.1      
 #> [22] dplyr_1.1.3         knitr_1.43          generics_0.1.3     
-#> [25] vctrs_0.6.3         grid_4.1.2          tidyselect_1.2.0   
-#> [28] glue_1.6.2          R6_2.5.1            fansi_1.0.4        
-#> [31] rmarkdown_2.24      ggplot2_3.4.3       magrittr_2.0.3     
+#> [25] vctrs_0.6.4         grid_4.1.2          tidyselect_1.2.0   
+#> [28] glue_1.6.2          R6_2.5.1            fansi_1.0.5        
+#> [31] rmarkdown_2.24      ggplot2_3.4.4       magrittr_2.0.3     
 #> [34] scales_1.2.1        htmltools_0.5.6     matrixcalc_1.0-6   
-#> [37] colorspace_2.1-0    utf8_1.2.3          RcppParallel_5.1.7 
+#> [37] colorspace_2.1-0    utf8_1.2.4          RcppParallel_5.1.7 
 #> [40] munsell_0.5.0       RcppEigen_0.3.3.9.3
 ```

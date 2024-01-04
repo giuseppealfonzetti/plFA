@@ -40,7 +40,7 @@ library(plFA)
 set.seed(123)
 
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 30; q <- 5; n <- 5000L
+p <- 40; q <- 8; n <- 5000L
 
 # Simple loading matrix constraints
 A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
@@ -74,7 +74,7 @@ Estimate the model with the stochastic optimiser
 
 # Set options for cpp stochastic optimiser
 cpp_ctrl <- list(
-  MAXT = 1000,
+  MAXT = 10000,
   PAIRS_PER_ITERATION = 8
 )
 
