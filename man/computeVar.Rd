@@ -4,7 +4,7 @@
 \alias{computeVar}
 \title{Compute estimates' variance}
 \usage{
-computeVar(OBJ, DATA)
+computeVar(OBJ, DATA, NUMDERIV = F, OPTION = "raw")
 }
 \description{
 Compute estimates' variance

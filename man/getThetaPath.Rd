@@ -4,7 +4,7 @@
 \alias{getThetaPath}
 \title{Extract parameters trajectory along the optimisation}
 \usage{
-getThetaPath(...)
+getThetaPath(OBJ, LAB = "pathAvTheta", OPTION = "transformed")
 }
 \arguments{
 \item{OBJ}{Object of class StoFit}
