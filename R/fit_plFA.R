@@ -24,6 +24,8 @@ stoc_args <- function(ARGS, P){
 
 #' Fit factor models for ordinal data with pairwise likelihood methods
 #'
+#' @description
+#'
 #' fit_plFA() allows to fit models both numerically and stochastically
 #'
 #' @param DATA Integer data matrix of dimension \eqn{n*p}. Categories must be coded starting from zero.
@@ -68,13 +70,12 @@ stoc_args <- function(ARGS, P){
 #'    \tab \cr
 #'    \code{CHECKCONV} \tab Flag to check for convergence using complete pairwise likelihood on the validation set. \cr
 #'    \tab \cr
-#'    \code{EACHCHECK} \tab How often (in terms of iterations) to check for convergence}. \cr
+#'    \code{EACHCHECK} \tab How often (in terms of iterations) to check for convergence. \cr
 #'    \tab \cr
-#'    \code{TOL} \tab Tolerance between consecutive evaluations of the validation composite likelihood}. \cr
+#'    \code{TOL} \tab Tolerance between consecutive evaluations of the validation composite likelihood. \cr
 #'    \tab \cr
-#'    \code{TOLCOUNT} \tab How many checks the algorithm is allowed to accept if the validation negative composite likelihood starts increasing}. \cr
+#'    \code{TOLCOUNT} \tab How many checks the algorithm is allowed to accept if the validation negative composite likelihood starts increasing. \cr
 #'    \tab \cr
-#'
 #' }
 #' @export
 fit_plFA <- function(
@@ -149,13 +150,7 @@ fit_plFA <- function(
       tmp@init <-  c(lambda0_init, lambda_init, transformed_rhos_init)
     }
 
-
-
-
-
-  # freq_tab <- pairs_freq(DATA, categories)
-  # val_freq_tab <- pairs_freq(VALDATA, categories)
-  message('2. Computing frequencies...')
+ message('2. Computing frequencies...')
   freq_start_time <- Sys.time()
   tmp@freq <- pairs_freq(DATA, categories)
   tmp@valfreq <- pairs_freq(VALDATA, categories)
@@ -175,42 +170,28 @@ fit_plFA <- function(
     # Compute frequency table bivariate patterns
 
     Rwr_ncl <- function(par_vec){
-      # lambda0_ <- par_vec[1:(sum(categories)-p)]
-      # lambda_ <- par_vec[(sum(categories)-p+1):(sum(categories)-p+sum(CONSTR_LIST$CONSTRMAT))]
-      # transformed_rhos_ <- par_vec[(sum(categories)-p+1+sum(CONSTR_LIST$CONSTRMAT)):length(par_vec)]
-      out <-multiThread_completePairwise_nll(
+      mod <- multiThread_completePairwise(
         N = n,
         C_VEC = categories,
         CONSTRMAT = CONSTR_LIST$CONSTRMAT,
         FREQ = tmp@freq,
-        # TAU = lambda0_,
-        # LAMBDA = lambda_,
-        # TRANSFORMED_RHOS = transformed_rhos_,
         THETA = par_vec,
         CORRFLAG = CONSTR_LIST$CORRFLAG,
-        # GRFLAG = 0,
         SILENTFLAG = 1
       )
-      # out <- mod$iter_nll
+      out <- mod$iter_nll/n
       return(out)
     }
 
     # function for gradient
     Rwr_ngr <- function(par_vec){
-      # lambda0_ <- par_vec[1:(sum(categories)-p)]
-      # lambda_ <- par_vec[(sum(categories)-p+1):(sum(categories)-p+sum(CONSTR_LIST$CONSTRMAT))]
-      # transformed_rhos_ <- par_vec[(sum(categories)-p+1+sum(CONSTR_LIST$CONSTRMAT)):length(par_vec)]
-      mod <-multiThread_completePairwise(
+      mod <- multiThread_completePairwise(
         N = n,
         C_VEC = categories,
         CONSTRMAT = CONSTR_LIST$CONSTRMAT,
         FREQ = tmp@freq,
-        # TAU = lambda0_,
-        # LAMBDA = lambda_,
-        # TRANSFORMED_RHOS = transformed_rhos_,
         THETA = par_vec,
         CORRFLAG = CONSTR_LIST$CORRFLAG,
-        GRFLAG = 1,
         SILENTFLAG = 1
       )
 
@@ -227,7 +208,6 @@ fit_plFA <- function(
       'hessian' = ifelse(is.null(CONTROL$hessian), 0, CONTROL$hessian))
 
     # optimisation
-    # start_opt <- Sys.time()
     opt <- do.call(ucminf::ucminf, args)
 
 

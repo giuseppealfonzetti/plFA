@@ -59,21 +59,74 @@ grad_S <- function(A, THETA, IDX) {
     .Call(`_plFA_grad_S`, A, THETA, IDX)
 }
 
-#' Complete pairiwse iteration with multithreading option//'
-NULL
-
-#' Complete pairiwse iteration with multithreading option//'
-#' Used by external optimisers
-multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG, SILENTFLAG) {
+#' Full pairwise iteration
+#'
+#' @description
+#' Evaluate negative loglikelihood or gradient of the complete pool of pairs.
+#' Used by external optimisers. Multithreading options via `RcppParallel`.
+#'
+#' @param N Number of observations
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param THETA Parameter vector
+#' @param FREQ Frequency table
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
+#' @param SILENTFLAG optional for verbose output
+#'
+multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG = 1L, SILENTFLAG = 1L) {
     .Call(`_plFA_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
 }
 
+#' Full pairwise likelihood
+#'
+#' @description
+#' Evaluate negative loglikelihood. Same structure of `multiThread_completePairwise`.
+#' Used to monitor validation log-likelihood. Multithreading options via `RcppParallel`.
+#'
+#' @param N Number of observations
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param THETA Parameter vector
+#' @param FREQ Frequency table
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param SILENTFLAG optional for verbose output
+#'
 multiThread_completePairwise_nll <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, SILENTFLAG) {
     .Call(`_plFA_multiThread_completePairwise_nll`, N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, SILENTFLAG)
 }
 
-plFA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT = 50L, SILENTFLAG = 1L, TOL = 1e-6, TOLCOUNTER = 10L, EACHCLOCK = 100L, PAR1 = 1, PAR2 = 1, PAR3 = .75, SAMPLING_WINDOW = 1L, STEPSIZEFLAG = 0L, CHECKCONV = 0L, EACHCHECK = 100L, SEED = 123L) {
-    .Call(`_plFA_plFA`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, CHECKCONV, EACHCHECK, SEED)
+#' Stochastic optimiser
+#'
+#' @description
+#' Core function to evaluate stochastic estimators
+#'
+#' @param FREQ Frequency table.
+#' @param VALFREQ Frequency table validation data.
+#' @param N Number of observations.
+#' @param C_VEC Vector containing the number of categories for each item.
+#' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param THETA_INIT Initial parameter vector
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param METHODFLAG 0 for hypergeometric, 1 for Bernoulli.
+#' @param PAIRS_PER_ITERATION Number of pairs to draw per iteration.
+#' @param ETA Initial stepsize.
+#' @param BURN Initial burn-in period.
+#' @param MAXT Maximum number of iterations.
+#' @param TOLCOUNT Tolerance count for convergence with validation nll.
+#' @param SILENTFLAG Silent output.
+#' @param TOL Tolerance level.
+#' @param EACHCLOCK How often (in terms of iterations) to measure single iteration computational times (using \code{RcppClock}..
+#' @param PAR1 Hyperparameter for stepsize scheduling by Xu (2011): Scaling.
+#' @param PAR2 Hyperparameter for stepsize scheduling by Xu (2011): Smallest Hessian eigenvalue.
+#' @param PAR3 Hyperparameter for stepsize scheduling by Xu (2011): Decay rate.
+#' @param STEPSIZEFLAG Choose stepsize scheduling: Set 0 for Polyak and Juditsky (1992), 1 for Xu (2011).
+#' @param CHECKCONV Flag to check for convergence using complete pairwise likelihood on the validation set.
+#' @param EACHCHECK  How often (in terms of iterations) to check for convergence.
+#' @param SEED Randomising seed.
+#'
+plFA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT = 50L, SILENTFLAG = 1L, TOL = 1e-6, EACHCLOCK = 100L, PAR1 = 1, PAR2 = 1, PAR3 = .75, STEPSIZEFLAG = 0L, CHECKCONV = 0L, EACHCHECK = 100L, SEED = 123L) {
+    .Call(`_plFA_plFA`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, TOL, EACHCLOCK, PAR1, PAR2, PAR3, STEPSIZEFLAG, CHECKCONV, EACHCHECK, SEED)
 }
 
 #' @export

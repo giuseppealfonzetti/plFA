@@ -7,6 +7,7 @@
 fit_plFA(
   DATA,
   CONSTR_LIST,
+  VALDATA = NULL,
   METHOD = "ucminf",
   CONTROL = list(),
   INIT = NULL,
@@ -23,6 +24,8 @@ fit_plFA(
 \tab \cr
 \code{CORRFLAG} \tab Binary indicator. Set it to 0 if the latent variables are assumed to be independent. Set it 1 otherwise. \cr
 }}
+
+\item{VALDATA}{Data matrix used as validation set to check for convergence.}
 
 \item{METHOD}{Label for the method chosen. Possible values are: \tabular{ll}{
 \code{'ucminf'} \tab for estimation via the numerical optimiser from the \code{ucminf} package. \cr
@@ -55,7 +58,14 @@ fit_plFA(
 \tab \cr
 \code{EACHCLOCK} \tab How often (in terms of iterations) to measure single iteration computational times (using \code{RcppClock}. \cr
 \tab \cr
-
+\code{CHECKCONV} \tab Flag to check for convergence using complete pairwise likelihood on the validation set. \cr
+\tab \cr
+\code{EACHCHECK} \tab How often (in terms of iterations) to check for convergence. \cr
+\tab \cr
+\code{TOL} \tab Tolerance between consecutive evaluations of the validation composite likelihood. \cr
+\tab \cr
+\code{TOLCOUNT} \tab How many checks the algorithm is allowed to accept if the validation negative composite likelihood starts increasing. \cr
+\tab \cr
 }}
 
 \item{INIT}{Initialising vector. If not provided, optiisation starts at the zero vector.}

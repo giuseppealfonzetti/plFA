@@ -95,8 +95,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // plFA
-Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SILENTFLAG, const double TOL, const int TOLCOUNTER, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int SAMPLING_WINDOW, const unsigned int STEPSIZEFLAG, const unsigned int CHECKCONV, const unsigned int EACHCHECK, const unsigned int SEED);
-RcppExport SEXP _plFA_plFA(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SILENTFLAGSEXP, SEXP TOLSEXP, SEXP TOLCOUNTERSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP SAMPLING_WINDOWSEXP, SEXP STEPSIZEFLAGSEXP, SEXP CHECKCONVSEXP, SEXP EACHCHECKSEXP, SEXP SEEDSEXP) {
+Rcpp::List plFA(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA_INIT, const unsigned int CORRFLAG, unsigned int METHODFLAG, const unsigned int PAIRS_PER_ITERATION, double ETA, const unsigned int BURN, const unsigned int MAXT, const unsigned int TOLCOUNT, const unsigned int SILENTFLAG, const double TOL, const int EACHCLOCK, const double PAR1, const double PAR2, const double PAR3, const unsigned int STEPSIZEFLAG, const unsigned int CHECKCONV, const unsigned int EACHCHECK, const unsigned int SEED);
+RcppExport SEXP _plFA_plFA(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETA_INITSEXP, SEXP CORRFLAGSEXP, SEXP METHODFLAGSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP ETASEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP SILENTFLAGSEXP, SEXP TOLSEXP, SEXP EACHCLOCKSEXP, SEXP PAR1SEXP, SEXP PAR2SEXP, SEXP PAR3SEXP, SEXP STEPSIZEFLAGSEXP, SEXP CHECKCONVSEXP, SEXP EACHCHECKSEXP, SEXP SEEDSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -115,17 +115,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const unsigned int >::type TOLCOUNT(TOLCOUNTSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SILENTFLAG(SILENTFLAGSEXP);
     Rcpp::traits::input_parameter< const double >::type TOL(TOLSEXP);
-    Rcpp::traits::input_parameter< const int >::type TOLCOUNTER(TOLCOUNTERSEXP);
     Rcpp::traits::input_parameter< const int >::type EACHCLOCK(EACHCLOCKSEXP);
     Rcpp::traits::input_parameter< const double >::type PAR1(PAR1SEXP);
     Rcpp::traits::input_parameter< const double >::type PAR2(PAR2SEXP);
     Rcpp::traits::input_parameter< const double >::type PAR3(PAR3SEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type SAMPLING_WINDOW(SAMPLING_WINDOWSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type STEPSIZEFLAG(STEPSIZEFLAGSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type CHECKCONV(CHECKCONVSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type EACHCHECK(EACHCHECKSEXP);
     Rcpp::traits::input_parameter< const unsigned int >::type SEED(SEEDSEXP);
-    rcpp_result_gen = Rcpp::wrap(plFA(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, TOL, TOLCOUNTER, EACHCLOCK, PAR1, PAR2, PAR3, SAMPLING_WINDOW, STEPSIZEFLAG, CHECKCONV, EACHCHECK, SEED));
+    rcpp_result_gen = Rcpp::wrap(plFA(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, TOL, EACHCLOCK, PAR1, PAR2, PAR3, STEPSIZEFLAG, CHECKCONV, EACHCHECK, SEED));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -205,7 +203,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_grad_S", (DL_FUNC) &_plFA_grad_S, 3},
     {"_plFA_multiThread_completePairwise", (DL_FUNC) &_plFA_multiThread_completePairwise, 8},
     {"_plFA_multiThread_completePairwise_nll", (DL_FUNC) &_plFA_multiThread_completePairwise_nll, 7},
-    {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 25},
+    {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 23},
     {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
     {"_plFA_compute_pair", (DL_FUNC) &_plFA_compute_pair, 9},
     {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 6},
