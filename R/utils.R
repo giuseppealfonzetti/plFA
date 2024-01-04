@@ -119,9 +119,3 @@ get_tidy_path <- function(MOD_OBJ, PATH_LAB){
   return(out)
 }
 
-# Custom call to pvnorm to pass to rcpp functions
-pmvnorm_custom <- function(lower, upper, sigma, seed = 123){
-  set.seed(seed)
-  out <- pmvnorm(lower = lower, upper = upper, sigma = sigma, keepAttr = F)
-  return(out)
-}

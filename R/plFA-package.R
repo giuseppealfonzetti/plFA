@@ -21,3 +21,12 @@ NULL
 ## usethis namespace: end
 NULL
 
+## usethis namespace: start
+#' @importFrom methods new slot
+## usethis namespace: end
+NULL
+
+## usethis namespace: start
+#' @importFrom stats runif
+## usethis namespace: end
+NULL

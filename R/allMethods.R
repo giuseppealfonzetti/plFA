@@ -31,7 +31,7 @@ setMethod('show', 'PlFaFit', function(object){
 #' @param OBJ Object of class StoFit
 #' @param LAB Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.
 #' @param OPTION Parameterisation option.
-
+#'
 #' @export
 setGeneric('getThetaPath', function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed') standardGeneric('getThetaPath'))
 setMethod('getThetaPath', 'PlFaFit', function(OBJ, LAB, OPTION) extract_theta_path(OBJ, LAB, OPTION))

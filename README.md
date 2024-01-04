@@ -83,7 +83,7 @@ stFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with hyper...
-#> 4. Done! (16.66 secs)
+#> 4. Done! (16.57 secs)
 
 # extract estimated parameter vector
 stPar <- getPar(stFit)
@@ -108,7 +108,7 @@ numFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with ucminf...
-#> 4. Done! (117.39 secs)
+#> 4. Done! (116.84 secs)
 
 # extract estimated parameter vector
 numPar <- getPar(numFit)
