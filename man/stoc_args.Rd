@@ -6,6 +6,11 @@
 \usage{
 stoc_args(ARGS, P)
 }
+\arguments{
+\item{ARGS}{List of arguments}
+
+\item{P}{Number of pairs}
+}
 \description{
 Internal function to check arguments in fit_plFA
 }

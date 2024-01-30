@@ -4,10 +4,16 @@
 #include "bivariateProbs.h"
 //' Estimate of H
 //'
+//' @description
 //' Compute a sample estimate of the expected negative Hessian by taking
 //' advantage of the second Bartlett's identity at the single pair level
 //'
-//' @export
+//' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+//' @param C_VEC Vector containing the number of categories for each item
+//' @param THETA Parameter vector
+//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param FREQ output from [pairs_freq()]
+//' @param N sample size
 // [[Rcpp::export]]
 Rcpp::List estimate_H(
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
@@ -114,10 +120,15 @@ Rcpp::List estimate_H(
 
 //' Estimate of J
 //'
+//' @description
 //' Compute a sample estimate of the variability matrix via the sample average outer product
 //' of the composite score
 //'
-//' @export
+//' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+//' @param C_VEC Vector containing the number of categories for each item
+//' @param THETA Parameter vector
+//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param Y data matrix
 // [[Rcpp::export]]
 Rcpp::List estimate_J(
     Eigen::Map<Eigen::MatrixXd> Y,                    // Manifest data

@@ -131,35 +131,55 @@ plFA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHO
     .Call(`_plFA_plFA`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, TOL, EACHCLOCK, PAR1, PAR2, PAR3, STEPSIZEFLAG, CHECKCONV, EACHCHECK, SEED)
 }
 
-#' @export
 sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER) {
     .Call(`_plFA_sampling_step`, FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER)
 }
 
 #' Single pair contribution
 #'
+#' @description
 #' Wrapper of pair_contribution() used for unit tests
-#' @export
+#'
+#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param THETA Parameter vector
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param k first index identifying the pair
+#' @param l second index identifying the pair
+#' @param PAIRS_TABLE output from [pairs_freq()]
+#' @param SILENTFLAG optional for verbose output
+#' @param GRADFLAG 1 to compute gradient
 compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG) {
     .Call(`_plFA_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG)
 }
 
 #' Estimate of H
 #'
+#' @description
 #' Compute a sample estimate of the expected negative Hessian by taking
 #' advantage of the second Bartlett's identity at the single pair level
 #'
-#' @export
+#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param THETA Parameter vector
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param FREQ output from [pairs_freq()]
+#' @param N sample size
 estimate_H <- function(C_VEC, A, THETA, FREQ, N, CORRFLAG) {
     .Call(`_plFA_estimate_H`, C_VEC, A, THETA, FREQ, N, CORRFLAG)
 }
 
 #' Estimate of J
 #'
+#' @description
 #' Compute a sample estimate of the variability matrix via the sample average outer product
 #' of the composite score
 #'
-#' @export
+#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param THETA Parameter vector
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param Y data matrix
 estimate_J <- function(Y, C_VEC, A, THETA, CORRFLAG) {
     .Call(`_plFA_estimate_J`, Y, C_VEC, A, THETA, CORRFLAG)
 }

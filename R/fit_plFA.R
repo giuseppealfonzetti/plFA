@@ -1,5 +1,7 @@
+utils::globalVariables(c("clock"))
 #' Internal function to check arguments in fit_plFA
-#' @export
+#' @param ARGS List of arguments
+#' @param P Number of pairs
 stoc_args <- function(ARGS, P){
 
   pairs <- P*(P-1)/2
@@ -77,6 +79,7 @@ stoc_args <- function(ARGS, P){
 #'    \code{TOLCOUNT} \tab How many checks the algorithm is allowed to accept if the validation negative composite likelihood starts increasing. \cr
 #'    \tab \cr
 #' }
+#' @param VERBOSEFLAG TRUE verbose output
 #' @export
 fit_plFA <- function(
     DATA,

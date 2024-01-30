@@ -322,8 +322,18 @@ void pair_contribution(
 
 //' Single pair contribution
 //'
+//' @description
 //' Wrapper of pair_contribution() used for unit tests
-//' @export
+//'
+//' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+//' @param C_VEC Vector containing the number of categories for each item
+//' @param THETA Parameter vector
+//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param k first index identifying the pair
+//' @param l second index identifying the pair
+//' @param PAIRS_TABLE output from [pairs_freq()]
+//' @param SILENTFLAG optional for verbose output
+//' @param GRADFLAG 1 to compute gradient
 // [[Rcpp::export]]
 Rcpp::List compute_pair(
      Eigen::Map<Eigen::MatrixXd> A,

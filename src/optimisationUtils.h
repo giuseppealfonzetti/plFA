@@ -4,9 +4,8 @@
 #include "genericUtils.h"
 
 /* SAMPLING PAIRS */
-//' @export
- // [[Rcpp::export]]
- std::vector<int> sampling_step(
+// [[Rcpp::export]]
+std::vector<int> sampling_step(
      std::vector<int> &FULL_POOL,                // Address of pairs indices
      const unsigned int METHODFLAG,                    // 0 hypergeometric, 1 Bernoulli
      const double PROB,
@@ -15,7 +14,7 @@
      const unsigned int SEED,
      const int SILENTFLAG,
      const unsigned int ITER
- ){
+){
    // Set-up the randomizer
    std::mt19937 randomizer(SEED + ITER);
 

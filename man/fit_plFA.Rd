@@ -72,6 +72,8 @@ fit_plFA(
 
 \item{ITERATIONS_SUBSET}{Vector with the indexes of iterations used to store trajectories.}
 
+\item{VERBOSEFLAG}{TRUE verbose output}
+
 \item{NCORES}{Integer value setting the number of threads to carry out the estimation.}
 }
 \description{

@@ -19,7 +19,7 @@ where \eqn{q} is the number of latent variables.}
 \item{CAT}{Integer vector storing the possible number of categories
 for each item. Values must be ordered following items order in the dataset.}
 
-\item{A}{Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
+\item{CONSTRMAT}{Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
 that the corresponding element in the loading matrix is free to be estimated.
 A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 to \eqn{0}.}

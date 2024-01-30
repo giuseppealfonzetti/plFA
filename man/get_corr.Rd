@@ -7,10 +7,9 @@
 get_corr(THETA, Q)
 }
 \arguments{
-\item{Q}{Number of latent variables.}
+\item{THETA}{Parameter vector}
 
-\item{CONSTRMAT}{Matrix of dimension \eqn{p * q},
-with \eqn{p} the number of items.}
+\item{Q}{Number of latent variables.}
 }
 \description{
 get_corr() extracts the latent correlations from the

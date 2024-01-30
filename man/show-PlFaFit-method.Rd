@@ -6,6 +6,9 @@
 \usage{
 \S4method{show}{PlFaFit}(object)
 }
+\arguments{
+\item{object}{Object of class StoFit}
+}
 \description{
 Show method for the output of fit_plFA()
 }

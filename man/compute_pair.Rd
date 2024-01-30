@@ -16,6 +16,25 @@ compute_pair(
   GRADFLAG
 )
 }
+\arguments{
+\item{A}{Constraint matrix. Loadings free to be estimated are identified by a 1.}
+
+\item{C_VEC}{Vector containing the number of categories for each item}
+
+\item{THETA}{Parameter vector}
+
+\item{CORRFLAG}{1 to estimate latent correlations. 0 for orthogonal latent factors.}
+
+\item{k}{first index identifying the pair}
+
+\item{l}{second index identifying the pair}
+
+\item{PAIRS_TABLE}{output from \code{\link[=pairs_freq]{pairs_freq()}}}
+
+\item{SILENTFLAG}{optional for verbose output}
+
+\item{GRADFLAG}{1 to compute gradient}
+}
 \description{
 Wrapper of pair_contribution() used for unit tests
 }

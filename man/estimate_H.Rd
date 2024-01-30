@@ -6,6 +6,19 @@
 \usage{
 estimate_H(C_VEC, A, THETA, FREQ, N, CORRFLAG)
 }
+\arguments{
+\item{C_VEC}{Vector containing the number of categories for each item}
+
+\item{A}{Constraint matrix. Loadings free to be estimated are identified by a 1.}
+
+\item{THETA}{Parameter vector}
+
+\item{FREQ}{output from \code{\link[=pairs_freq]{pairs_freq()}}}
+
+\item{N}{sample size}
+
+\item{CORRFLAG}{1 to estimate latent correlations. 0 for orthogonal latent factors.}
+}
 \description{
 Compute a sample estimate of the expected negative Hessian by taking
 advantage of the second Bartlett's identity at the single pair level

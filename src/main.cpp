@@ -356,7 +356,7 @@ Rcpp::List plFA(
     theta -= stepsize * iter_gradient;
     if(iter % EACHCLOCK == 0) clock.tock("Update");
 
-    // 4. Post update loadings normalisation, if needed
+    // 4. Post update loadings projection, if needed
     bool checkevent = false;
     stabilise_loadings(CONSTRMAT, C_VEC, theta, checkevent);
     if(checkevent)post_index.push_back(iter);

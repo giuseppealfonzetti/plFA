@@ -7,7 +7,7 @@ Authors@R:
     role = c("aut", "cre"),
     comment = c(ORCID = "0000-0002-6118-6553"))
 Description: The plFA package provides a fast implementation of numerical and stochastic pairiwse likelihood estimation for factor models with ordinal data. 
-License: use_mit_license()
+License: MIT + file LICENSE
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
@@ -24,6 +24,7 @@ Imports:
     RcppEigen  (>= 0.3.3.9.3),
     RcppParallel  (>= 5.1.7),
     RcppClock  (>= 1.1),
+    mvtnorm,
     magrittr,
     ucminf,
     matrixcalc,

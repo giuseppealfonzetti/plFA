@@ -4,10 +4,8 @@
 #' parameter vector. The vector has length \eqn{q*(q-1)/2},
 #' where \eqn{q} is the number of latent variables.
 #'
-#' @param CONSTRMAT Matrix of dimension \eqn{p * q},
-#' with \eqn{p} the number of items.
 #' @param Q Number of latent variables.
-#'
+#' @param THETA Parameter vector
 #' @export
 get_corr <- function(THETA, Q){
   if(sum(!is.finite(THETA))>0)stop('THETA not numeric.')
@@ -60,7 +58,7 @@ get_lambda <- function(THETA, C, P, Q){
 #' @param LATENT_COV Correlation matrix of dimension \eqn{q}.
 #' @param CAT Integer vector storing the possible number of categories
 #' for each item. Values must be ordered following items order in the dataset.
-#' @param A Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
+#' @param CONSTRMAT Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
 #' that the corresponding element in the loading matrix is free to be estimated.
 #' A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 #' to \eqn{0}.
@@ -109,8 +107,7 @@ get_tidy_path <- function(MOD_OBJ, PATH_LAB){
   iters <- MOD_OBJ$iterations_subset
   path  <- MOD_OBJ$fit[[PATH_LAB]]
 
-  out <- dplyr::tibble(iter = iters) %>%
-    dplyr::mutate(
+  out <- dplyr::mutate(dplyr::tibble(iter = iters),
       path_chosen = split(t(path), rep(1:nrow(path), each = ncol(path)))
     )
 
