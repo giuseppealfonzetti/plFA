@@ -33,7 +33,7 @@ double compute_pi(
   } else if(sl == (cl-1)){
     cum1 = R::pnorm(t_sk, 0, 1, 1, 0);
   } else {
-    cum1 = pbv_rcpp_pbvnorm0( t_sk, t_sl, rho_kl);
+    cum1 = binorm::pbvnorm( t_sk, t_sl, rho_kl);
   }
 
   // Phi(t_sk, t_sl-1; rho_kl)
@@ -41,26 +41,22 @@ double compute_pi(
   if(sl == 0){
     cum2 = 0;
   } else {
-    cum2 = pbv_rcpp_pbvnorm0( t_sk, t_sl_prev, rho_kl);
+    cum2 = binorm::pbvnorm( t_sk, t_sl_prev, rho_kl);
   }
   // Phi(t_sk-1, t_sl; rho_kl)
   double cum3;
   if(sk == 0){
     cum3 = 0;
   } else{
-    cum3 = pbv_rcpp_pbvnorm0( t_sk_prev, t_sl, rho_kl);
+    cum3 = binorm::pbvnorm( t_sk_prev, t_sl, rho_kl);
   }
   // Phi(t_sk-1, t_sl-1; rho_kl)
   double cum4;
   if(sl == 0 | sk == 0){
     cum4 = 0;
   }else{
-    cum4 = pbv_rcpp_pbvnorm0( t_sk_prev, t_sl_prev, rho_kl);
+    cum4 = binorm::pbvnorm( t_sk_prev, t_sl_prev, rho_kl);
   }
-
-  //Rcpp::Rcout << " |__ k: " << k << " , l: "<< l << " ,sk: " << sk << " , sl: " << sl << "\n";
-  //Rcpp::Rcout << " |__ t_sk: " << t_sk << " , t_sl: "<< t_sl <<", t_sk_prev:"<<t_sk_prev<<", t_sl_prev:"<<t_sl_prev<<", corr:" << rho_kl<<"\n";
-  //Rcpp::Rcout << " |__ c1:"<< cum1 <<", c2:"<< cum2<<", c3:"<<cum3<<", c4:"<< cum4 << "\n";
 
   double pi_sksl = cum1 - cum2 - cum3 + cum4;
 
@@ -100,16 +96,16 @@ Eigen::VectorXd compute_pi_grad(Eigen::Map<Eigen::MatrixXd> A,
 
   //Intermediate derivative pi wrt to kl correlation
   // phi(t_sk, t_sl; rho_kl)
-  double d1 = pbv_rcpp_dbvnorm0( t_sk, t_sl, rho_kl, 0);
+  double d1 = binorm::dbvnorm( t_sk, t_sl, rho_kl, 0);
 
   // phi(t_sk, t_sl-1; rho_kl)
-  double d2 = pbv_rcpp_dbvnorm0( t_sk, t_sl_prev, rho_kl, 0);
+  double d2 = binorm::dbvnorm( t_sk, t_sl_prev, rho_kl, 0);
 
   // phi(t_sk-1, t_sl; rho_kl)
-  double d3 = pbv_rcpp_dbvnorm0( t_sk_prev, t_sl, rho_kl, 0);
+  double d3 = binorm::dbvnorm( t_sk_prev, t_sl, rho_kl, 0);
 
   // phi(t_sk-1, t_sl-1; rho_kl)
-  double d4 = pbv_rcpp_dbvnorm0( t_sk_prev, t_sl_prev, rho_kl, 0);
+  double d4 = binorm::dbvnorm( t_sk_prev, t_sl_prev, rho_kl, 0);
 
   double tmp_sksl = d1 - d2 - d3 + d4;
 
@@ -215,26 +211,6 @@ Eigen::VectorXd compute_pi_grad(Eigen::Map<Eigen::MatrixXd> A,
   // gradient pi_sksl wrt correlations
   ///////////////////////////////////////
   if(corrFLAG == 1){
-    // double loop: iterate over each non-redundant latent correlation
-    // for(unsigned int v = 1; v < q; v++){
-    //     for(unsigned int  t = 0; t < v; t++){
-    //         Eigen::VectorXd ev(q); ev.fill(0.0); ev(v) = 1;
-    //         Eigen::VectorXd et(q); et.fill(0.0); et(t) = 1;
-    //         double trho = transformed_rhos(iter_th - c_vec.sum() + p - A.sum());
-    //         double drho = 2*exp(2*trho) * pow((exp(2*trho) + 1),-1) * ( 1 - ( exp(2*trho) - 1) * pow((exp(2*trho) + 1),-1) );
-    //
-    //         // impose symmetric structure
-    //         Eigen::MatrixXd Jvt = ev * et.transpose();
-    //         Eigen::MatrixXd Jtv = et * ev.transpose();
-    //         Eigen::MatrixXd Svt = Jvt + Jtv - Jvt*Jvt;
-    //
-    //         double d_rho_kl = lambdak.transpose() * (Svt * drho) * lambdal;
-    //
-    //         //if(silentFLAG == 0)
-    //         dpi(iter_th) = tmp_sksl * d_rho_kl;
-    //         iter_th ++;
-    //     }
-    // }
     for(unsigned int thro_idx = 0; thro_idx < ncorr; thro_idx ++){
 
       Eigen::MatrixXd dSigma = grad_S(A, transformed_rhos, thro_idx);

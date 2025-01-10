@@ -239,16 +239,16 @@ void pair_contribution(
         const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2); const double t_sl_prev = pi_thresholds(3);
 
         // phi(t_sk, t_sl; rho_kl)
-        const double d1 = pbv_rcpp_dbvnorm0( t_sk, t_sl, rho_kl, 0);
+        const double d1 = binorm::dbvnorm( t_sk, t_sl, rho_kl, 0);
 
         // phi(t_sk, t_sl-1; rho_kl)
-        const double d2 = pbv_rcpp_dbvnorm0( t_sk, t_sl_prev, rho_kl, 0);
+        const double d2 = binorm::dbvnorm( t_sk, t_sl_prev, rho_kl, 0);
 
         // phi(t_sk-1, t_sl; rho_kl)
-        const double d3 = pbv_rcpp_dbvnorm0( t_sk_prev, t_sl, rho_kl, 0);
+        const double d3 = binorm::dbvnorm( t_sk_prev, t_sl, rho_kl, 0);
 
         // phi(t_sk-1, t_sl-1; rho_kl)
-        const double d4 = pbv_rcpp_dbvnorm0( t_sk_prev, t_sl_prev, rho_kl, 0);
+        const double d4 = binorm::dbvnorm( t_sk_prev, t_sl_prev, rho_kl, 0);
 
         tmp_kl += (n_sksl/(pi_sksl+1e-8)) * ( d1 - d2 - d3 + d4);
       }
