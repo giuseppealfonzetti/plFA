@@ -3,6 +3,8 @@
 
 #include "genericUtils.h"
 #include "bivariateProbs.h"
+#include "latCorr.h"
+
 
 // Single pair contribution to
 // 1. Log-likelihood
@@ -305,7 +307,7 @@ void pair_contribution(
     if(CORRFLAG == 1){
 
       for(int thro_idx = 0; thro_idx < ncorr; thro_idx ++){
-        const Eigen::MatrixXd dSigma = grad_S(A, transformed_rhos, thro_idx);
+        const Eigen::MatrixXd dSigma = latcorr::grad_S(A, transformed_rhos, thro_idx);
         const double d_rho_kl = lambdak.transpose() * dSigma * lambdal;
         tmp_gradient(iter) += tmp_kl * d_rho_kl;
         iter++;

@@ -59,19 +59,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// grad_S
-Eigen::MatrixXd grad_S(Eigen::Map<Eigen::MatrixXd> A, const Eigen::VectorXd& THETA, const unsigned int IDX);
-RcppExport SEXP _plFA_grad_S(SEXP ASEXP, SEXP THETASEXP, SEXP IDXSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type IDX(IDXSEXP);
-    rcpp_result_gen = Rcpp::wrap(grad_S(A, THETA, IDX));
-    return rcpp_result_gen;
-END_RCPP
-}
 // multiThread_completePairwise
 Rcpp::List multiThread_completePairwise(const unsigned int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, const unsigned int CORRFLAG, const unsigned int GRFLAG, const unsigned int SILENTFLAG);
 RcppExport SEXP _plFA_multiThread_completePairwise(SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
@@ -214,7 +201,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_get_Lam", (DL_FUNC) &_plFA_get_Lam, 3},
     {"_plFA_get_par_from_S", (DL_FUNC) &_plFA_get_par_from_S, 1},
     {"_plFA_get_S", (DL_FUNC) &_plFA_get_S, 2},
-    {"_plFA_grad_S", (DL_FUNC) &_plFA_grad_S, 3},
     {"_plFA_multiThread_completePairwise", (DL_FUNC) &_plFA_multiThread_completePairwise, 8},
     {"_plFA_multiThread_completePairwise_nll", (DL_FUNC) &_plFA_multiThread_completePairwise_nll, 7},
     {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 23},

@@ -57,10 +57,6 @@ get_S <- function(THETA, Q) {
     .Call(`_plFA_get_S`, THETA, Q)
 }
 
-grad_S <- function(A, THETA, IDX) {
-    .Call(`_plFA_grad_S`, A, THETA, IDX)
-}
-
 #' Full pairwise iteration
 #'
 #' @description

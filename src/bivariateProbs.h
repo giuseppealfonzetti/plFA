@@ -2,6 +2,7 @@
 #define bivariateProbs_H
 
 #include "bivariateNormal.h"
+#include "latCorr.h"
 
 /*  PI (the probability of a bivariate response pattern) */
 // Compute specific pi_sksl
@@ -213,7 +214,7 @@ Eigen::VectorXd compute_pi_grad(Eigen::Map<Eigen::MatrixXd> A,
   if(corrFLAG == 1){
     for(unsigned int thro_idx = 0; thro_idx < ncorr; thro_idx ++){
 
-      Eigen::MatrixXd dSigma = grad_S(A, transformed_rhos, thro_idx);
+      Eigen::MatrixXd dSigma = latcorr::grad_S(A, transformed_rhos, thro_idx);
       // Rcpp::Rcout << "dsigma wrt corr idx " << thro_idx << ":\n"<< dSigma << "\n";
 
       double d_rho_kl = lambdak.transpose() * dSigma * lambdal;
