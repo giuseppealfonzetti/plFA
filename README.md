@@ -84,14 +84,14 @@ stFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with hyper...
-#> 4. Done! (2.8 secs)
+#> 4. Done! (1.7 secs)
 stFit
 #> - Stochastic estimate
 #> 
 #>      Sampling scheme: hyper 
 #>      Pairs per iteration: 8  out of  435 
 #>      Iterations: 2000 
-#>      Total time: 2.8 s (Data reduction: 0.03 s)
+#>      Total time: 1.7 s (Data reduction: 0.02 s)
 #>      Cores used: 1 
 #>  
 #> - Use getPar() to extract parameter estimates.
@@ -118,7 +118,7 @@ numFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with ucminf...
-#> 4. Done! (46.03 secs)
+#> 4. Done! (31.7 secs)
 
 # extract estimated parameter vector
 numPar <- getPar(numFit)
@@ -162,12 +162,12 @@ numse[1:10]
 
 ``` r
 sessionInfo()
-#> R version 4.1.2 (2021-11-01)
-#> Platform: x86_64-pc-linux-gnu (64-bit)
-#> Running under: Ubuntu 22.04.3 LTS
+#> R version 4.4.2 (2024-10-31)
+#> Platform: x86_64-pc-linux-gnu
+#> Running under: Ubuntu 22.04.5 LTS
 #> 
 #> Matrix products: default
-#> BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0
+#> BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
 #> LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
 #> 
 #> locale:
@@ -178,6 +178,9 @@ sessionInfo()
 #>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
 #> [11] LC_MEASUREMENT=it_IT.UTF-8 LC_IDENTIFICATION=C       
 #> 
+#> time zone: Europe/Rome
+#> tzcode source: system (glibc)
+#> 
 #> attached base packages:
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
@@ -185,18 +188,18 @@ sessionInfo()
 #> [1] plFA_0.0.0.9000
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] Rcpp_1.0.12         pillar_1.9.0        compiler_4.1.2     
-#>  [4] tools_4.1.2         digest_0.6.33       evaluate_0.21      
-#>  [7] lifecycle_1.0.4     tibble_3.2.1        gtable_0.3.4       
-#> [10] ucminf_1.2.0        pkgconfig_2.0.3     rlang_1.1.3        
-#> [13] cli_3.6.2           rstudioapi_0.15.0   RcppClock_1.1      
-#> [16] yaml_2.3.7          mvtnorm_1.2-3       xfun_0.40          
-#> [19] fastmap_1.1.1       dplyr_1.1.4         knitr_1.43         
-#> [22] generics_0.1.3      vctrs_0.6.5         grid_4.1.2         
-#> [25] tidyselect_1.2.0    glue_1.7.0          R6_2.5.1           
-#> [28] fansi_1.0.6         rmarkdown_2.24      ggplot2_3.4.4      
-#> [31] magrittr_2.0.3      scales_1.3.0        htmltools_0.5.6    
-#> [34] matrixcalc_1.0-6    colorspace_2.1-0    numDeriv_2016.8-1.1
-#> [37] utf8_1.2.4          RcppParallel_5.1.7  munsell_0.5.0      
-#> [40] RcppEigen_0.3.3.9.4
+#>  [1] vctrs_0.6.5         cli_3.6.3           knitr_1.48         
+#>  [4] rlang_1.1.4         xfun_0.47           generics_0.1.3     
+#>  [7] RcppParallel_5.1.8  glue_1.8.0          colorspace_2.1-1   
+#> [10] htmltools_0.5.8.1   matrixcalc_1.0-6    RcppClock_1.1      
+#> [13] scales_1.3.0        fansi_1.0.6         rmarkdown_2.28     
+#> [16] grid_4.4.2          evaluate_1.0.1      munsell_0.5.1      
+#> [19] tibble_3.2.1        fastmap_1.2.0       numDeriv_2016.8-1.1
+#> [22] mvtnorm_1.3-1       yaml_2.3.10         lifecycle_1.0.4    
+#> [25] compiler_4.4.2      dplyr_1.1.4         ucminf_1.2.2       
+#> [28] pkgconfig_2.0.3     Rcpp_1.0.13-1       RcppEigen_0.3.4.0.2
+#> [31] rstudioapi_0.16.0   digest_0.6.37       R6_2.5.1           
+#> [34] tidyselect_1.2.1    utf8_1.2.4          pillar_1.9.0       
+#> [37] magrittr_2.0.3      tools_4.4.2         gtable_0.3.6       
+#> [40] ggplot2_3.5.1
 ```

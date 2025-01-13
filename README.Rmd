@@ -116,7 +116,7 @@ numParList <- getPar(numFit, OPTION = 'list')
 mean((numPar-theta)^2)
 ```
 
-Compute standard errors 
+Compute standard errors
 ```{r stovar}
 stovar <- computeVar(OBJ = stFit, DATA = D, NUMDERIV = T)
 stose <- sqrt(stovar$optimisation_noise+stovar$asymptotic_variance)
