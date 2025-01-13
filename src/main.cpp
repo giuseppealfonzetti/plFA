@@ -13,6 +13,7 @@
 #include "pairs.h"
 #include "optimisationUtils.h"
 #include "variance.h"
+#include "exportedFuns.h"
 
 //' Full pairwise iteration
 //'
@@ -75,10 +76,11 @@ Rcpp::List multiThread_completePairwise(
   double iter_ll = 0;
   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
-  SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, GRFLAG, theta, vector_pairs);
+  pairs::SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, GRFLAG, theta, vector_pairs);
   RcppParallel::parallelReduce(0, R, iteration_subset);
   iter_ll = iteration_subset.subset_ll;
   iter_gradient = iteration_subset.subset_gradient;
+
   // output list
   Rcpp::List output =
     Rcpp::List::create(
@@ -148,7 +150,7 @@ double multiThread_completePairwise_nll(
   double iter_ll = 0;
   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
-  SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 0, theta, vector_pairs);
+  pairs::SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 0, theta, vector_pairs);
   RcppParallel::parallelReduce(0, R, iteration_subset);
   iter_ll = -iteration_subset.subset_ll;
 
@@ -328,7 +330,7 @@ Rcpp::List plFA(
     /* GRADIENT COMPUTATION  */
     ///////////////////////////
     if(iter % EACHCLOCK == 0) clock.tick("Stochastic_gradient");
-    SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 1, theta, iter_chosen_pairs);
+    pairs::SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 1, theta, iter_chosen_pairs);
     RcppParallel::parallelReduce(0, iter_chosen_pairs.size(), iteration_subset);
 
     iter_nll = -iteration_subset.subset_ll;

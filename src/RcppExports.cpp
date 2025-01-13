@@ -11,6 +11,25 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// cpp_compute_pair
+Rcpp::List cpp_compute_pair(Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::VectorXd THETA, const int CORRFLAG, const unsigned int k, const unsigned int l, Eigen::MatrixXd PAIRS_TABLE, const unsigned int SILENTFLAG, const unsigned int GRADFLAG);
+RcppExport SEXP _plFA_cpp_compute_pair(SEXP ASEXP, SEXP C_VECSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP kSEXP, SEXP lSEXP, SEXP PAIRS_TABLESEXP, SEXP SILENTFLAGSEXP, SEXP GRADFLAGSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< const int >::type CORRFLAG(CORRFLAGSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type l(lSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type PAIRS_TABLE(PAIRS_TABLESEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type SILENTFLAG(SILENTFLAGSEXP);
+    Rcpp::traits::input_parameter< const unsigned int >::type GRADFLAG(GRADFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_compute_pair(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pairs_freq
 Eigen::MatrixXd pairs_freq(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC);
 RcppExport SEXP _plFA_pairs_freq(SEXP YSEXP, SEXP C_VECSEXP) {
@@ -145,25 +164,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_pair
-Rcpp::List compute_pair(Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::VectorXd THETA, const int CORRFLAG, const unsigned int k, const unsigned int l, Eigen::MatrixXd PAIRS_TABLE, const unsigned int SILENTFLAG, const unsigned int GRADFLAG);
-RcppExport SEXP _plFA_compute_pair(SEXP ASEXP, SEXP C_VECSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP kSEXP, SEXP lSEXP, SEXP PAIRS_TABLESEXP, SEXP SILENTFLAGSEXP, SEXP GRADFLAGSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
-    Rcpp::traits::input_parameter< Eigen::VectorXd >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< const int >::type CORRFLAG(CORRFLAGSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type k(kSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type l(lSEXP);
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type PAIRS_TABLE(PAIRS_TABLESEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type SILENTFLAG(SILENTFLAGSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type GRADFLAG(GRADFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_pair(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG));
-    return rcpp_result_gen;
-END_RCPP
-}
 // estimate_H
 Rcpp::List estimate_H(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::VectorXd& THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG);
 RcppExport SEXP _plFA_estimate_H(SEXP C_VECSEXP, SEXP ASEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP) {
@@ -197,6 +197,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_plFA_cpp_compute_pair", (DL_FUNC) &_plFA_cpp_compute_pair, 9},
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
     {"_plFA_get_Lam", (DL_FUNC) &_plFA_get_Lam, 3},
     {"_plFA_get_par_from_S", (DL_FUNC) &_plFA_get_par_from_S, 1},
@@ -205,7 +206,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_multiThread_completePairwise_nll", (DL_FUNC) &_plFA_multiThread_completePairwise_nll, 7},
     {"_plFA_plFA", (DL_FUNC) &_plFA_plFA, 23},
     {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
-    {"_plFA_compute_pair", (DL_FUNC) &_plFA_compute_pair, 9},
     {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 6},
     {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 5},
     {NULL, NULL, 0}
