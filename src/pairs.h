@@ -4,6 +4,7 @@
 #include "genericUtils.h"
 #include "bivariateProbs.h"
 #include "latCorr.h"
+#include "gradients.h"
 
 namespace pairs{
   // Single pair contribution to
@@ -91,7 +92,7 @@ namespace pairs{
         const Eigen::VectorXd pi_thresholds = extract_thresholds(tau, C_VEC, k, l, sk, sl);
 
         // compute pi
-        const double pi_sksl = compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
+        const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
         if(SILENTFLAG == 0)Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
         pairs_tab(5,r) = pi_sksl;
 
@@ -113,104 +114,106 @@ namespace pairs{
       if(SILENTFLAG == 0)Rcpp::Rcout << "- Gradient wrt thresholds: \n";
 
       // loop: iterate over elements of thresholds vector
-      for(unsigned int s = 0; s < tau.size(); s++){
-        double grs = 0; // temporary location for gradient related to s-th element of tau
-        if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ gradient("<< s<< ")\n";
+      // for(unsigned int s = 0; s < tau.size(); s++){
+      //   double grs = 0; // temporary location for gradient related to s-th element of tau
+      //   if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ gradient("<< s<< ")\n";
+      //
+      //   // List three cases: 1. threshold related to item k, 2. threshold related to item l, 3. threshold non relevant to items couple (k,l)
+      //   if(s >= (C_VEC.segment(0, k).sum()) - (k) & s < C_VEC.segment(0, k + 1).sum() - (k + 1)){
+      //     // [CASE 1]: threshold related to item k
+      //
+      //     if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item k:\n";
+      //     const unsigned int sk = s - (C_VEC.segment(0, k).sum()) + (k);
+      //
+      //     // i3: starting index from i2 for cat sk and sk+1
+      //     const unsigned int i3 = sk * cl;
+      //     const unsigned int i3suc = (sk+1) * cl;
+      //     if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ sk: " << sk << ". Summing over categories item l: ";
+      //
+      //     // iterate over categories of item l
+      //     for(unsigned int sl = 0; sl < cl; sl ++){
+      //       if(SILENTFLAG == 0)Rcpp::Rcout << " ... cat" << sl ;
+      //
+      //       // identify pairs_tab column for (sk,sl) and (sk+1, sl)
+      //       const unsigned int r = i1 + i2 + i3 + sl;
+      //       const unsigned int rsuc = i1 + i2 + i3suc + sl;
+      //
+      //       // read frequences
+      //       const unsigned int n_sksl = pairs_tab(4, r);
+      //       const unsigned int n_sksucsl = pairs_tab(4, rsuc);
+      //
+      //       // read probabilities
+      //       const double pi_sksl = pairs_tab(5, r);
+      //       const double pi_sksucsl = pairs_tab(5, rsuc);
+      //
+      //       // identify tau_sk, tau_sl, tau_sl-1
+      //       const Eigen::VectorXd pi_thresholds = extract_thresholds(tau, C_VEC, k, l, sk, sl);
+      //       const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2); const double t_sl_prev = pi_thresholds(3);
+      //
+      //       // compute gradient
+      //       const double tmp1 = ((n_sksl/(pi_sksl+1e-8))-(n_sksucsl/(pi_sksucsl+1e-8)));
+      //       const double tmp2 = R::dnorm(t_sk, 0, 1, 0);
+      //       const double tmp3 = R::pnorm((t_sl-rho_kl*t_sk)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
+      //       const double tmp4 = R::pnorm((t_sl_prev-rho_kl*t_sk)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
+      //       grs += tmp1 * tmp2 * (tmp3 - tmp4);
+      //     }
+      //     if(SILENTFLAG == 0)Rcpp::Rcout << "\n";
+      //
+      //   }else if(s >= (C_VEC.segment(0, l).sum())-(l) & s<C_VEC.segment(0, l + 1).sum()-(l + 1)){
+      //     // [CASE 2]: threshold related to item l
+      //
+      //     if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item l\n";
+      //     const unsigned int sl = s - (C_VEC.segment(0, l).sum()) + (l);
+      //
+      //     if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_  sl: " << sl << ". Summing over categories item k: ";
+      //
+      //     // iterate over categories item k
+      //     for(unsigned int sk = 0; sk < ck; sk ++){
+      //
+      //       // i3: starting index from i2 for cat sk
+      //       const unsigned int i3 = sk * cl;
+      //
+      //       // identify pairs_tab column for (sk,sl) and (sk, sl + 1)
+      //       const unsigned int r = i1 + i2 + i3 + sl;
+      //       const unsigned int rsuc = i1 + i2 + i3 + sl + 1;
+      //
+      //       // read frequences
+      //       const unsigned int n_sksl = pairs_tab(4, r);
+      //       const unsigned int n_skslsuc = pairs_tab(4, rsuc);
+      //
+      //       // read probabilities
+      //       const double pi_sksl = pairs_tab(5, r);
+      //       const double pi_skslsuc = pairs_tab(5, rsuc);
+      //
+      //       // identify tau_sk, tau_sl, tau_sl-1
+      //       const Eigen::VectorXd pi_thresholds = extract_thresholds(tau, C_VEC, k, l, sk, sl);
+      //       const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2); const double t_sl_prev = pi_thresholds(3);
+      //
+      //
+      //       if(SILENTFLAG == 0)Rcpp::Rcout<<"\n  |    |   |_ sk:"<< sk << ", r: "<< r<<", n_sksl:"
+      //                                     << n_sksl<< ", n_sksl+1:" << n_skslsuc << ", pi_sksl:"
+      //                                     << pi_sksl << ", pi_sksl+1:"<< pi_skslsuc << ", t_sk:"
+      //                                     << t_sk<< ", t_sl:" << t_sl << "t_sk-1:"<< t_sk_prev;
+      //       // compute gradient
+      //       const double tmp1 = ((n_sksl/(pi_sksl+1e-8))-(n_skslsuc/(pi_skslsuc+1e-8)));
+      //       const double tmp2 = R::dnorm(t_sl, 0, 1, 0);
+      //       const double tmp3 = R::pnorm((t_sk-rho_kl*t_sl)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
+      //       const double tmp4 = R::pnorm((t_sk_prev-rho_kl*t_sl)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
+      //       if(SILENTFLAG == 0)Rcpp::Rcout<<" => out" << sk << ":" << tmp1 * tmp2 * (tmp3 - tmp4);
+      //       grs += tmp1 * tmp2 * (tmp3 - tmp4);
+      //     }
+      //     if(SILENTFLAG == 0)Rcpp::Rcout << "\n";
+      //
+      //   }else{
+      //     if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_  tau of other item\n";
+      //   }
+      //   if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_  Thresholds:: " << iter<< "/"<< tau.size()
+      //                                  <<". Tot:: "<< iter << "/"<< d <<". Val ="<< grs <<"\n";
+      //   tmp_gradient(iter) += grs;
+      //   iter ++;
+      // }
 
-        // List three cases: 1. threshold related to item k, 2. threshold related to item l, 3. threshold non relevant to items couple (k,l)
-        if(s >= (C_VEC.segment(0, k).sum()) - (k) & s < C_VEC.segment(0, k + 1).sum() - (k + 1)){
-          // [CASE 1]: threshold related to item k
-
-          if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item k:\n";
-          const unsigned int sk = s - (C_VEC.segment(0, k).sum()) + (k);
-
-          // i3: starting index from i2 for cat sk and sk+1
-          const unsigned int i3 = sk * cl;
-          const unsigned int i3suc = (sk+1) * cl;
-          if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ sk: " << sk << ". Summing over categories item l: ";
-
-          // iterate over categories of item l
-          for(unsigned int sl = 0; sl < cl; sl ++){
-            if(SILENTFLAG == 0)Rcpp::Rcout << " ... cat" << sl ;
-
-            // identify pairs_tab column for (sk,sl) and (sk+1, sl)
-            const unsigned int r = i1 + i2 + i3 + sl;
-            const unsigned int rsuc = i1 + i2 + i3suc + sl;
-
-            // read frequences
-            const unsigned int n_sksl = pairs_tab(4, r);
-            const unsigned int n_sksucsl = pairs_tab(4, rsuc);
-
-            // read probabilities
-            const double pi_sksl = pairs_tab(5, r);
-            const double pi_sksucsl = pairs_tab(5, rsuc);
-
-            // identify tau_sk, tau_sl, tau_sl-1
-            const Eigen::VectorXd pi_thresholds = extract_thresholds(tau, C_VEC, k, l, sk, sl);
-            const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2); const double t_sl_prev = pi_thresholds(3);
-
-            // compute gradient
-            const double tmp1 = ((n_sksl/(pi_sksl+1e-8))-(n_sksucsl/(pi_sksucsl+1e-8)));
-            const double tmp2 = R::dnorm(t_sk, 0, 1, 0);
-            const double tmp3 = R::pnorm((t_sl-rho_kl*t_sk)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
-            const double tmp4 = R::pnorm((t_sl_prev-rho_kl*t_sk)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
-            grs += tmp1 * tmp2 * (tmp3 - tmp4);
-          }
-          if(SILENTFLAG == 0)Rcpp::Rcout << "\n";
-
-        }else if(s >= (C_VEC.segment(0, l).sum())-(l) & s<C_VEC.segment(0, l + 1).sum()-(l + 1)){
-          // [CASE 2]: threshold related to item l
-
-          if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item l\n";
-          const unsigned int sl = s - (C_VEC.segment(0, l).sum()) + (l);
-
-          if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_  sl: " << sl << ". Summing over categories item k: ";
-
-          // iterate over categories item k
-          for(unsigned int sk = 0; sk < ck; sk ++){
-
-            // i3: starting index from i2 for cat sk
-            const unsigned int i3 = sk * cl;
-
-            // identify pairs_tab column for (sk,sl) and (sk, sl + 1)
-            const unsigned int r = i1 + i2 + i3 + sl;
-            const unsigned int rsuc = i1 + i2 + i3 + sl + 1;
-
-            // read frequences
-            const unsigned int n_sksl = pairs_tab(4, r);
-            const unsigned int n_skslsuc = pairs_tab(4, rsuc);
-
-            // read probabilities
-            const double pi_sksl = pairs_tab(5, r);
-            const double pi_skslsuc = pairs_tab(5, rsuc);
-
-            // identify tau_sk, tau_sl, tau_sl-1
-            const Eigen::VectorXd pi_thresholds = extract_thresholds(tau, C_VEC, k, l, sk, sl);
-            const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2); const double t_sl_prev = pi_thresholds(3);
-
-
-            if(SILENTFLAG == 0)Rcpp::Rcout<<"\n  |    |   |_ sk:"<< sk << ", r: "<< r<<", n_sksl:"
-                                          << n_sksl<< ", n_sksl+1:" << n_skslsuc << ", pi_sksl:"
-                                          << pi_sksl << ", pi_sksl+1:"<< pi_skslsuc << ", t_sk:"
-                                          << t_sk<< ", t_sl:" << t_sl << "t_sk-1:"<< t_sk_prev;
-            // compute gradient
-            const double tmp1 = ((n_sksl/(pi_sksl+1e-8))-(n_skslsuc/(pi_skslsuc+1e-8)));
-            const double tmp2 = R::dnorm(t_sl, 0, 1, 0);
-            const double tmp3 = R::pnorm((t_sk-rho_kl*t_sl)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
-            const double tmp4 = R::pnorm((t_sk_prev-rho_kl*t_sl)/(pow(1-pow(rho_kl,2), .5)), 0, 1, 1, 0);
-            if(SILENTFLAG == 0)Rcpp::Rcout<<" => out" << sk << ":" << tmp1 * tmp2 * (tmp3 - tmp4);
-            grs += tmp1 * tmp2 * (tmp3 - tmp4);
-          }
-          if(SILENTFLAG == 0)Rcpp::Rcout << "\n";
-
-        }else{
-          if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_  tau of other item\n";
-        }
-        if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_  Thresholds:: " << iter<< "/"<< tau.size()
-                                       <<". Tot:: "<< iter << "/"<< d <<". Val ="<< grs <<"\n";
-        tmp_gradient(iter) += grs;
-        iter ++;
-      }
+      grads::thresholds(tmp_gradient, pairs_tab, C_VEC, tau, rho_kl, k, l, ck, cl, i1, i2, iter);
       if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ Done. \n";
 
       ///////////////////////////////////////////////////////////
