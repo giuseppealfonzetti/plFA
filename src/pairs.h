@@ -1,5 +1,6 @@
 #ifndef pairs_H
 #define pairs_H
+#include <RcppParallel.h>
 
 #include "genericUtils.h"
 #include "bivariateProbs.h"
