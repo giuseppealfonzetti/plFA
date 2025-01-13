@@ -58,8 +58,8 @@ void stabilise_loadings(
   const unsigned int c = C_VEC.sum();
 
   // Extract parameters
-  Eigen::MatrixXd Lam = get_Lam(A, c, THETA);                             // Loading matrix
-  Eigen::MatrixXd Sigma_u = get_S(THETA, q);                            // Latent variable covariance matrix
+  Eigen::MatrixXd Lam = params::get_Lam(A, c, THETA);                             // Loading matrix
+  Eigen::MatrixXd Sigma_u = params::get_S(THETA, q);                            // Latent variable covariance matrix
   const double eps = 1e-8;
 
 
