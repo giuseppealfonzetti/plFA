@@ -257,8 +257,8 @@ Rcpp::List plFA(
   // Rearrange parameters
   Eigen::VectorXd theta = THETA_INIT;
   // theta << rep_tau, LAMBDA, TRANSFORMED_RHOS;                                 // Complete parameters vector
-  Eigen::MatrixXd Lam = get_Lam(CONSTRMAT, c, theta);                             // Loading matrix
-  Eigen::MatrixXd Sigma_u = get_S(theta, q);                            // Latent variable covariance matrix
+  Eigen::MatrixXd Lam = params::get_Lam(CONSTRMAT, c, theta);                             // Loading matrix
+  Eigen::MatrixXd Sigma_u = params::get_S(theta, q);                            // Latent variable covariance matrix
 
   // Initialize vector of indexes for entries in pairs_table
   std::vector<int> outloop_pool;

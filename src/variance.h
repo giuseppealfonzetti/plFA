@@ -2,6 +2,9 @@
 #define variance_H
 
 #include "bivariateProbs.h"
+#include "genericUtils.h"
+#include "gradients.h"
+
 //' Estimate of H
 //'
 //' @description
@@ -18,7 +21,7 @@
 Rcpp::List estimate_H(
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
     Eigen::Map<Eigen::MatrixXd> A,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
-    Eigen::VectorXd &THETA,
+    Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
     int N,
     int CORRFLAG
@@ -39,9 +42,10 @@ Rcpp::List estimate_H(
 
 
   // rearrange parameters
-  Eigen::MatrixXd Lam            = get_Lam(A, c, THETA);
-  Eigen::MatrixXd Sigma_u        = get_S(THETA, q);
-  Eigen::VectorXd tau            = THETA.segment(0,c-p);
+  Eigen::MatrixXd Lam              = params::get_Lam(A, c, THETA);
+  Eigen::MatrixXd Sigma_u          = params::get_S(THETA, q);
+  Eigen::VectorXd tau              = params::get_tau(THETA, c, p);
+  Eigen::VectorXd transformed_rhos = params::get_thros(THETA, nthr, nload, ncorr);
 
   double ll = 0;
   Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
@@ -87,13 +91,18 @@ Rcpp::List estimate_H(
           unsigned int n_sksl = pairs_table(4, r);
 
           // identify thresholds
-          Eigen::VectorXd pi_thresholds = extract_thresholds(tau, C_VEC, k, l, sk, sl);
+          Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, k, l, sk, sl);
 
           // compute pi
           double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
           //if(SILENTFLAG == 0)Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
           pairs_table(5,r) = pi_sksl;
-          Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
+          Eigen::VectorXd pi_grad = Eigen::VectorXd::Zero(THETA.size());
+          grads::pi(pi_grad, pairs_table, A, C_VEC, tau, Sigma_u,
+                    lambdak, lambdal, transformed_rhos, rho_kl,
+                    p, q, k, l, ck, cl, i1, i2, ncorr,
+                    CORRFLAG);
+          // Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
 
           gradient += (n_sksl/(pi_sksl+1e-8))*pi_grad;
           // Eigen::MatrixXd tempH = pi_grad*pi_grad.transpose();
@@ -149,9 +158,11 @@ Rcpp::List estimate_J(
 
 
   // rearrange parameters
-  Eigen::MatrixXd Lam            = get_Lam(A, c, THETA);
-  Eigen::MatrixXd Sigma_u        = get_S(THETA, q);
-  Eigen::VectorXd tau            = THETA.segment(0,c-p);
+  Eigen::MatrixXd Lam              = params::get_Lam(A, c, THETA);
+  Eigen::MatrixXd Sigma_u          = params::get_S(THETA, q);
+  Eigen::VectorXd tau              = params::get_tau(THETA, c, p);
+  Eigen::VectorXd transformed_rhos = params::get_thros(THETA, nthr, nload, ncorr);
+
 
   double ll = 0;
   Eigen::MatrixXd est_J = Eigen::MatrixXd::Zero(d,d);
@@ -203,7 +214,7 @@ Rcpp::List estimate_J(
         // const unsigned int n_sksl = pairs_table(4, r);
 
         // identify thresholds
-        const Eigen::VectorXd pi_thresholds = extract_thresholds(tau, C_VEC, k, l, sk, sl);
+        const Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, k, l, sk, sl);
 
         // compute pi
         const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
