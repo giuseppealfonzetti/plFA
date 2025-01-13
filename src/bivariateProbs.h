@@ -2,7 +2,7 @@
 #define bivariateProbs_H
 
 #include "bivariateNormal.h"
-#include "latCorr.h"
+#include "gradients.h"
 
 namespace biprobs{
   /*  PI (the probability of a bivariate response pattern) */
@@ -215,7 +215,7 @@ namespace biprobs{
     if(corrFLAG == 1){
       for(unsigned int thro_idx = 0; thro_idx < ncorr; thro_idx ++){
 
-        Eigen::MatrixXd dSigma = latcorr::grad_S(A, transformed_rhos, thro_idx);
+        Eigen::MatrixXd dSigma = grads::S(A, transformed_rhos, q, thro_idx);
         // Rcpp::Rcout << "dsigma wrt corr idx " << thro_idx << ":\n"<< dSigma << "\n";
 
         double d_rho_kl = lambdak.transpose() * dSigma * lambdal;

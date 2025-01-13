@@ -4,7 +4,6 @@
 
 #include "genericUtils.h"
 #include "bivariateProbs.h"
-#include "latCorr.h"
 #include "gradients.h"
 
 namespace pairs{
