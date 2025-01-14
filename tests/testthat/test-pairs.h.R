@@ -31,7 +31,7 @@ test_that("check pair gradient ",{
   par_init <- c(lambda0_init, lambda_init, transformed_rhos_init)
 
   pair_nll <- function(par_vec){
-    pair <- compute_pair(
+    pair <- cpp_compute_pair(
       A = A,
       C_VEC = cat,
       THETA = par_vec,
@@ -46,7 +46,7 @@ test_that("check pair gradient ",{
     return(out)
   }
   pair_ngr <- function(par_vec){
-    pair <- compute_pair(
+    pair <- cpp_compute_pair(
       A = A,
       C_VEC = cat,
       THETA = par_vec,

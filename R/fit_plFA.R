@@ -126,11 +126,16 @@ fit_plFA <- function(
         s <- 0
 
         for (i in 1:length(categories)) {
-          vec <- 1:(categories[i]-1)
-          vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
-          lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
+          if(categories[i]==2){
+            lambda0_init[(s + 1):(s + categories[i] - 1)] <- 0
+          }else{
+            vec <- 1:(categories[i]-1)
+            vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
+            lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
+          }
           s <- s + categories[i] - 1
         }
+
         lambda_init = rep(0.5, sum(CONSTR_LIST$CONSTRMAT))
         transformed_rhos_init = rep(0, q*(q-1)/2)
         tmp@init <-  c(lambda0_init, lambda_init, transformed_rhos_init)
@@ -143,9 +148,13 @@ fit_plFA <- function(
       s <- 0
 
       for (i in 1:length(categories)) {
-        vec <- 1:(categories[i]-1)
-        vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
-        lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
+        if(categories[i]==2){
+          lambda0_init[(s + 1):(s + categories[i] - 1)] <- 0
+        }else{
+          vec <- 1:(categories[i]-1)
+          vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
+          lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
+        }
         s <- s + categories[i] - 1
       }
       lambda_init = rep(0.5, sum(CONSTR_LIST$CONSTRMAT))
