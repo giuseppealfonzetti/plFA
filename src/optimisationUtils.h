@@ -51,44 +51,44 @@ void stabilise_loadings(
     Eigen::VectorXd &THETA,          // Address used to update projected theta
     bool &CHECKEVENT                 // Turn on the indicator whether there was a projection or not
 ){
-  //dimensions
-  const unsigned int p = A.rows(); // number of items
-  const unsigned int q = A.cols(); // number of latents
-  const unsigned int d = THETA.size(); // number of parameters
-  const unsigned int c = C_VEC.sum();
-
-  // Extract parameters
-  Eigen::MatrixXd Lam = params::get_Lam(A, c, THETA);                             // Loading matrix
-  Eigen::MatrixXd Sigma_u = params::get_S(THETA, q);                            // Latent variable covariance matrix
-  const double eps = 1e-8;
-
-
-  // Normalisation if needed
-  for(unsigned int k = 0; k < p; k++){
-    const Eigen::VectorXd lambdak = Lam.row(k);
-    const double vk = lambdak.transpose()*Sigma_u*lambdak;
-    if(vk>=1){
-      Lam.row(k) = lambdak/(vk+eps);
-      CHECKEVENT = true;
-    }
-  }
-
-
-  if(CHECKEVENT){
-    Eigen::VectorXd norm_lambda(d-c+p-q*(q-1)/2);
-    unsigned int iter = 0;
-    for(unsigned int h = 0; h < q; h++){
-      for(unsigned int j = 0; j < p; j++){
-        if(A(j, h) != 0.0)
-        {
-          norm_lambda(iter) = Lam(j, h);
-          iter ++;
-        };
-      };
-    }
-
-    THETA.segment(c-p, d-c+p-q*(q-1)/2) = norm_lambda;
-  }
+  // //dimensions
+  // const unsigned int p = A.rows(); // number of items
+  // const unsigned int q = A.cols(); // number of latents
+  // const unsigned int d = THETA.size(); // number of parameters
+  // const unsigned int c = C_VEC.sum();
+  //
+  // // Extract parameters
+  // Eigen::MatrixXd Lam = params::get_Lam(A, c, THETA);                             // Loading matrix
+  // Eigen::MatrixXd Sigma_u = params::get_S(THETA, q);                            // Latent variable covariance matrix
+  // const double eps = 1e-8;
+  //
+  //
+  // // Normalisation if needed
+  // for(unsigned int k = 0; k < p; k++){
+  //   const Eigen::VectorXd lambdak = Lam.row(k);
+  //   const double vk = lambdak.transpose()*Sigma_u*lambdak;
+  //   if(vk>=1){
+  //     Lam.row(k) = lambdak/(vk+eps);
+  //     CHECKEVENT = true;
+  //   }
+  // }
+  //
+  //
+  // if(CHECKEVENT){
+  //   Eigen::VectorXd norm_lambda(d-c+p-q*(q-1)/2);
+  //   unsigned int iter = 0;
+  //   for(unsigned int h = 0; h < q; h++){
+  //     for(unsigned int j = 0; j < p; j++){
+  //       if(A(j, h) != 0.0)
+  //       {
+  //         norm_lambda(iter) = Lam(j, h);
+  //         iter ++;
+  //       };
+  //     };
+  //   }
+  //
+  //   THETA.segment(c-p, d-c+p-q*(q-1)/2) = norm_lambda;
+  // }
 }
 
 std::vector<int> hyper_sampling(const unsigned int K, const unsigned int SEED){

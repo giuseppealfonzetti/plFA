@@ -4,54 +4,54 @@
 #include "pairs.h"
 
 
-//' Get loading matrix from theta
-//'
-//' get_Lam() constructs the loading matrix from the parameter vector
-//'
-//' @param THETA Numerical vector of parameters.
-//' @param A Binary matrix of dimension \eqn{p*q} where \eqn{p} is the number
-//' of items and \eqn{q} the number of latent variables. Entries equal to
-//' \eqn{1} refer to free loadings, while entries equal to \eqn{0} indicate
-//' loadings constrained to be null.
-//' @param C Sum of the number of categories for each item.
-//' @export
-// [[Rcpp::export]]
-Eigen::MatrixXd cpp_get_Lam(Eigen::Map<Eigen::MatrixXd> A,
-                        const unsigned int C,
-                        Eigen::Map<Eigen::VectorXd> THETA
-){
-  return params::get_Lam(A, C, THETA);
-}
-
-//' Get latent correlation matrix from theta
-//'
-//' get_S() extracts the latent correlation matrix from theta assuming
-//' theta elements to be reparametrised following the
-//' Lewandowski-Kurowicka-Joe (2009) transform.
-//'
-//' @param THETA Numerical vector of parameters.
-//' @param Q Number of latent variables.
-//'
-//' @export
-// [[Rcpp::export]]
-Eigen::MatrixXd cpp_get_S(Eigen::Map<Eigen::VectorXd> THETA,
-                      const unsigned int Q
-){
-  return params::get_S(THETA, Q);
-}
-
-//' Get transformed parameters from latent correlation matrix
-//'
-//' Use Lewandowski-Kurowicka-Joe (2009) transformation on latent correlations
-//' with Choleski decomposition.
-//'
-//' @param S Latent correlation matrix.
-//'
-//' @export
-// [[Rcpp::export]]
-Eigen::VectorXd cpp_get_par_from_S(Eigen::Map<Eigen::MatrixXd> S){
-  return params::get_par_from_S(S);
-}
+// //' Get loading matrix from theta
+// //'
+// //' get_Lam() constructs the loading matrix from the parameter vector
+// //'
+// //' @param THETA Numerical vector of parameters.
+// //' @param A Binary matrix of dimension \eqn{p*q} where \eqn{p} is the number
+// //' of items and \eqn{q} the number of latent variables. Entries equal to
+// //' \eqn{1} refer to free loadings, while entries equal to \eqn{0} indicate
+// //' loadings constrained to be null.
+// //' @param C Sum of the number of categories for each item.
+// //' @export
+// // [[Rcpp::export]]
+// Eigen::MatrixXd cpp_get_Lam(Eigen::Map<Eigen::MatrixXd> A,
+//                         const unsigned int C,
+//                         Eigen::Map<Eigen::VectorXd> THETA
+// ){
+//   return params::get_Lam(A, C, THETA);
+// }
+//
+// //' Get latent correlation matrix from theta
+// //'
+// //' get_S() extracts the latent correlation matrix from theta assuming
+// //' theta elements to be reparametrised following the
+// //' Lewandowski-Kurowicka-Joe (2009) transform.
+// //'
+// //' @param THETA Numerical vector of parameters.
+// //' @param Q Number of latent variables.
+// //'
+// //' @export
+// // [[Rcpp::export]]
+// Eigen::MatrixXd cpp_get_S(Eigen::Map<Eigen::VectorXd> THETA,
+//                       const unsigned int Q
+// ){
+//   return params::get_S(THETA, Q);
+// }
+//
+// //' Get transformed parameters from latent correlation matrix
+// //'
+// //' Use Lewandowski-Kurowicka-Joe (2009) transformation on latent correlations
+// //' with Choleski decomposition.
+// //'
+// //' @param S Latent correlation matrix.
+// //'
+// //' @export
+// // [[Rcpp::export]]
+// Eigen::VectorXd cpp_get_par_from_S(Eigen::Map<Eigen::MatrixXd> S){
+//   return params::get_par_from_S(S);
+// }
 
 //' Single pair contribution
 //'

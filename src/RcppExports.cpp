@@ -11,42 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// cpp_get_Lam
-Eigen::MatrixXd cpp_get_Lam(Eigen::Map<Eigen::MatrixXd> A, const unsigned int C, Eigen::Map<Eigen::VectorXd> THETA);
-RcppExport SEXP _plFA_cpp_get_Lam(SEXP ASEXP, SEXP CSEXP, SEXP THETASEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type C(CSEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_Lam(A, C, THETA));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_get_S
-Eigen::MatrixXd cpp_get_S(Eigen::Map<Eigen::VectorXd> THETA, const unsigned int Q);
-RcppExport SEXP _plFA_cpp_get_S(SEXP THETASEXP, SEXP QSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type Q(QSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_S(THETA, Q));
-    return rcpp_result_gen;
-END_RCPP
-}
-// cpp_get_par_from_S
-Eigen::VectorXd cpp_get_par_from_S(Eigen::Map<Eigen::MatrixXd> S);
-RcppExport SEXP _plFA_cpp_get_par_from_S(SEXP SSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_par_from_S(S));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cpp_compute_pair
 Rcpp::List cpp_compute_pair(Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::VectorXd THETA, const int CORRFLAG, const unsigned int k, const unsigned int l, Eigen::MatrixXd PAIRS_TABLE, const unsigned int SILENTFLAG, const unsigned int GRADFLAG);
 RcppExport SEXP _plFA_cpp_compute_pair(SEXP ASEXP, SEXP C_VECSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP kSEXP, SEXP lSEXP, SEXP PAIRS_TABLESEXP, SEXP SILENTFLAGSEXP, SEXP GRADFLAGSEXP) {
@@ -268,9 +232,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_plFA_cpp_get_Lam", (DL_FUNC) &_plFA_cpp_get_Lam, 3},
-    {"_plFA_cpp_get_S", (DL_FUNC) &_plFA_cpp_get_S, 2},
-    {"_plFA_cpp_get_par_from_S", (DL_FUNC) &_plFA_cpp_get_par_from_S, 1},
     {"_plFA_cpp_compute_pair", (DL_FUNC) &_plFA_cpp_compute_pair, 9},
     {"_plFA_cpp_get_thresholds_theta2vec", (DL_FUNC) &_plFA_cpp_get_thresholds_theta2vec, 3},
     {"_plFA_cpp_get_loadings_mat2vec", (DL_FUNC) &_plFA_cpp_get_loadings_mat2vec, 3},
