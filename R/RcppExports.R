@@ -12,8 +12,8 @@
 #' loadings constrained to be null.
 #' @param C Sum of the number of categories for each item.
 #' @export
-get_Lam <- function(A, C, THETA) {
-    .Call(`_plFA_get_Lam`, A, C, THETA)
+cpp_get_Lam <- function(A, C, THETA) {
+    .Call(`_plFA_cpp_get_Lam`, A, C, THETA)
 }
 
 #' Get latent correlation matrix from theta
@@ -26,8 +26,8 @@ get_Lam <- function(A, C, THETA) {
 #' @param Q Number of latent variables.
 #'
 #' @export
-get_S <- function(THETA, Q) {
-    .Call(`_plFA_get_S`, THETA, Q)
+cpp_get_S <- function(THETA, Q) {
+    .Call(`_plFA_cpp_get_S`, THETA, Q)
 }
 
 #' Get transformed parameters from latent correlation matrix
@@ -38,8 +38,8 @@ get_S <- function(THETA, Q) {
 #' @param S Latent correlation matrix.
 #'
 #' @export
-get_par_from_S <- function(S) {
-    .Call(`_plFA_get_par_from_S`, S)
+cpp_get_par_from_S <- function(S) {
+    .Call(`_plFA_cpp_get_par_from_S`, S)
 }
 
 #' Single pair contribution
@@ -58,6 +58,46 @@ get_par_from_S <- function(S) {
 #' @param GRADFLAG 1 to compute gradient
 cpp_compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG) {
     .Call(`_plFA_cpp_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG)
+}
+
+#' @export
+cpp_get_thresholds_theta2vec <- function(THETA, P, C) {
+    .Call(`_plFA_cpp_get_thresholds_theta2vec`, THETA, P, C)
+}
+
+#' @export
+cpp_get_loadings_mat2vec <- function(LOADINGS, CONSTRMAT, NLOAD) {
+    .Call(`_plFA_cpp_get_loadings_mat2vec`, LOADINGS, CONSTRMAT, NLOAD)
+}
+
+#' @export
+cpp_get_loadings_vec2mat <- function(LOADINGS, CONSTRMAT) {
+    .Call(`_plFA_cpp_get_loadings_vec2mat`, LOADINGS, CONSTRMAT)
+}
+
+#' @export
+cpp_get_latvar_mat2vec <- function(S) {
+    .Call(`_plFA_cpp_get_latvar_mat2vec`, S)
+}
+
+#' @export
+cpp_get_latvar_vec2mat <- function(SVEC, Q) {
+    .Call(`_plFA_cpp_get_latvar_vec2mat`, SVEC, Q)
+}
+
+#' @export
+cpp_get_loadings_theta2mat <- function(THETA, CONSTRMAT, P, Q, D, C) {
+    .Call(`_plFA_cpp_get_loadings_theta2mat`, THETA, CONSTRMAT, P, Q, D, C)
+}
+
+#' @export
+cpp_get_latvar_theta2mat <- function(THETA, Q, D) {
+    .Call(`_plFA_cpp_get_latvar_theta2mat`, THETA, Q, D)
+}
+
+#' @export
+cpp_get_latvar_theta2vec <- function(THETA, NTHR, NLOAD, NCORR) {
+    .Call(`_plFA_cpp_get_latvar_theta2vec`, THETA, NTHR, NLOAD, NCORR)
 }
 
 #' Compute pairwise frequencies
@@ -85,15 +125,15 @@ pairs_freq <- function(Y, C_VEC) {
 #'
 #' @param N Number of observations
 #' @param C_VEC Vector containing the number of categories for each item
-#' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a NA.
 #' @param THETA Parameter vector
 #' @param FREQ Frequency table
 #' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 #' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
 #' @param SILENTFLAG optional for verbose output
 #'
-multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG = 1L, SILENTFLAG = 1L) {
-    .Call(`_plFA_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
+cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG = 1L, SILENTFLAG = 1L) {
+    .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
 }
 
 #' Full pairwise likelihood
@@ -112,39 +152,6 @@ multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRF
 #'
 multiThread_completePairwise_nll <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, SILENTFLAG) {
     .Call(`_plFA_multiThread_completePairwise_nll`, N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, SILENTFLAG)
-}
-
-#' Stochastic optimiser
-#'
-#' @description
-#' Core function to evaluate stochastic estimators
-#'
-#' @param FREQ Frequency table.
-#' @param VALFREQ Frequency table validation data.
-#' @param N Number of observations.
-#' @param C_VEC Vector containing the number of categories for each item.
-#' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
-#' @param THETA_INIT Initial parameter vector
-#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
-#' @param METHODFLAG 0 for hypergeometric, 1 for Bernoulli.
-#' @param PAIRS_PER_ITERATION Number of pairs to draw per iteration.
-#' @param ETA Initial stepsize.
-#' @param BURN Initial burn-in period.
-#' @param MAXT Maximum number of iterations.
-#' @param TOLCOUNT Tolerance count for convergence with validation nll.
-#' @param SILENTFLAG Silent output.
-#' @param TOL Tolerance level.
-#' @param EACHCLOCK How often (in terms of iterations) to measure single iteration computational times (using \code{RcppClock}..
-#' @param PAR1 Hyperparameter for stepsize scheduling by Xu (2011): Scaling.
-#' @param PAR2 Hyperparameter for stepsize scheduling by Xu (2011): Smallest Hessian eigenvalue.
-#' @param PAR3 Hyperparameter for stepsize scheduling by Xu (2011): Decay rate.
-#' @param STEPSIZEFLAG Choose stepsize scheduling: Set 0 for Polyak and Juditsky (1992), 1 for Xu (2011).
-#' @param CHECKCONV Flag to check for convergence using complete pairwise likelihood on the validation set.
-#' @param EACHCHECK  How often (in terms of iterations) to check for convergence.
-#' @param SEED Randomising seed.
-#'
-plFA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT = 50L, SILENTFLAG = 1L, TOL = 1e-6, EACHCLOCK = 100L, PAR1 = 1, PAR2 = 1, PAR3 = .75, STEPSIZEFLAG = 0L, CHECKCONV = 0L, EACHCHECK = 100L, SEED = 123L) {
-    .Call(`_plFA_plFA`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, THETA_INIT, CORRFLAG, METHODFLAG, PAIRS_PER_ITERATION, ETA, BURN, MAXT, TOLCOUNT, SILENTFLAG, TOL, EACHCLOCK, PAR1, PAR2, PAR3, STEPSIZEFLAG, CHECKCONV, EACHCHECK, SEED)
 }
 
 sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER) {

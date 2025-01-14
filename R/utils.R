@@ -1,3 +1,11 @@
+#' @export
+get_S <- function(THETA, Q){
+  THETA <- check_theta(THETA)
+  return( cpp_get_latvar_theta2mat(THETA, Q, length(THETA)))
+}
+
+
+
 #' Extract vector of correlations from parameter vector
 #'
 #' get_corr() extracts the latent correlations from the
@@ -8,8 +16,8 @@
 #' @param THETA Parameter vector
 #' @export
 get_corr <- function(THETA, Q){
-  if(sum(!is.finite(THETA))>0)stop('THETA not numeric.')
-  if(!is.finite(Q))stop('Q not numeric.')
+  Q <- check_q(Q)
+  THETA <- check_theta(THETA)
   if(length(THETA)<(Q*(Q-1)/2))stop('Check THETA dimensions.')
 
   s <- get_S(THETA = THETA, Q = Q)
@@ -30,10 +38,11 @@ get_corr <- function(THETA, Q){
 #'
 #'@export
 get_lambda <- function(THETA, C, P, Q){
-  if(sum(!is.finite(THETA))>0) stop('THETA not numeric.')
+  THETA <- check_theta(THETA)
+  P     <- check_p(P)
+  Q     <- check_q(Q)
   if(!is.finite(C))stop('C not numeric.')
-  if(!is.finite(P))stop('P not numeric.')
-  if(!is.finite(Q))stop('Q not numeric.')
+
 
   d <- length(THETA)
   ncorr <- Q*(Q-1)/2
@@ -66,28 +75,18 @@ get_lambda <- function(THETA, C, P, Q){
 #' @export
 get_theta <- function(TAU, LOADINGS, LATENT_COV, CAT, CONSTRMAT){
 
-  if(sum(!is.finite(TAU))>0)stop('TAU not numeric.')
-  if(sum(!is.finite(LOADINGS))>0)stop('LOADINGS not numeric.')
-  if(sum(!is.finite(LATENT_COV))>0)stop('LATENT_COV not numeric.')
-  if(sum(!is.finite(CAT))>0)stop('CAT not numeric.')
-  if(!matrixcalc::is.positive.definite(LATENT_COV))stop('Latent correlation matrix not positive definite!')
+  TAU <- check_thresholds(TAU, CAT)
+  LOADINGS <- check_loadings(LOADINGS)
+  LATENT_COV <- check_latcov(LATENT_COV)
+  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT)
+  stopifnot(dim(LOADINGS)==dim(CONSTRMAT))
+  stopifnot(ncol(LOADINGS)==ncol(LATENT_COV))
+  stopifnot(length(TAU)==(sum(CAT)-nrow(CONSTRMAT)))
 
-  if(sum(dim(LOADINGS)==dim(CONSTRMAT))<2)stop('LOADINGS and A dimensions do not match.')
-  if(ncol(LOADINGS)!=ncol(LATENT_COV))stop('LOADINGS and LATENT_COV dimensions do not match.')
-  if(length(TAU)!=(sum(CAT)-nrow(CONSTRMAT)))stop('TAU and CAT dimensions do not match.')
 
-  load_vec <- c()
-  s <- 1
-  for (j in 1:ncol(LOADINGS)) {
-    for (i in 1:nrow(LOADINGS)) {
-      if(CONSTRMAT[i,j]!=0){
-        load_vec[s] <- LOADINGS[i,j]
-        s = s+1
-      }
-    }
-  }
 
-  corr_vec <- get_par_from_S(LATENT_COV)
+  load_vec <- cpp_get_loadings_mat2vec(LOADINGS, CONSTRMAT, sum(is.na(CONSTRMAT)))
+  corr_vec <- cpp_get_latvar_mat2vec(LATENT_COV)
   theta <- c(TAU, load_vec, corr_vec)
   return(theta)
 }

@@ -24,7 +24,7 @@ test_that("check pair gradient ",{
     lambda0_init[(s + 1):(s + cat[i] - 1)] <- vec
     s <- s + cat[i] - 1
   }
-  lambda_init = rep(0, sum(A))
+  lambda_init = rep(0, sum(is.na(A)))
   transformed_rhos_init = rep(0, q*(q-1)/2)
   #get_Sigma_u2(constrMat, transformed_rhos_init)
 

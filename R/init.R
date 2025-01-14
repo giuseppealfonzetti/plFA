@@ -1,0 +1,25 @@
+init_thresholds <- function(DIMS, CONSTR_LIST){
+  out <- c()
+  s <- 0
+  for (i in 1:length(DIMS$cat)) {
+    if(DIMS$cat[i]==2){
+      out[(s + 1):(s + DIMS$cat[i] - 1)] <- 0
+    }else{
+      vec <- 1:(DIMS$cat[i]-1)
+      vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
+      out[(s + 1):(s + DIMS$cat[i] - 1)] <- vec
+    }
+    s <- s + DIMS$cat[i] - 1
+  }
+  return(out)
+}
+
+init_loadings <- function(DIMS, CONSTR_LIST, FXD=0.5){
+  out <-  rep(FXD, sum(is.na(CONSTR_LIST$CONSTRMAT)))
+  return(out)
+}
+
+init_transformed_latcorr <- function(DIMS, CONSTR_LIST){
+  out <-  rep(0, DIMS$q*(DIMS$q-1)/2)
+  return(out)
+}

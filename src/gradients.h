@@ -191,7 +191,7 @@ namespace grads{
 
         // elicit three cases: 1. free loading item k, 2. free loading l, 3. other
         if(j == K){
-          if(A(j,v)!=0 ){
+          if(!std::isfinite(A(j,v))){
             if(SILENTFLAG == 0)Rcpp::Rcout << "  |   |_ item k, free loading:\n";
             Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
             const double d_rho_kl = ev.transpose() * SIGMA_U * LAMBDAL;
@@ -201,7 +201,7 @@ namespace grads{
             IDX ++;
           }
         }else if (j == L){
-          if(A(j,v)!=0 ){
+          if(!std::isfinite(A(j,v))){
             if(SILENTFLAG == 0)Rcpp::Rcout << "  |   |_ item l, free loading:\n";
             Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
             const double d_rho_kl = LAMBDAK.transpose() * SIGMA_U * ev;
@@ -210,7 +210,7 @@ namespace grads{
 
             IDX ++;
           }
-        }else if(A(j,v)!=0){
+        }else if(!std::isfinite(A(j,v))){
           IDX ++;
         }
       }

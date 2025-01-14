@@ -16,7 +16,7 @@
 //' @param C Sum of the number of categories for each item.
 //' @export
 // [[Rcpp::export]]
-Eigen::MatrixXd get_Lam(Eigen::Map<Eigen::MatrixXd> A,
+Eigen::MatrixXd cpp_get_Lam(Eigen::Map<Eigen::MatrixXd> A,
                         const unsigned int C,
                         Eigen::Map<Eigen::VectorXd> THETA
 ){
@@ -34,7 +34,7 @@ Eigen::MatrixXd get_Lam(Eigen::Map<Eigen::MatrixXd> A,
 //'
 //' @export
 // [[Rcpp::export]]
-Eigen::MatrixXd get_S(Eigen::Map<Eigen::VectorXd> THETA,
+Eigen::MatrixXd cpp_get_S(Eigen::Map<Eigen::VectorXd> THETA,
                       const unsigned int Q
 ){
   return params::get_S(THETA, Q);
@@ -49,7 +49,7 @@ Eigen::MatrixXd get_S(Eigen::Map<Eigen::VectorXd> THETA,
 //'
 //' @export
 // [[Rcpp::export]]
-Eigen::VectorXd get_par_from_S(Eigen::Map<Eigen::MatrixXd> S){
+Eigen::VectorXd cpp_get_par_from_S(Eigen::Map<Eigen::MatrixXd> S){
   return params::get_par_from_S(S);
 }
 
@@ -100,4 +100,70 @@ Rcpp::List cpp_compute_pair(
    return(output);
 
  }
+
+//' @export
+// [[Rcpp::export]]
+Eigen::VectorXd cpp_get_thresholds_theta2vec(Eigen::Map<Eigen::VectorXd> THETA,
+                                             const unsigned int P,
+                                             const unsigned int C){
+  return params::get_thresholds_theta2vec(THETA, P, C);
+}
+//' @export
+// [[Rcpp::export]]
+Eigen::VectorXd cpp_get_loadings_mat2vec(Eigen::Map<Eigen::MatrixXd> LOADINGS,
+                                         Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+                                         const int  NLOAD){
+  return params::get_loadings_mat2vec(LOADINGS, CONSTRMAT, NLOAD);
+}
+
+//' @export
+// [[Rcpp::export]]
+Eigen::MatrixXd cpp_get_loadings_vec2mat(Eigen::Map<Eigen::VectorXd> LOADINGS,
+                                         Eigen::Map<Eigen::MatrixXd> CONSTRMAT){
+  return params::get_loadings_vec2mat(LOADINGS, CONSTRMAT);
+}
+
+//' @export
+// [[Rcpp::export]]
+Eigen::VectorXd cpp_get_latvar_mat2vec(Eigen::Map<Eigen::MatrixXd> S){
+  return params::get_latvar_mat2vec(S);
+}
+
+//' @export
+// [[Rcpp::export]]
+Eigen::MatrixXd cpp_get_latvar_vec2mat(Eigen::Map<Eigen::VectorXd> SVEC,
+                                       const unsigned int Q){
+  return params::get_latvar_vec2mat(SVEC, Q);
+}
+
+//' @export
+// [[Rcpp::export]]
+Eigen::MatrixXd cpp_get_loadings_theta2mat(
+    Eigen::Map<Eigen::VectorXd> THETA,
+    Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+    const int P,
+    const int Q,
+    const int D,
+    const int C
+){
+  return params::get_loadings_theta2mat(THETA, CONSTRMAT, P, Q, D, C);
+}
+
+//' @export
+// [[Rcpp::export]]
+Eigen::MatrixXd cpp_get_latvar_theta2mat(Eigen::Map<Eigen::VectorXd> THETA,
+                                         const int Q,
+                                         const int D
+){
+  return params::get_latvar_theta2mat(THETA, Q, D);
+}
+
+//' @export
+// [[Rcpp::export]]
+Eigen::VectorXd cpp_get_latvar_theta2vec(Eigen::Map<Eigen::VectorXd> THETA,
+                                         const unsigned int NTHR,
+                                         const unsigned int NLOAD,
+                                         const unsigned int NCORR){
+  return params::get_latvar_theta2vec(THETA, NTHR, NLOAD, NCORR);
+}
 #endif

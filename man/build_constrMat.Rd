@@ -4,7 +4,12 @@
 \alias{build_constrMat}
 \title{Automatic construction of simple constraints matrices}
 \usage{
-build_constrMat(P, Q, STRUCT = "triangular", CROSS = NULL)
+build_constrMat(
+  P,
+  Q,
+  STRUCT = c("simple", "triangular", "crossed"),
+  CROSS = NULL
+)
 }
 \arguments{
 \item{P}{Number of items.}

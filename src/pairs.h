@@ -39,10 +39,10 @@ namespace pairs{
     const unsigned int nload = d-nthr-ncorr;
 
     // rearrange parameters
-    Eigen::MatrixXd Lam             = params::get_Lam(A, c, THETA);
-    Eigen::MatrixXd Sigma_u         = params::get_S(THETA, q);
-    Eigen::VectorXd tau             = params::get_tau(THETA, c, p);
-    Eigen::VectorXd transformed_rhos= params::get_thros(THETA, nthr, nload, ncorr);
+    Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, q, d, c);
+    Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d);
+    Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
+    Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr);
 
     // Identifies quantities related to pair (k,l)
     const unsigned int ck = C_VEC(k);

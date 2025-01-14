@@ -115,9 +115,11 @@ extract_par <- function(THETA, OPTION = 'transformed', C, P, Q, CONSTRMAT){
     s <- 1
     for (j in 1:ncol(ld)) {
       for (i in 1:nrow(ld)) {
-        if(CONSTRMAT[i,j]!=0){
+        if(is.na(CONSTRMAT[i,j])){
           ld[i,j] <- ld_vec[s]
           s = s+1
+        }else{
+          ld[i,j] <- CONSTRMAT[i,j]
         }
       }
     }

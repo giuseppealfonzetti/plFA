@@ -32,43 +32,44 @@ compute_frequencies <- function(Y, C_VEC){
 #' @param CROSS Integer referring to the number of items latent i shares with latent i+1
 #'
 #' @export
-build_constrMat <- function(P, Q, STRUCT = 'triangular', CROSS = NULL){
-  if(!is.finite(P))stop('P not numeric.')
-  if(!is.finite(Q))stop('Q not numeric.')
-  if(!(STRUCT %in% c('simple', 'triangular', 'crossed')))stop('STRUCT not available.')
+build_constrMat <- function(P, Q, STRUCT = c('simple', 'triangular', 'crossed'), CROSS = NULL){
+  p <- check_p(P)
+  q <- check_q(Q)
+
+  STRUCT <- match.arg(STRUCT)
   if(STRUCT == 'triangular'){
     # Build lower trinagular matrix
-    constrMat <- matrix(1, nrow = P, ncol = Q)
-    for(j in 1:P){
-      for (h in 1:Q) {
+    constrMat <- matrix(NA, nrow = p, ncol = q)
+    for(j in 1:p){
+      for (h in 1:q) {
         if(h > j) constrMat[j,h] <- 0
       }
     }
 
   } else if ( STRUCT == 'simple'){
     # Each item to one factor
-    loadings_per_factor <- P %/% Q
-    remaining_loadings <- P %% Q
+    loadings_per_factor <- p %/% q
+    remaining_loadings <- p %% q
 
-    constrMat <- matrix(0, nrow = P, ncol = Q)
-    for (h in 1:(Q-1)) {
-      constrMat[ (loadings_per_factor*(h-1)+1) : (loadings_per_factor*(h-1) + loadings_per_factor), h] <- rep(1,loadings_per_factor)
+    constrMat <- matrix(0, nrow = p, ncol = q)
+    for (h in 1:(q-1)) {
+      constrMat[ (loadings_per_factor*(h-1)+1) : (loadings_per_factor*(h-1) + loadings_per_factor), h] <- rep(NA,loadings_per_factor)
     }
-    h <- Q
-    constrMat[ (loadings_per_factor*(h-1)+1) : (loadings_per_factor*(h-1) + loadings_per_factor + remaining_loadings), h] <- rep(1,loadings_per_factor + remaining_loadings)
+    h <- q
+    constrMat[ (loadings_per_factor*(h-1)+1) : (loadings_per_factor*(h-1) + loadings_per_factor + remaining_loadings), h] <- rep(NA,loadings_per_factor + remaining_loadings)
   } else if( STRUCT == 'crossed'){
     if(is.null(CROSS)) CROSS <- 1
 
     # Each item to one factor
-    loadings_per_factor <- P %/% Q
-    remaining_loadings <- P %% Q
+    loadings_per_factor <- p %/% q
+    remaining_loadings <- p %% q
 
-    constrMat <- matrix(0, nrow = P, ncol = Q)
-    for (h in 1:(Q-1)) {
-      constrMat[ max(1, (loadings_per_factor*(h-1) + 1 - CROSS)) : (loadings_per_factor*(h-1) + loadings_per_factor), h] <- 1
+    constrMat <- matrix(0, nrow = p, ncol = q)
+    for (h in 1:(q-1)) {
+      constrMat[ max(1, (loadings_per_factor*(h-1) + 1 - CROSS)) : (loadings_per_factor*(h-1) + loadings_per_factor), h] <- NA
     }
-    h <- Q
-    constrMat[ max(1, (loadings_per_factor*(h-1) + 1 - CROSS)) : (loadings_per_factor*(h-1) + loadings_per_factor + remaining_loadings), h] <- 1
+    h <- q
+    constrMat[ max(1, (loadings_per_factor*(h-1) + 1 - CROSS)) : (loadings_per_factor*(h-1) + loadings_per_factor + remaining_loadings), h] <- NA
 
   }
   return(constrMat)
@@ -90,24 +91,24 @@ build_constrMat <- function(P, Q, STRUCT = 'triangular', CROSS = NULL){
 #' @param LB Lower bound for uniform random generator. Default set to 0.
 #' @param UB Upper bound for uniform random generator. Default set to 1.
 #' @export
-gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123, LB = 0, UB = 1){
-  if(!is.matrix(CONSTRMAT))stop('CONSTRMAT must be a matrix')
+gen_loadings <- function(CONSTRMAT, FIXED = NULL,  SEED = 123, LB = 0, UB = 1){
+  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT)
 
   set.seed(SEED)
-  p <- nrow(CONSTRMAT);
-  q <- ncol(CONSTRMAT)
+  p <- check_p(nrow(CONSTRMAT));
+  q <- check_q(ncol(CONSTRMAT))
 
   out <-  CONSTRMAT
   for (j in 1:p) {
     for (h in 1:q) {
-      if(out[j,h] != 0) out[j,h] <- runif(1, LB, UB)
+      if(is.na(out[j,h])) out[j,h] <- runif(1, LB, UB)
     }
   }
 
-  if(is.null(FIXED)==FALSE){
+  if(!is.null(FIXED)){
     for (j in 1:p) {
       for (h in 1:q) {
-        if(out[j,h] != 0) out[j,h] <- FIXED
+        if(is.na(out[j,h])) out[j,h] <- FIXED
       }
     }
   }
@@ -128,31 +129,26 @@ gen_loadings <- function(FIXED = NULL, CONSTRMAT, SEED = 123, LB = 0, UB = 1){
 #'
 #'@export
 sim_data <- function(SAMPLE_SIZE, LOADINGS, THRESHOLDS, LATENT_COV, SEED = 123){
-  if(!is.finite(SAMPLE_SIZE) | length(SAMPLE_SIZE)!=1 )stop('SAMPLE_SIZE must be a positive integer.')
-  if(SAMPLE_SIZE<=0 | round(SAMPLE_SIZE)!=SAMPLE_SIZE )stop('SAMPLE_SIZE must be a positive integer.')
-  if(sum(!is.finite(LOADINGS))!=0 | !is.matrix(LOADINGS))stop('LOADINGS is not a numeric matrix.')
-  if(sum(!is.finite(THRESHOLDS))!=0 | !is.vector(THRESHOLDS))stop('THRESHOLDS is not a numeric vector.')
-  if(sum(!is.finite(LATENT_COV))!=0 | !is.matrix(LATENT_COV))stop('LATENT_COV is not a numeric matrix.')
 
-  if(!isSymmetric.matrix(LATENT_COV))stop('LATENT_COV not symmetric.')
-  if(!matrixcalc::is.positive.definite(LATENT_COV))stop('LATENT_COV not positive definite.')
-  if(is.unsorted(THRESHOLDS))stop('THRESHOLDS must be sorted.')
-  if(!(sum(round(diag(LATENT_COV))==1)==ncol(LATENT_COV)))stop('LATENT_COV not a correlation matrix.')
-  if(ncol(LOADINGS)!=ncol(LATENT_COV))stop('LOADINGS and LATENT_COV dimensions not compatible.')
+  n          <- check_n(SAMPLE_SIZE)
+  loadings   <- check_loadings(LOADINGS)
+  thresholds <- check_thresholds_j(THRESHOLDS)
+  lat_cov    <- check_latcov(LATENT_COV)
+  stopifnot(ncol(loadings)==ncol(lat_cov))
 
   set.seed(SEED)
 
-  p <- nrow(LOADINGS)
-  error_variance <- diag(1, p, p) - diag(diag(LOADINGS%*%LATENT_COV%*%t(LOADINGS)),p,p)
+  p <- check_p(nrow(loadings))
+  error_variance <- diag(1, p, p) - diag(diag(loadings%*%lat_cov%*%t(loadings)),p,p)
 
-  errors <- mvtnorm::rmvnorm(n = SAMPLE_SIZE, sigma = error_variance)
-  factors <- mvtnorm::rmvnorm(n = SAMPLE_SIZE, sigma = LATENT_COV)
+  errors <- mvtnorm::rmvnorm(n = n, sigma = error_variance)
+  factors <- mvtnorm::rmvnorm(n = n, sigma = lat_cov)
 
-  URV <- factors %*% t(LOADINGS) + errors
+  URV <- factors %*% t(loadings) + errors
 
-  out <- matrix(0, SAMPLE_SIZE, p)
-  for(i in 1:length(THRESHOLDS)){
-    out[URV>THRESHOLDS[i]] <- i
+  out <- matrix(0, n, p)
+  for(i in 1:length(thresholds)){
+    out[URV>thresholds[i]] <- i
   }
 
   return(out)
