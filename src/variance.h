@@ -98,10 +98,10 @@ Rcpp::List estimate_H(
           //if(SILENTFLAG == 0)Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
           pairs_table(5,r) = pi_sksl;
           Eigen::VectorXd pi_grad = Eigen::VectorXd::Zero(THETA.size());
-          grads::pi(pi_grad, pairs_table, A, C_VEC, tau, Sigma_u,
-                    lambdak, lambdal, transformed_rhos, rho_kl,
-                    p, q, k, l, ck, cl, i1, i2, ncorr,
-                    CORRFLAG);
+          grads::samplepi(pi_grad, pairs_table, A, C_VEC, tau, Sigma_u,
+                          lambdak, lambdal, transformed_rhos, rho_kl,
+                          p, q, k, l, ck, cl, i1, i2, ncorr,
+                          CORRFLAG);
           // Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
 
           gradient += (n_sksl/(pi_sksl+1e-8))*pi_grad;
@@ -219,7 +219,32 @@ Rcpp::List estimate_J(
         const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
 
         // compute pi gradient contribution
-        Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
+        // Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
+        // Eigen::VectorXd pi_grad = Eigen::VectorXd::Zero(d);
+        Eigen::VectorXd pi_grad = grads::pi(A,
+                                            C_VEC,
+                                            pi_thresholds,
+                                            Sigma_u,
+                                            lambdak,
+                                            lambdal,
+                                            transformed_rhos,
+                                            rho_kl,
+                                            d,
+                                            p,
+                                            q,
+                                            k,
+                                            l,
+                                            ck,
+                                            cl,
+                                            sk,
+                                            sl,
+                                            i1,
+                                            i2,
+                                            ncorr,
+                                            CORRFLAG);
+
+
+
 
         // Update gradient
         gradienti += (1/(pi_sksl+1e-8))*pi_grad;
