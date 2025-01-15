@@ -35,14 +35,14 @@ namespace pairs{
     const unsigned int d = THETA.size();
     const unsigned int c = C_VEC.sum();
     const unsigned int nthr = c-p;
-    const unsigned int ncorr = q*(q-1)/2;
+    unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
     const unsigned int nload = d-nthr-ncorr;
 
     // rearrange parameters
-    Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, q, d, c);
-    Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d);
+    Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, c, nload);
+    Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d, CORRFLAG);
     Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
-    Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr);
+    Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr, CORRFLAG);
 
     // Identifies quantities related to pair (k,l)
     const unsigned int ck = C_VEC(k);
@@ -140,14 +140,14 @@ namespace pairs{
     const unsigned int d = THETA.size();
     const unsigned int c = C_VEC.sum();
     const unsigned int nthr = c-p;
-    const unsigned int ncorr = q*(q-1)/2;
+    unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
     const unsigned int nload = d-nthr-ncorr;
 
     // rearrange parameters
-    Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, q, d, c);
-    Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d);
+    Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, c, nload);
+    Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d, CORRFLAG);
     Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
-    Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr);
+    Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr, CORRFLAG);
 
     // Identifies quantities related to pair (k,l)
     const unsigned int ck = C_VEC(k);

@@ -20,6 +20,8 @@ init_loadings <- function(DIMS, CONSTR_LIST, FXD=0.5){
 }
 
 init_transformed_latcorr <- function(DIMS, CONSTR_LIST){
-  out <-  rep(0, DIMS$q*(DIMS$q-1)/2)
+
+  out <- NULL
+  if(CONSTR_LIST$CORRFLAG==1) out <- rep(0, DIMS$q*(DIMS$q-1)/2)
   return(out)
 }

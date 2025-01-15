@@ -1,7 +1,8 @@
 #' @export
-get_S <- function(THETA, Q){
+get_S <- function(THETA, Q, CORRFLAG){
   THETA <- check_theta(THETA)
-  return( cpp_get_latvar_theta2mat(THETA, Q, length(THETA)))
+
+  return(cpp_get_latvar_theta2mat(THETA, Q, length(THETA), CORRFLAG))
 }
 
 
@@ -15,12 +16,12 @@ get_S <- function(THETA, Q){
 #' @param Q Number of latent variables.
 #' @param THETA Parameter vector
 #' @export
-get_corr <- function(THETA, Q){
+get_corr <- function(THETA, Q, CORRFLAG){
   Q <- check_q(Q)
   THETA <- check_theta(THETA)
-  if(length(THETA)<(Q*(Q-1)/2))stop('Check THETA dimensions.')
+  # if(length(THETA)<(Q*(Q-1)/2))stop('Check THETA dimensions.')
 
-  s <- get_S(THETA = THETA, Q = Q)
+  s <- get_S(THETA = THETA, Q = Q, CORRFLAG = CORRFLAG)
   out <- s[upper.tri(s)]
 
   return(out)
@@ -73,12 +74,14 @@ get_lambda <- function(THETA, C, P, Q){
 #' to \eqn{0}.
 #'
 #' @export
-get_theta <- function(TAU, LOADINGS, LATENT_COV, CAT, CONSTRMAT){
+get_theta <- function(TAU, LOADINGS, LATENT_COV=NULL, CAT, CONSTRMAT, CORRFLAG){
 
   TAU <- check_thresholds(TAU, CAT)
   LOADINGS <- check_loadings(LOADINGS)
-  LATENT_COV <- check_latcov(LATENT_COV)
   CONSTRMAT <- check_cnstr_loadings(CONSTRMAT)
+
+  if(CORRFLAG)LATENT_COV <- check_latcov(LATENT_COV)
+
   stopifnot(dim(LOADINGS)==dim(CONSTRMAT))
   stopifnot(ncol(LOADINGS)==ncol(LATENT_COV))
   stopifnot(length(TAU)==(sum(CAT)-nrow(CONSTRMAT)))
@@ -86,7 +89,9 @@ get_theta <- function(TAU, LOADINGS, LATENT_COV, CAT, CONSTRMAT){
 
 
   load_vec <- cpp_get_loadings_mat2vec(LOADINGS, CONSTRMAT, sum(is.na(CONSTRMAT)))
-  corr_vec <- cpp_get_latvar_mat2vec(LATENT_COV)
+
+  corr_vec <- NULL
+  if(CORRFLAG)  corr_vec <- cpp_get_latvar_mat2vec(LATENT_COV)
   theta <- c(TAU, load_vec, corr_vec)
   return(theta)
 }

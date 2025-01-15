@@ -45,18 +45,18 @@ cpp_get_latvar_vec2mat <- function(SVEC, Q) {
 }
 
 #' @export
-cpp_get_loadings_theta2mat <- function(THETA, CONSTRMAT, P, Q, D, C) {
-    .Call(`_plFA_cpp_get_loadings_theta2mat`, THETA, CONSTRMAT, P, Q, D, C)
+cpp_get_loadings_theta2mat <- function(THETA, CONSTRMAT, P, C, NLOAD) {
+    .Call(`_plFA_cpp_get_loadings_theta2mat`, THETA, CONSTRMAT, P, C, NLOAD)
 }
 
 #' @export
-cpp_get_latvar_theta2mat <- function(THETA, Q, D) {
-    .Call(`_plFA_cpp_get_latvar_theta2mat`, THETA, Q, D)
+cpp_get_latvar_theta2mat <- function(THETA, Q, D, CORRFLAG) {
+    .Call(`_plFA_cpp_get_latvar_theta2mat`, THETA, Q, D, CORRFLAG)
 }
 
 #' @export
-cpp_get_latvar_theta2vec <- function(THETA, NTHR, NLOAD, NCORR) {
-    .Call(`_plFA_cpp_get_latvar_theta2vec`, THETA, NTHR, NLOAD, NCORR)
+cpp_get_latvar_theta2vec <- function(THETA, NTHR, NLOAD, NCORR, CORRFLAG) {
+    .Call(`_plFA_cpp_get_latvar_theta2vec`, THETA, NTHR, NLOAD, NCORR, CORRFLAG)
 }
 
 #' Compute pairwise frequencies

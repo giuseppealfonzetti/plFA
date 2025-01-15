@@ -63,7 +63,8 @@ extract_theta_path <- function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed')
                                             C = sum(OBJ@dims@cat),
                                             P = OBJ@dims@p,
                                             Q = OBJ@dims@q,
-                                            CONSTRMAT = OBJ@cnstr@loadings))
+                                            CONSTRMAT = OBJ@cnstr@loadings,
+                                            CORRFLAG = OBJ@cnstr@corrflag))
 
   out$par <- newParList
   return(out)
@@ -80,7 +81,7 @@ setGeneric('getPar', function(OBJ, ...) standardGeneric('getPar'))
 #'
 #' @param OBJ Object of class PlFaFit.
 #' @param ... Additional arguments
-setMethod('getPar', 'PlFaFit', function(OBJ, ...) extract_par(THETA = OBJ@theta, C = sum(OBJ@dims@cat), P = OBJ@dims@p, Q = OBJ@dims@q, CONSTRMAT = OBJ@cnstr@loadings, ...))
+setMethod('getPar', 'PlFaFit', function(OBJ, ...) extract_par(THETA = OBJ@theta, C = sum(OBJ@dims@cat), P = OBJ@dims@p, Q = OBJ@dims@q, CONSTRMAT = OBJ@cnstr@loadings, CORRFLAG = OBJ@cnstr@corrflag, ...))
 #' Extract parameters
 #'
 #' @param OBJ Raw theta vector to extract \code{'transformed'} and \code{'list'}.
@@ -101,29 +102,29 @@ setMethod('getPar', 'vector', function(OBJ, ...) extract_par(THETA = OBJ, ...))
 #' @param P Number if items
 #' @param Q Number of latent variables
 #' @param CONSTRMAT Matrix of dimension \eqn{p * q} with binary loading constraints. 1 for free loadings, 0 otherwise.
-extract_par <- function(THETA, OPTION = 'transformed', C, P, Q, CONSTRMAT){
-  if(!(OPTION %in% c('raw', 'transformed', 'list'))) stop('The OPTION chosen is not implemented')
+extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'), C, P, Q, CONSTRMAT, CORRFLAG){
+  OPTION <- match.arg(OPTION)
 
-
-  if(OPTION == 'raw') return(THETA)
-  if(OPTION == 'transformed') return(c(THETA[1:(length(THETA)-Q*(Q-1)/2)], get_corr(THETA = THETA, Q = Q)))
-  if(OPTION == 'list') {
+  if(OPTION == 'raw'){
+    return(THETA)
+    }else if(OPTION == 'transformed'){
+      return(c(THETA[1:(length(THETA)-Q*(Q-1)/2)], get_corr(THETA = THETA, Q = Q, CORRFLAG=CORRFLAG)))
+    }else if(OPTION == 'list') {
     out <- list()
     thr = THETA[1:(C-P)]
-    ld <- CONSTRMAT
-    ld_vec <- get_lambda(THETA = THETA, C = C, P = P, Q = Q)
-    s <- 1
-    for (j in 1:ncol(ld)) {
-      for (i in 1:nrow(ld)) {
-        if(is.na(CONSTRMAT[i,j])){
-          ld[i,j] <- ld_vec[s]
-          s = s+1
-        }else{
-          ld[i,j] <- CONSTRMAT[i,j]
-        }
-      }
-    }
-    S <- get_S(THETA = THETA, Q = Q)
+    ld <- cpp_get_loadings_theta2mat(
+      THETA = THETA,
+      CONSTRMAT = CONSTRMAT,
+      P = P,
+      C = C,
+      NLOAD = sum(is.na(CONSTRMAT))
+    )
+    S <- cpp_get_latvar_theta2mat(
+      THETA = THETA,
+      Q=Q,
+      D=length(theta),
+      CORRFLAG = CORRFLAG
+    )
 
     out <- list(thresholds = thr, loadings = ld, latent_correlations = S)
     return(out)

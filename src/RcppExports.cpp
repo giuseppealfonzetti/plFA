@@ -81,57 +81,58 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_get_latvar_vec2mat
-Eigen::MatrixXd cpp_get_latvar_vec2mat(Eigen::Map<Eigen::VectorXd> SVEC, const unsigned int Q);
+Eigen::MatrixXd cpp_get_latvar_vec2mat(Eigen::Map<Eigen::VectorXd> SVEC, const int Q);
 RcppExport SEXP _plFA_cpp_get_latvar_vec2mat(SEXP SVECSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type SVEC(SVECSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< const int >::type Q(QSEXP);
     rcpp_result_gen = Rcpp::wrap(cpp_get_latvar_vec2mat(SVEC, Q));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_get_loadings_theta2mat
-Eigen::MatrixXd cpp_get_loadings_theta2mat(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, const int P, const int Q, const int D, const int C);
-RcppExport SEXP _plFA_cpp_get_loadings_theta2mat(SEXP THETASEXP, SEXP CONSTRMATSEXP, SEXP PSEXP, SEXP QSEXP, SEXP DSEXP, SEXP CSEXP) {
+Eigen::MatrixXd cpp_get_loadings_theta2mat(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, const int P, const int C, const int NLOAD);
+RcppExport SEXP _plFA_cpp_get_loadings_theta2mat(SEXP THETASEXP, SEXP CONSTRMATSEXP, SEXP PSEXP, SEXP CSEXP, SEXP NLOADSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
     Rcpp::traits::input_parameter< const int >::type P(PSEXP);
-    Rcpp::traits::input_parameter< const int >::type Q(QSEXP);
-    Rcpp::traits::input_parameter< const int >::type D(DSEXP);
     Rcpp::traits::input_parameter< const int >::type C(CSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_loadings_theta2mat(THETA, CONSTRMAT, P, Q, D, C));
+    Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_get_loadings_theta2mat(THETA, CONSTRMAT, P, C, NLOAD));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_get_latvar_theta2mat
-Eigen::MatrixXd cpp_get_latvar_theta2mat(Eigen::Map<Eigen::VectorXd> THETA, const int Q, const int D);
-RcppExport SEXP _plFA_cpp_get_latvar_theta2mat(SEXP THETASEXP, SEXP QSEXP, SEXP DSEXP) {
+Eigen::MatrixXd cpp_get_latvar_theta2mat(Eigen::Map<Eigen::VectorXd> THETA, const int Q, const int D, const int CORRFLAG);
+RcppExport SEXP _plFA_cpp_get_latvar_theta2mat(SEXP THETASEXP, SEXP QSEXP, SEXP DSEXP, SEXP CORRFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
     Rcpp::traits::input_parameter< const int >::type Q(QSEXP);
     Rcpp::traits::input_parameter< const int >::type D(DSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_latvar_theta2mat(THETA, Q, D));
+    Rcpp::traits::input_parameter< const int >::type CORRFLAG(CORRFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_get_latvar_theta2mat(THETA, Q, D, CORRFLAG));
     return rcpp_result_gen;
 END_RCPP
 }
 // cpp_get_latvar_theta2vec
-Eigen::VectorXd cpp_get_latvar_theta2vec(Eigen::Map<Eigen::VectorXd> THETA, const unsigned int NTHR, const unsigned int NLOAD, const unsigned int NCORR);
-RcppExport SEXP _plFA_cpp_get_latvar_theta2vec(SEXP THETASEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP) {
+Eigen::VectorXd cpp_get_latvar_theta2vec(Eigen::Map<Eigen::VectorXd> THETA, const int NTHR, const int NLOAD, const int NCORR, const int CORRFLAG);
+RcppExport SEXP _plFA_cpp_get_latvar_theta2vec(SEXP THETASEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP CORRFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type NTHR(NTHRSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type NLOAD(NLOADSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type NCORR(NCORRSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_get_latvar_theta2vec(THETA, NTHR, NLOAD, NCORR));
+    Rcpp::traits::input_parameter< const int >::type NTHR(NTHRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
+    Rcpp::traits::input_parameter< const int >::type NCORR(NCORRSEXP);
+    Rcpp::traits::input_parameter< const int >::type CORRFLAG(CORRFLAGSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_get_latvar_theta2vec(THETA, NTHR, NLOAD, NCORR, CORRFLAG));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -239,9 +240,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_cpp_get_loadings_vec2mat", (DL_FUNC) &_plFA_cpp_get_loadings_vec2mat, 2},
     {"_plFA_cpp_get_latvar_mat2vec", (DL_FUNC) &_plFA_cpp_get_latvar_mat2vec, 1},
     {"_plFA_cpp_get_latvar_vec2mat", (DL_FUNC) &_plFA_cpp_get_latvar_vec2mat, 2},
-    {"_plFA_cpp_get_loadings_theta2mat", (DL_FUNC) &_plFA_cpp_get_loadings_theta2mat, 6},
-    {"_plFA_cpp_get_latvar_theta2mat", (DL_FUNC) &_plFA_cpp_get_latvar_theta2mat, 3},
-    {"_plFA_cpp_get_latvar_theta2vec", (DL_FUNC) &_plFA_cpp_get_latvar_theta2vec, 4},
+    {"_plFA_cpp_get_loadings_theta2mat", (DL_FUNC) &_plFA_cpp_get_loadings_theta2mat, 5},
+    {"_plFA_cpp_get_latvar_theta2mat", (DL_FUNC) &_plFA_cpp_get_latvar_theta2mat, 4},
+    {"_plFA_cpp_get_latvar_theta2vec", (DL_FUNC) &_plFA_cpp_get_latvar_theta2vec, 5},
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
     {"_plFA_cpp_multiThread_completePairwise", (DL_FUNC) &_plFA_cpp_multiThread_completePairwise, 8},
     {"_plFA_multiThread_completePairwise_nll", (DL_FUNC) &_plFA_multiThread_completePairwise_nll, 7},

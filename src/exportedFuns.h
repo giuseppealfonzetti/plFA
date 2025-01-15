@@ -88,7 +88,7 @@ Eigen::VectorXd cpp_get_latvar_mat2vec(Eigen::Map<Eigen::MatrixXd> S){
 //' @export
 // [[Rcpp::export]]
 Eigen::MatrixXd cpp_get_latvar_vec2mat(Eigen::Map<Eigen::VectorXd> SVEC,
-                                       const unsigned int Q){
+                                       const int Q){
   return params::get_latvar_vec2mat(SVEC, Q);
 }
 
@@ -98,28 +98,29 @@ Eigen::MatrixXd cpp_get_loadings_theta2mat(
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
     const int P,
-    const int Q,
-    const int D,
-    const int C
+    const int C,
+    const int NLOAD
 ){
-  return params::get_loadings_theta2mat(THETA, CONSTRMAT, P, Q, D, C);
+  return params::get_loadings_theta2mat(THETA, CONSTRMAT, P, C, NLOAD);
 }
 
 //' @export
 // [[Rcpp::export]]
 Eigen::MatrixXd cpp_get_latvar_theta2mat(Eigen::Map<Eigen::VectorXd> THETA,
                                          const int Q,
-                                         const int D
+                                         const int D,
+                                         const int CORRFLAG
 ){
-  return params::get_latvar_theta2mat(THETA, Q, D);
+  return params::get_latvar_theta2mat(THETA, Q, D, CORRFLAG);
 }
 
 //' @export
 // [[Rcpp::export]]
 Eigen::VectorXd cpp_get_latvar_theta2vec(Eigen::Map<Eigen::VectorXd> THETA,
-                                         const unsigned int NTHR,
-                                         const unsigned int NLOAD,
-                                         const unsigned int NCORR){
-  return params::get_latvar_theta2vec(THETA, NTHR, NLOAD, NCORR);
+                                         const int NTHR,
+                                         const int NLOAD,
+                                         const int NCORR,
+                                         const int CORRFLAG){
+  return params::get_latvar_theta2vec(THETA, NTHR, NLOAD, NCORR, CORRFLAG);
 }
 #endif
