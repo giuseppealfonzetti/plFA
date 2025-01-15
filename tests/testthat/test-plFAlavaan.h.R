@@ -1,6 +1,7 @@
 test_that("cfa function works", {
+
   # Generate some data
-  set.seed(123)
+  set.seed(456)
   p <- 10; q <- 2; n <- 1000
   A <- build_constrMat(P = p, Q = q, STRUCT = "simple")
   Load <- gen_loadings(CONSTRMAT = A)

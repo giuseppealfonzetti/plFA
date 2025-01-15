@@ -3,11 +3,28 @@ is_ordinal_df <- function(D) {
   else all(sapply(D, is.ordered))
 }
 
+#' Fit Confirmatory Factor Analysis Models using plFA
+#'
+#' @param model A description of the user-specified model. Typically, the model
+#'   is described using the lavaan model syntax. See [`lavaan::model.syntax`]
+#'   for more information. Alternatively, a parameter table (eg. the output of
+#'   the [`lavaan::lavaanify()`] function) is also accepted.
+#' @param data A data frame containing the observed variables used in the model.
+#'   Variables must be declared as ordered factors.
+#' @param start Starting values to use.
+#' @param estimator (For `lavaan` compatibility only). The estimator is `PML`.
+#' @param estimator.args A list of arguments for [`plFA()`]. TBC.
+#' @param information (For `lavaan` compatibility only). The information matrix is...
+#' @param control A list of control parameters for the estimation algorithm. See [`plFA()`] for more information.
+#' @param ... Additional arguments to be passed to [lavaan()].
+#'
+#' @returns A `plFAlavaan` object.
+#' @export
 cfa <- function(
     model,
     data,
     start = NULL,
-    estimator = "SPML",
+    estimator = "PML",
     estimator.args = list(
       method = "ucminf",
       valdata = NULL,
@@ -22,6 +39,8 @@ cfa <- function(
   lavargs <- list(...)
 
   # Validate arguments
+  D <- sapply(data, as.numeric) - 1
+
   if (!is_ordinal_df(data)) {
     cli::cli_abort("Ordinal data required")
   }
@@ -55,7 +74,6 @@ cfa <- function(
   fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
 
   # Fit plFA -------------------------------------------------------------------
-  D <- as.matrix(DAT) - 1
 
   # Build A matrix
   FREE <- lavaan::inspect(fit0, what = "free")
@@ -96,11 +114,11 @@ cfa <- function(
   )
 
   # list(fit0 = fit0, fit1 = fit1, vars = vars)
-  out <- create_lav_from_fitplFA(fit0, fit1, vars)
+  out <- create_lav_from_fitplFA(fit0, fit1, vars, D)
   new("plFAlavaan", out)
 }
 
-create_lav_from_fitplFA <- function(fit0, fit1, vars) {
+create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   # Get coefficients and standard errors
   parlist <- getPar(fit1, OPTION = "list")
@@ -170,7 +188,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars) {
   # fit0@baseline <- fit_lav@baseline
 
   # Include the entire output of fit_sem
-  fit0@external <- list(plFA = fit1)
+  fit0@external <- list(plFA = fit1, D = D)
 
   fit0
 }
