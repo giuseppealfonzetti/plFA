@@ -1,29 +1,3 @@
-utils::globalVariables(c("clock"))
-#' Internal function to check arguments in fit_plFA
-#' @param ARGS List of arguments
-#' @param P Number of pairs
-stoc_args <- function(ARGS, P){
-
-  pairs <- P*(P-1)/2
-  tmp <- ARGS
-
-  tmp$PAIRS_PER_ITERATION <- ifelse(!is.numeric(ARGS$PAIRS_PER_ITERATION), 8, round(ARGS$PAIRS_PER_ITERATION,0))
-  tmp$MAXT <- ifelse(!is.numeric(ARGS$MAXT), round(100*pairs/tmp$PAIRS_PER_ITERATION,0), round(ARGS$MAXT,0))
-  tmp$BURN <- ifelse(!is.numeric(ARGS$BURN), round(tmp$MAXT/2,0), round(ARGS$BURN,0))
-  tmp$ETA <- ifelse(!is.numeric(ARGS$ETA), .005, ARGS$ETA)
-  tmp$PAR1 <- ifelse(!is.numeric(ARGS$PAR1), 1, ARGS$PAR1)
-  tmp$PAR2 <- ifelse(!is.numeric(ARGS$PAR2), .002, ARGS$PAR2)
-  tmp$PAR3 <- ifelse(!is.numeric(ARGS$PAR3), 3/4, ARGS$PAR3)
-  tmp$STEPSIZEFLAG <- ifelse(!is.numeric(ARGS$STEPSIZEFLAG), 1, max(1, round(abs(ARGS$STEPSIZEFLAG),0)))
-  tmp$EACHCLOCK <- ifelse(!is.numeric(ARGS$EACHCLOCK), round(tmp$MAXT/10,0), round(ARGS$EACHCLOCK,0))
-  tmp$CHECKCONV <- ifelse(!is.numeric(ARGS$CHECKCONV), 0, ARGS$CHECKCONV)
-
-
-  out <- tmp
-
-  return(out)
-}
-
 #' Fit factor models for ordinal data with pairwise likelihood methods
 #'
 #' @description
@@ -85,7 +59,7 @@ fit_plFA <- function(
     DATA,
     CONSTR_LIST,
     VALDATA = NULL,
-    METHOD = 'ucminf',
+    METHOD = c('ucminf'),
     CONTROL = list(),
     INIT = NULL,
     ITERATIONS_SUBSET = NULL,
@@ -95,77 +69,26 @@ fit_plFA <- function(
 
   start_time <- Sys.time()
 
-  if(sum(!is.finite(DATA))>0 | !is.matrix(DATA)) stop('DATA is not a numeric matrix.')
-  if(sum(!is.finite(VALDATA))>0 | !is.matrix(VALDATA)) VALDATA <- DATA
-  if(sum(!is.finite(CONSTR_LIST$CONSTRMAT))>0 | !is.matrix(CONSTR_LIST$CONSTRMAT) | sum(!(CONSTR_LIST$CONSTRMAT %in% c(0,1)))!=0) stop('CONSTRMAT must be a binary matrix')
-  if(nrow(CONSTR_LIST$CONSTRMAT)!=ncol(DATA) | ncol(CONSTR_LIST$CONSTRMAT)>=nrow(CONSTR_LIST$CONSTRMAT)) stop('CONSTRMAT dimensions not allowed. Check Items x Factors.')
-  if(is.null(CONSTR_LIST$CORRFLAG) | sum(is.finite(CONSTR_LIST$CORRFLAG))==0 | !(CONSTR_LIST$CORRFLAG %in% c(0,1))) stop('CORRFLAG must be 0 or 1')
-  if(!(METHOD %in% c('ucminf','bernoulli', 'hyper'))) stop('Method not available.')
+  dat <- check_data(DATA)
+  constr_list <- check_cnstr(CONSTR_LIST)
+  method <- match.arg(METHOD)
+
+
   # Identify model dimensions
-  p <- ncol(DATA)
-  n <- nrow(DATA)
-  q <- ncol(CONSTR_LIST$CONSTRMAT)
-  categories <- apply(DATA, 2, max, na.rm = T) + 1
-  d = sum(categories)-p + sum(CONSTR_LIST$CONSTRMAT) + q*(q-1)/2
+  dims <- check_dims(dat, constr_list)
 
   tmp <- new('PlFaFit',
-             cnstr = new('Constraints', loadings = CONSTR_LIST$CONSTRMAT, corrflag = CONSTR_LIST$CORRFLAG),
-             dims = new('Dimensions', n = n, p = p, q = q, cat = categories, pairs = p*(p-1)/2),
+             cnstr = new('Constraints', loadings = constr_list$CONSTRMAT, corrflag = constr_list$CORRFLAG),
+             dims = new('Dimensions', n = dims$n, p = dims$p, q = dims$q, cat = dims$cat, pairs = dims$pairs),
              method = METHOD)
+
   # Check Initialisation
+  tmp@init <- check_init(INIT, dims, constr_list)
 
-    if(is.vector(INIT)){
-      if(length(INIT)!=d)
-        stop(paste0('init vector has length ', length(INIT), ' instead of ', d ,'.'))
-      else if((sum(!is.finite(INIT))==0)){
-        message('1. Initialising at INIT vector.')
-        tmp@init <-  INIT
-      }else{
-        message('1. Initialising at default values')
-        lambda0_init <- c()
-        s <- 0
 
-        for (i in 1:length(categories)) {
-          if(categories[i]==2){
-            lambda0_init[(s + 1):(s + categories[i] - 1)] <- 0
-          }else{
-            vec <- 1:(categories[i]-1)
-            vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
-            lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
-          }
-          s <- s + categories[i] - 1
-        }
-
-        lambda_init = rep(0.5, sum(CONSTR_LIST$CONSTRMAT))
-        transformed_rhos_init = rep(0, q*(q-1)/2)
-        tmp@init <-  c(lambda0_init, lambda_init, transformed_rhos_init)
-      }
-    }
-
-    if(!is.vector(INIT)){
-      message('1. Initialising at default values')
-      lambda0_init <- c()
-      s <- 0
-
-      for (i in 1:length(categories)) {
-        if(categories[i]==2){
-          lambda0_init[(s + 1):(s + categories[i] - 1)] <- 0
-        }else{
-          vec <- 1:(categories[i]-1)
-          vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
-          lambda0_init[(s + 1):(s + categories[i] - 1)] <- vec
-        }
-        s <- s + categories[i] - 1
-      }
-      lambda_init = rep(0.5, sum(CONSTR_LIST$CONSTRMAT))
-      transformed_rhos_init = rep(0, q*(q-1)/2)
-      tmp@init <-  c(lambda0_init, lambda_init, transformed_rhos_init)
-    }
-
- message('2. Computing frequencies...')
+  message('2. Computing frequencies...')
   freq_start_time <- Sys.time()
-  tmp@freq <- pairs_freq(DATA, categories)
-  tmp@valfreq <- pairs_freq(VALDATA, categories)
+  tmp@freq <- pairs_freq(DATA, dims$cat)
   freq_end_time <- Sys.time()
 
   tmp@freqTime <- as.numeric(difftime(freq_end_time, freq_start_time, units = 'secs')[1])
@@ -182,13 +105,13 @@ fit_plFA <- function(
     # Compute frequency table bivariate patterns
 
     Rwr_ncl <- function(par_vec){
-      mod <- multiThread_completePairwise(
-        N = n,
-        C_VEC = categories,
-        CONSTRMAT = CONSTR_LIST$CONSTRMAT,
+      mod <- cpp_multiThread_completePairwise(
+        N = dims$n,
+        C_VEC = dims$cat,
+        CONSTRMAT = constr_list$CONSTRMAT,
         FREQ = tmp@freq,
         THETA = par_vec,
-        CORRFLAG = CONSTR_LIST$CORRFLAG,
+        CORRFLAG = constr_list$CORRFLAG,
         SILENTFLAG = 1
       )
       out <- mod$iter_nll/n
@@ -197,13 +120,13 @@ fit_plFA <- function(
 
     # function for gradient
     Rwr_ngr <- function(par_vec){
-      mod <- multiThread_completePairwise(
-        N = n,
-        C_VEC = categories,
-        CONSTRMAT = CONSTR_LIST$CONSTRMAT,
+      mod <- cpp_multiThread_completePairwise(
+        N = dims$n,
+        C_VEC = dims$cat,
+        CONSTRMAT = constr_list$CONSTRMAT,
         FREQ = tmp@freq,
         THETA = par_vec,
-        CORRFLAG = CONSTR_LIST$CORRFLAG,
+        CORRFLAG = constr_list$CORRFLAG,
         SILENTFLAG = 1
       )
 
@@ -230,62 +153,6 @@ fit_plFA <- function(
 
 
     message('4. Done! (', round(tmp@RTime,2),' secs)')
-    return(tmp)
-  }
-
-  # Stochastic approximation
-  if(METHOD == 'bernoulli' | METHOD == 'hyper'){
-
-    stoFit <- new('StoFit')
-    message(paste0('3. Optimising with ', METHOD, '...'))
-
-    # Check stochastic control parameters
-    cpp_ctrl <- stoc_args(CONTROL, P = p)
-
-    # Check iterations selected
-    if(!is.null(ITERATIONS_SUBSET)){
-      stoFit@trajSubset <- unique(c(0, ITERATIONS_SUBSET[ITERATIONS_SUBSET < cpp_ctrl$MAXT], cpp_ctrl$MAXT))
-    }else{
-      stoFit@trajSubset <- 0:cpp_ctrl$MAXT
-    }
-
-    # Guarantee reproducibility stochastic optimisation
-    # Note: R set.seed() is only needed by Bernoulli sampling.
-    # For Hypergeometric sampling the seed is directly passed to cpp
-    set.seed(cpp_ctrl$SEED)
-
-    # Collect and rearrange arguments to pass to cpp function
-    args <- append(
-      list( 'FREQ' = tmp@freq,
-            'VALFREQ' = tmp@valfreq,
-            'N' = tmp@dims@n,
-            'THETA_INIT' = tmp@init,
-            'C_VEC' = tmp@dims@cat
-            ),
-      c( CONSTR_LIST, cpp_ctrl) )
-
-    args$METHODFLAG <- ifelse(METHOD == 'hyper', 0, 1)
-    fit <- do.call(plFA, args)
-
-    end_time <- Sys.time()
-    tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
-
-    stoFit@projIters <- fit$post_index
-    stoFit@trajSubset <- c(stoFit@trajSubset[stoFit@trajSubset<=fit$last_iter], fit$last_iter)
-    stoFit@pathTheta <- fit$path_theta[stoFit@trajSubset + 1,]
-    stoFit@pathAvTheta <- fit$path_av_theta[stoFit@trajSubset + 1,]
-    stoFit@pathGrad <- fit$path_grad[stoFit@trajSubset,]
-    stoFit@control <- cpp_ctrl
-    stoFit@lastIter <- fit$last_iter
-    stoFit@pathValNll <- cbind(fit$check_val_iter, fit$check_val_nll)
-    stoFit@convergence <- fit$convergence
-    tmp@theta <- stoFit@pathAvTheta[nrow(stoFit@pathAvTheta),]
-    stoFit@cppTime <- summary(clock, units = 's')
-    tmp@stoFit <- stoFit
-
-    message('4. Done! (',round(tmp@RTime,2),' secs)')
-
-
     return(tmp)
   }
 }
