@@ -40,8 +40,8 @@ cfa <- function(
   valdata <- estimator.args$valdata
   iterations_subset <- estimator.args$iterations_subset
   ncores <- estimator.args$ncores
-  if ("verbose" %in% names(lavargs)) verbose <- FALSE
-  else verbose <- lavargs$verbose
+  if ("verbose" %in% names(lavargs)) verbose <- lavargs$verbose
+  else verbose <- FALSE
 
   # Initialise {lavaan} model object -------------------------------------------
   lavargs$model <- model
