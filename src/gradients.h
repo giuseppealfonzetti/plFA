@@ -337,7 +337,7 @@ namespace grads{
     }
   }
 
-  void pi(Eigen::VectorXd &GRADIENT,
+  void samplepi(Eigen::VectorXd &GRADIENT,
           const Eigen::Ref<const Eigen::MatrixXd> PAIRS_TAB,
           const Eigen::Ref<const Eigen::MatrixXd> A,
           const Eigen::Ref<const Eigen::VectorXd> C_VEC,
@@ -383,6 +383,175 @@ namespace grads{
     if(CORRFLAG == 1){
       grads::lat_corr(GRADIENT, A, LAMBDAK, LAMBDAL, TRANSFORMED_RHOS, tmp_kl, Q, NCORR, iter);
     }
+  }
+
+  Eigen::VectorXd pi(
+      const Eigen::Ref<const Eigen::MatrixXd> A,
+      const Eigen::Ref<const Eigen::VectorXd> C_VEC,
+      const Eigen::Ref<const Eigen::VectorXd> PI_THRESHOLDS,
+      const Eigen::Ref<const Eigen::MatrixXd> SIGMA_U,
+      const Eigen::Ref<const Eigen::VectorXd> LAMBDAK,
+      const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
+      const Eigen::Ref<const Eigen::VectorXd> TRANSFORMED_RHOS,
+      const double RHO_KL,
+      const unsigned int D,
+      const unsigned int P,
+      const unsigned int Q,
+      const unsigned int K,
+      const unsigned int L,
+      const unsigned int CK,
+      const unsigned int CL,
+      const unsigned int SK,
+      const unsigned int SL,
+      const unsigned int I1,
+      const unsigned int I2,
+      const unsigned int NCORR,
+      const unsigned int CORRFLAG
+  ){
+    // read pi related thresholds
+    const double t_sk = PI_THRESHOLDS(0);
+    const double t_sl = PI_THRESHOLDS(1);
+    const double t_sk_prev = PI_THRESHOLDS(2);
+    const double t_sl_prev = PI_THRESHOLDS(3);
+
+    //Intermediate derivative pi wrt to kl correlation
+    // phi(t_sk, t_sl; rho_kl)
+    const double d1 = binorm::dbvnorm( t_sk, t_sl, RHO_KL, 0);
+
+    // phi(t_sk, t_sl-1; rho_kl)
+    const double d2 = binorm::dbvnorm( t_sk, t_sl_prev, RHO_KL, 0);
+
+    // phi(t_sk-1, t_sl; rho_kl)
+    const double d3 = binorm::dbvnorm( t_sk_prev, t_sl, RHO_KL, 0);
+
+    // phi(t_sk-1, t_sl-1; rho_kl)
+    const double d4 = binorm::dbvnorm( t_sk_prev, t_sl_prev, RHO_KL, 0);
+
+    const double tmp_sksl = d1 - d2 - d3 + d4;
+
+    Eigen::VectorXd grad=Eigen::VectorXd::Zero(D);
+
+
+    // iterator over parameter vector
+    unsigned int idx = 0;
+
+    ////////////////////////////////////////////////
+    // gradient pi_sksl wrt to thresholds
+    ///////////////////////////////////////////////
+
+    // loop: iterate over elements of thresholds vector
+    for(unsigned int s = 0; s < C_VEC.sum()-P; s++){
+
+      // Elicit three cases: 1. threshold related to item k, 2. threshold related to item l, 3. threshold non relevant to items couple (k,l)
+      if(s >= (C_VEC.segment(0, K).sum()) - (K) & s < C_VEC.segment(0, K + 1).sum() - (K + 1)){
+        // [CASE 1]: threshold related to item k
+        unsigned int sk_a = s - (C_VEC.segment(0, K).sum()) + (K);
+        //Rcpp::Rcout << "  |    |_ tau item k. sk_a:"<< sk_a <<"\n";
+        if(sk_a == SK){
+          double tmp1 = R::dnorm(t_sk, 0, 1, 0);
+          double tmp2 = R::pnorm((t_sl-RHO_KL*t_sk)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);
+          double tmp3 = R::pnorm((t_sl_prev-RHO_KL*t_sk)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);;
+          grad(idx) = tmp1*tmp2-tmp1*tmp3;
+        }else if(sk_a == (SK-1)){
+          double tmp1 = R::dnorm(t_sk_prev, 0, 1, 0);
+          double tmp2 = R::pnorm((t_sl-RHO_KL*t_sk_prev)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);
+          double tmp3 = R::pnorm((t_sl_prev-RHO_KL*t_sk_prev)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);;
+          grad(idx) = -tmp1*tmp2+tmp1*tmp3;
+        }else{
+          grad(idx) = 0;
+        }
+
+      }else if(s >= (C_VEC.segment(0, L).sum())-(L) & s<C_VEC.segment(0, L + 1).sum()-(L + 1)){
+        // [CASE 2]: threshold related to item l
+        unsigned int sl_a = s - (C_VEC.segment(0, L).sum()) + (L);
+        //Rcpp::Rcout << "  |    |_ tau item l. sl_a:"<< sl_a<<"\n";
+        if(sl_a == SL){
+          double tmp1 = R::dnorm(t_sl, 0, 1, 0);
+          double tmp2 = R::pnorm((t_sk-RHO_KL*t_sl)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);
+          double tmp3 = R::pnorm((t_sk_prev-RHO_KL*t_sl)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);;
+          grad(idx) = tmp1*tmp2-tmp1*tmp3;
+        }else if(sl_a == (SL-1)){
+          double tmp1 = R::dnorm(t_sl_prev, 0, 1, 0);
+          double tmp2 = R::pnorm((t_sk-RHO_KL*t_sl_prev)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);
+          double tmp3 = R::pnorm((t_sk_prev-RHO_KL*t_sl_prev)/(pow(1-pow(RHO_KL,2), .5)), 0, 1, 1, 0);;
+          grad(idx) = -tmp1*tmp2+tmp1*tmp3;
+        }else{
+          grad(idx) = 0;
+        }
+      } else {
+        // [CASE 3]: threshold non related to (k,l)
+        //Rcpp::Rcout << "  |    |_ tau non related to (k,l)\n";
+        grad(idx) = 0;
+      }
+      idx ++;
+    }
+
+    //////////////////////////////////////////////
+    // gradient pi_sksl wrt to loadings
+    //////////////////////////////////////
+
+    // double loop: iterate over elements of loadings matrix
+    for(unsigned int j = 0; j < P; j++){
+      for(unsigned int v = 0; v < Q; v++){
+
+        // elicit three cases: 1. free loading item k, 2. free loading l, 3. other
+        if(j == K){
+          if(!std::isfinite(A(j,v))){
+            Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
+            double d_rho_kl = ev.transpose() * SIGMA_U * LAMBDAL;
+            grad(idx) = tmp_sksl * d_rho_kl;
+            idx ++;
+          }
+        }else if (j == L){
+          if(!std::isfinite(A(j,v))){
+            Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
+            double d_rho_kl = LAMBDAK.transpose() * SIGMA_U * ev;
+            grad(idx) = tmp_sksl * d_rho_kl;
+            idx ++;
+          }
+        }else if(!std::isfinite(A(j,v))){
+          idx ++;
+        }
+      }
+    }
+
+    /////////////////////////////////////////
+    // gradient pi_sksl wrt correlations
+    ///////////////////////////////////////
+    if(CORRFLAG == 1){
+      for(unsigned int thro_idx = 0; thro_idx < NCORR; thro_idx ++){
+
+        Eigen::MatrixXd dSigma = grads::S(A, TRANSFORMED_RHOS, Q, thro_idx);
+        // Rcpp::Rcout << "dsigma wrt corr idx " << thro_idx << ":\n"<< dSigma << "\n";
+
+        double d_rho_kl = LAMBDAK.transpose() * dSigma * LAMBDAL;
+        grad(idx) += tmp_sksl * d_rho_kl;
+        idx++;
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return grad;
+
+
   }
 
 }

@@ -104,10 +104,10 @@ namespace pairs{
 
     if(GRADFLAG == 1){
 
-      grads::pi(gradient, pairs_tab, A, C_VEC, tau, Sigma_u,
-                lambdak, lambdal, transformed_rhos, rho_kl,
-                p, q, k, l, ck, cl, i1, i2, ncorr,
-                CORRFLAG);
+      grads::samplepi(gradient, pairs_tab, A, C_VEC, tau, Sigma_u,
+                      lambdak, lambdal, transformed_rhos, rho_kl,
+                      p, q, k, l, ck, cl, i1, i2, ncorr,
+                      CORRFLAG);
     }
 
   }

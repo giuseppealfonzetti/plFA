@@ -191,7 +191,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
     message('1. Computing H numerically...')
     # function for gradient
     Rwr_ngr <- function(par_vec){
-      mod <-multiThread_completePairwise(
+      mod <-cpp_multiThread_completePairwise(
         N = N,
         C_VEC = C_VEC,
         CONSTRMAT = CONSTRMAT,
