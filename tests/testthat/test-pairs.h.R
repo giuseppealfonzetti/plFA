@@ -30,7 +30,7 @@ test_that("check pair gradient ",{
 
   par_init <- c(lambda0_init, lambda_init, transformed_rhos_init)
 
-  pair_nll <- function(par_vec){
+  pair_nll <- function(par_vec, OPTION=0){
     pair <- cpp_compute_pair(
       A = A,
       C_VEC = cat,
@@ -40,12 +40,14 @@ test_that("check pair gradient ",{
       l = l,
       PAIRS_TABLE = f,
       SILENTFLAG = 1,
-      GRADFLAG = 0
+      GRADFLAG = 0,
+      OPTION = OPTION
     )
     out <- pair$ll/n
     return(out)
   }
-  pair_ngr <- function(par_vec){
+
+  pair_ngr <- function(par_vec, OPTION=0){
     pair <- cpp_compute_pair(
       A = A,
       C_VEC = cat,
@@ -55,7 +57,8 @@ test_that("check pair gradient ",{
       l = l,
       PAIRS_TABLE = f,
       SILENTFLAG = 1,
-      GRADFLAG = 1
+      GRADFLAG = 1,
+      OPTION = OPTION
     )
     out <- pair$ngradient/n
     return(out)
@@ -63,10 +66,24 @@ test_that("check pair gradient ",{
 
   for (l in 2:p) {
     for (k in 1:(l-1)) {
-      expect_identical(sum(abs(pair_ngr(theta) - numDeriv::grad(pair_nll, theta))>1e-4), 0L)
-      expect_equal(sum(abs(pair_ngr(par_init) - numDeriv::grad(pair_nll, par_init)) >1e-4), 0L)
+      expect_identical(sum(abs(pair_ngr(theta, OPTION=0) - numDeriv::grad(pair_nll, theta))>1e-4), 0L)
+      expect_equal(sum(abs(pair_ngr(par_init, OPTION=0) - numDeriv::grad(pair_nll, par_init)) >1e-4), 0L)
+    }
+  }
+
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      expect_identical(sum(abs(pair_ngr(theta, OPTION=1) - numDeriv::grad(pair_nll, theta))>1e-4), 0L)
+      expect_equal(sum(abs(pair_ngr(par_init, OPTION=1) - numDeriv::grad(pair_nll, par_init)) >1e-4), 0L)
     }
   }
 
 
 })
+
+# l <- 2
+# k <- 1
+# microbenchmark::microbenchmark(
+#   sample=pair_ngr(theta),
+#   ntimespi=pair_ngr(theta, OPTION=1)
+# )

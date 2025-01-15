@@ -15,8 +15,8 @@
 #' @param PAIRS_TABLE output from [pairs_freq()]
 #' @param SILENTFLAG optional for verbose output
 #' @param GRADFLAG 1 to compute gradient
-cpp_compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG) {
-    .Call(`_plFA_cpp_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG)
+cpp_compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION = 0L) {
+    .Call(`_plFA_cpp_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
 }
 
 #' @export
