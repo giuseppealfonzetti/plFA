@@ -36,7 +36,7 @@ mod <- "
 "
 
 tictoc::tic("DWLS Estimation")
-fit_lav1 <- cfa(mod, dat, std.lv = TRUE)
+fit_lav1 <- lavaan::cfa(mod, dat, std.lv = !TRUE)
 coef(fit_lav1)
 tictoc::toc()
 tictoc::tic("Pairwise ML Estimation")
