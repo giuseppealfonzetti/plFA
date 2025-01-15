@@ -40,7 +40,7 @@ fit_lav1 <- lavaan::cfa(mod, dat, std.lv = !TRUE)
 coef(fit_lav1)
 tictoc::toc()
 tictoc::tic("Pairwise ML Estimation")
-fit_lav2 <- cfa(mod, dat, std.lv = TRUE, estimator = "PML")
+fit_lav2 <- lavaan::cfa(mod, dat, std.lv = TRUE, estimator = "PML")
 coef(fit_lav2)
 tictoc::toc()
 

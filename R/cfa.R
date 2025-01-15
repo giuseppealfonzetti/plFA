@@ -88,29 +88,37 @@ cfa <- function(
     VERBOSEFLAG = as.numeric(verbose),
     NCORES = ncores
   )
-  # vars <- computeVar(
-  #   OBJ = fit1,
-  #   DATA = D,
-  #   NUMDERIV = computevar_numderiv,
-  #   OPTION = computevar_option
-  # )
+  vars <- computeVar(
+    OBJ = fit1,
+    DATA = D,
+    NUMDERIV = computevar_numderiv,
+    OPTION = computevar_option
+  )
 
-  list(fit1)
-  # out <- create_lav_from_fitsem(fit, model, data, ...)
-  # new("brlavaan", out)
+  # list(fit0 = fit0, fit1 = fit1, vars = vars)
+  out <- create_lav_from_fitplFA(fit0, fit1, vars)
+  new("plFAlavaan", out)
 }
 
-create_lav_from_fitplFA <- function(fit0, fit1 ) {
+create_lav_from_fitplFA <- function(fit0, fit1, vars) {
 
-  # Get coefficients
-  x <- getPar(fit1)
+  # Get coefficients and standard errors
+  parlist <- getPar(fit1, OPTION = "list")
+  FREE <- lavaan::inspect(fit0, what = "free")
+  lambda <- parlist$loadings[FREE$lambda > 0]
+  tau <- parlist$thresholds[FREE$tau > 0]
+  psi <- parlist$latent_correlations[FREE$psi > 0 & lower.tri(FREE$psi)]
+  x <- c(lambda, tau, psi)
+
+  SE <- sqrt(vars$asymptotic_variance)
+  vcov <- vars$vcov
 
   # Change version slot
   fit0@version <- as.character(packageVersion("plFA"))
 
   # Change timing slot
-  fit0@timing$optim <- fit0@timing$optim + fit$timing
-  fit0@timing$total <- fit0@timing$total + fit$timing
+  fit0@timing$optim <- fit0@timing$optim + fit1@RTime
+  fit0@timing$total <- fit0@timing$total + fit1@RTime
 
   # Change Model and implied slots
   fit0@Model <- lavaan::lav_model_set_parameters(fit0@Model, x)
@@ -120,22 +128,23 @@ create_lav_from_fitplFA <- function(fit0, fit1 ) {
   pt <- lavaan::partable(fit0)
   pt$est[pt$free > 0] <- x
   pt$se <- 0
-  pt$se[pt$free > 0] <- fit$stderr
+  pt$se[pt$free > 0] <- SE
   fit0@ParTable <- as.list(pt)
   fit0@pta$names <- names(pt)
 
   # Change Options slot
-  fit0@Options$estimator <- fit$estimator
-  # fit0@Options$estimator.args <- list(method = "eRBM")
+  fit0@Options$estimator <- "PML"
+  fit0@Options$optim.method <- fit1@method
+  # fit0@Options$estimator.args <- list()
   # fit0@Options$test <- "standard"
-  fit0@Options$se <- "standard"
+  fit0@Options$se <- "robust.huber.white"  # this is the sandwich
   fit0@Options$do.fit <- TRUE
 
   # Change Fit slot
   fit0@Fit@x <- x
-  fit0@Fit@se <- fit$stderr
-  fit0@Fit@iterations <- fit$optim$iterations
-  fit0@Fit@converged <- fit$optim$convergence == 0L
+  fit0@Fit@se <- SE
+  fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
+  fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
 
   # Change optim slot
   fit0@optim$x <- x
@@ -143,8 +152,8 @@ create_lav_from_fitplFA <- function(fit0, fit1 ) {
   fit0@optim$npar <- length(x)
   fit0@optim$fx <- fit0@Fit@fx
   fit0@optim$fx.group <- fit0@Fit@fx.group
-  fit0@optim$iterations <- fit$optim$iterations
-  fit0@optim$converged <- fit$optim$convergence == 0L
+  fit0@optim$iterations <- fit1@numFit$info["neval"]
+  fit0@optim$converged <- fit1@numFit$convergence == 1L
 
   # Change loglik slot
   # fit0@loglik$estimator <-
@@ -153,14 +162,15 @@ create_lav_from_fitplFA <- function(fit0, fit1 ) {
   #   else if (fit$estimator == "IBRMP") "IMP-BR ML"
   #   else if (fit$estimator == "EBRM") "EXP-BR ML"
   # Change vcov slot
-  fit0@vcov$se <- "standard"
-  fit0@vcov$vcov <- fit$vcov
+  fit0@vcov$se <- "robust.sem"
+  fit0@vcov$information <- "expected"
+  fit0@vcov$vcov <- vcov
 
   # fit0@test <- fit_lav@test
   # fit0@baseline <- fit_lav@baseline
 
   # Include the entire output of fit_sem
-  fit0@external <- fit
+  fit0@external <- list(plFA = fit1)
 
   fit0
 }
