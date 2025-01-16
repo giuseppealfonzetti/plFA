@@ -36,7 +36,7 @@ Rcpp::List cpp_compute_pair(
    const unsigned int d = THETA.size();
    const unsigned int c = C_VEC.sum();
    const unsigned int nthr = c-p;
-   const unsigned int ncorr = q*(q-1)/2;
+   unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
    const unsigned int nload = d-nthr-ncorr;
 
    double ll = 0;

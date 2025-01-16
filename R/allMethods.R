@@ -182,7 +182,8 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
     getPar(par_vec, OPTION = OPTION, C = sum(C_VEC),
            P = nrow(CONSTRMAT),
            Q = ncol(CONSTRMAT),
-           CONSTRMAT = CONSTRMAT)
+           CONSTRMAT = CONSTRMAT,
+           CORRFLAG = CORRFLAG)
   }
   trJacob <- numDeriv::jacobian(Rwr_getPar, THETA)
 

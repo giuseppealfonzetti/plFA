@@ -82,7 +82,8 @@ check_dims <- function(DATA, CONSTR_LIST){
   n <- nrow(DATA)
   q <- ncol(CONSTR_LIST$CONSTRMAT)
   categories <- apply(DATA, 2, max, na.rm = T) + 1
-  d = sum(categories)-p + sum(is.na(CONSTR_LIST$CONSTRMAT)) + q*(q-1)/2
+  d <- sum(categories)-p + sum(is.na(CONSTR_LIST$CONSTRMAT))
+  if(CONSTR_LIST$CORRFLAG==1) d <- d + q*(q-1)/2
   stopifnot(q<p)
   stopifnot(categories>1)
 
