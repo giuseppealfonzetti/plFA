@@ -157,7 +157,8 @@ setMethod('computeVar', 'PlFaFit',
                        DATA      = DATA,
                        METHOD    = OBJ@method,
                        NUMDERIV  = NUMDERIV,
-                       OPTION    = OPTION)
+                       OPTION    = OPTION,
+                       INVHAPPRX = OBJ@numFit$invhessian)
           }else{
             compute_var(THETA     = OBJ@theta,
                        C_VEC     = OBJ@dims@cat,
@@ -171,12 +172,13 @@ setMethod('computeVar', 'PlFaFit',
                        DATA      = DATA,
                        METHOD    = OBJ@method,
                        NUMDERIV  = NUMDERIV,
-                       OPTION    = OPTION)
+                       OPTION    = OPTION,
+                       INVHAPPRX = OBJ@numFit$invhessian)
           }}
 )
 
 #setMethod('computeVar', 'vector', function(OBJ, DATA, ...) compute_var(OBJ, DATA, ...))
-compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD, NUMDERIV = F, OPTION = 'raw'){
+compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD, NUMDERIV = F, OPTION = 'transformed', INVHAPPRX=NULL){
 
   Rwr_getPar <- function(par_vec){
     getPar(par_vec, OPTION = OPTION, C = sum(C_VEC),
@@ -210,15 +212,18 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
 
     Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
   }else{
-    message('1. Estimating H...')
-    Hhat <- estimate_H(
-      C_VEC = C_VEC,
-      A = CONSTRMAT,
-      THETA = THETA,
-      FREQ = FREQ,
-      N = N,
-      CORRFLAG = CORRFLAG
-    )$est_H
+    if(is.null(INVHAPPRX)){
+      message('1. Estimating H...')
+      Hhat <- estimate_H(
+        C_VEC = C_VEC,
+        A = CONSTRMAT,
+        THETA = THETA,
+        FREQ = FREQ,
+        N = N,
+        CORRFLAG = CORRFLAG
+      )$est_H
+    }
+
   }
 
   message('2. Estimating J...')
@@ -230,9 +235,13 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
     CORRFLAG = CORRFLAG
   )$est_J
 
-  if(!(det(Hhat)>0)) stop('H not invertible.')
-  message('3. Inverting H...')
-  invH <- solve(Hhat)
+  invH <- INVHAPPRX
+  if(is.null(INVHAPPRX)){
+    message('3. Inverting H...')
+    if(!(det(Hhat)>0)) stop('H not invertible.')
+    invH <- solve(Hhat)
+  }
+
   sandwich <- invH %*% Jhat %*% invH
 
   message('3. Computing the variances...')
