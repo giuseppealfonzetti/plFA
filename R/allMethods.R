@@ -108,7 +108,13 @@ extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'), C, P, Q
   if(OPTION == 'raw'){
     return(THETA)
     }else if(OPTION == 'transformed'){
-      return(c(THETA[1:(length(THETA)-Q*(Q-1)/2)], get_corr(THETA = THETA, Q = Q, CORRFLAG=CORRFLAG)))
+      ncorr <- 0; if(CORRFLAG) ncorr <- Q*(Q-1)/2
+      if(CORRFLAG){
+        return(c(THETA[1:(C-P+sum(is.na(CONSTRMAT)))], get_corr(THETA = THETA, Q = Q, CORRFLAG=CORRFLAG)))
+      }else{
+        return(c(THETA[1:(C-P+sum(is.na(CONSTRMAT)))]))
+      }
+
     }else if(OPTION == 'list') {
     out <- list()
     thr = THETA[1:(C-P)]
@@ -258,11 +264,12 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
 
   return(
     list(
+      trJacob = trJacob,
       H = Hhat,
       J = Jhat,
+      invH = invH,
       asymptotic_variance = asy_var,
       optimisation_noise = opt_noise
-
     )
   )
 
