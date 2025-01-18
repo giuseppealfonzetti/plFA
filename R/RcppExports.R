@@ -15,8 +15,8 @@
 #' @param PAIRS_TABLE output from [pairs_freq()]
 #' @param SILENTFLAG optional for verbose output
 #' @param GRADFLAG 1 to compute gradient
-cpp_compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG) {
-    .Call(`_plFA_cpp_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG)
+cpp_compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION = 0L) {
+    .Call(`_plFA_cpp_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
 }
 
 #' @export
@@ -45,18 +45,18 @@ cpp_get_latvar_vec2mat <- function(SVEC, Q) {
 }
 
 #' @export
-cpp_get_loadings_theta2mat <- function(THETA, CONSTRMAT, P, Q, D, C) {
-    .Call(`_plFA_cpp_get_loadings_theta2mat`, THETA, CONSTRMAT, P, Q, D, C)
+cpp_get_loadings_theta2mat <- function(THETA, CONSTRMAT, P, C, NLOAD) {
+    .Call(`_plFA_cpp_get_loadings_theta2mat`, THETA, CONSTRMAT, P, C, NLOAD)
 }
 
 #' @export
-cpp_get_latvar_theta2mat <- function(THETA, Q, D) {
-    .Call(`_plFA_cpp_get_latvar_theta2mat`, THETA, Q, D)
+cpp_get_latvar_theta2mat <- function(THETA, Q, D, CORRFLAG) {
+    .Call(`_plFA_cpp_get_latvar_theta2mat`, THETA, Q, D, CORRFLAG)
 }
 
 #' @export
-cpp_get_latvar_theta2vec <- function(THETA, NTHR, NLOAD, NCORR) {
-    .Call(`_plFA_cpp_get_latvar_theta2vec`, THETA, NTHR, NLOAD, NCORR)
+cpp_get_latvar_theta2vec <- function(THETA, NTHR, NLOAD, NCORR, CORRFLAG) {
+    .Call(`_plFA_cpp_get_latvar_theta2vec`, THETA, NTHR, NLOAD, NCORR, CORRFLAG)
 }
 
 #' Compute pairwise frequencies

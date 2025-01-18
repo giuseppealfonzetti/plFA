@@ -63,7 +63,8 @@ extract_theta_path <- function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed')
                                             C = sum(OBJ@dims@cat),
                                             P = OBJ@dims@p,
                                             Q = OBJ@dims@q,
-                                            CONSTRMAT = OBJ@cnstr@loadings))
+                                            CONSTRMAT = OBJ@cnstr@loadings,
+                                            CORRFLAG = OBJ@cnstr@corrflag))
 
   out$par <- newParList
   return(out)
@@ -80,7 +81,7 @@ setGeneric('getPar', function(OBJ, ...) standardGeneric('getPar'))
 #'
 #' @param OBJ Object of class PlFaFit.
 #' @param ... Additional arguments
-setMethod('getPar', 'PlFaFit', function(OBJ, ...) extract_par(THETA = OBJ@theta, C = sum(OBJ@dims@cat), P = OBJ@dims@p, Q = OBJ@dims@q, CONSTRMAT = OBJ@cnstr@loadings, ...))
+setMethod('getPar', 'PlFaFit', function(OBJ, ...) extract_par(THETA = OBJ@theta, C = sum(OBJ@dims@cat), P = OBJ@dims@p, Q = OBJ@dims@q, CONSTRMAT = OBJ@cnstr@loadings, CORRFLAG = OBJ@cnstr@corrflag, ...))
 #' Extract parameters
 #'
 #' @param OBJ Raw theta vector to extract \code{'transformed'} and \code{'list'}.
@@ -101,29 +102,35 @@ setMethod('getPar', 'vector', function(OBJ, ...) extract_par(THETA = OBJ, ...))
 #' @param P Number if items
 #' @param Q Number of latent variables
 #' @param CONSTRMAT Matrix of dimension \eqn{p * q} with binary loading constraints. 1 for free loadings, 0 otherwise.
-extract_par <- function(THETA, OPTION = 'transformed', C, P, Q, CONSTRMAT){
-  if(!(OPTION %in% c('raw', 'transformed', 'list'))) stop('The OPTION chosen is not implemented')
+extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'), C, P, Q, CONSTRMAT, CORRFLAG){
+  OPTION <- match.arg(OPTION)
 
+  if(OPTION == 'raw'){
+    return(THETA)
+    }else if(OPTION == 'transformed'){
+      ncorr <- 0; if(CORRFLAG) ncorr <- Q*(Q-1)/2
+      if(CORRFLAG){
+        return(c(THETA[1:(C-P+sum(is.na(CONSTRMAT)))], get_corr(THETA = THETA, Q = Q, CORRFLAG=CORRFLAG)))
+      }else{
+        return(c(THETA[1:(C-P+sum(is.na(CONSTRMAT)))]))
+      }
 
-  if(OPTION == 'raw') return(THETA)
-  if(OPTION == 'transformed') return(c(THETA[1:(length(THETA)-Q*(Q-1)/2)], get_corr(THETA = THETA, Q = Q)))
-  if(OPTION == 'list') {
+    }else if(OPTION == 'list') {
     out <- list()
     thr = THETA[1:(C-P)]
-    ld <- CONSTRMAT
-    ld_vec <- get_lambda(THETA = THETA, C = C, P = P, Q = Q)
-    s <- 1
-    for (j in 1:ncol(ld)) {
-      for (i in 1:nrow(ld)) {
-        if(is.na(CONSTRMAT[i,j])){
-          ld[i,j] <- ld_vec[s]
-          s = s+1
-        }else{
-          ld[i,j] <- CONSTRMAT[i,j]
-        }
-      }
-    }
-    S <- get_S(THETA = THETA, Q = Q)
+    ld <- cpp_get_loadings_theta2mat(
+      THETA = THETA,
+      CONSTRMAT = CONSTRMAT,
+      P = P,
+      C = C,
+      NLOAD = sum(is.na(CONSTRMAT))
+    )
+    S <- cpp_get_latvar_theta2mat(
+      THETA = THETA,
+      Q=Q,
+      D=length(theta),
+      CORRFLAG = CORRFLAG
+    )
 
     out <- list(thresholds = thr, loadings = ld, latent_correlations = S)
     return(out)
@@ -156,7 +163,8 @@ setMethod('computeVar', 'PlFaFit',
                        DATA      = DATA,
                        METHOD    = OBJ@method,
                        NUMDERIV  = NUMDERIV,
-                       OPTION    = OPTION)
+                       OPTION    = OPTION,
+                       INVHAPPRX = OBJ@numFit$invhessian)
           }else{
             compute_var(THETA     = OBJ@theta,
                        C_VEC     = OBJ@dims@cat,
@@ -170,18 +178,20 @@ setMethod('computeVar', 'PlFaFit',
                        DATA      = DATA,
                        METHOD    = OBJ@method,
                        NUMDERIV  = NUMDERIV,
-                       OPTION    = OPTION)
+                       OPTION    = OPTION,
+                       INVHAPPRX = OBJ@numFit$invhessian)
           }}
 )
 
 #setMethod('computeVar', 'vector', function(OBJ, DATA, ...) compute_var(OBJ, DATA, ...))
-compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD, NUMDERIV = F, OPTION = 'raw'){
+compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  CONSTRMAT, CORRFLAG, FREQ, DATA, METHOD, NUMDERIV = F, OPTION = 'transformed', INVHAPPRX=NULL){
 
   Rwr_getPar <- function(par_vec){
     getPar(par_vec, OPTION = OPTION, C = sum(C_VEC),
            P = nrow(CONSTRMAT),
            Q = ncol(CONSTRMAT),
-           CONSTRMAT = CONSTRMAT)
+           CONSTRMAT = CONSTRMAT,
+           CORRFLAG = CORRFLAG)
   }
   trJacob <- numDeriv::jacobian(Rwr_getPar, THETA)
 
@@ -208,15 +218,18 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
 
     Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
   }else{
-    message('1. Estimating H...')
-    Hhat <- estimate_H(
-      C_VEC = C_VEC,
-      A = CONSTRMAT,
-      THETA = THETA,
-      FREQ = FREQ,
-      N = N,
-      CORRFLAG = CORRFLAG
-    )$est_H
+    if(is.null(INVHAPPRX)){
+      message('1. Estimating H...')
+      Hhat <- estimate_H(
+        C_VEC = C_VEC,
+        A = CONSTRMAT,
+        THETA = THETA,
+        FREQ = FREQ,
+        N = N,
+        CORRFLAG = CORRFLAG
+      )$est_H
+    }
+
   }
 
   message('2. Estimating J...')
@@ -228,9 +241,13 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
     CORRFLAG = CORRFLAG
   )$est_J
 
-  if(!(det(Hhat)>0)) stop('H not invertible.')
-  message('3. Inverting H...')
-  invH <- solve(Hhat)
+  invH <- INVHAPPRX
+  if(is.null(INVHAPPRX)){
+    message('3. Inverting H...')
+    if(!(det(Hhat)>0)) stop('H not invertible.')
+    invH <- solve(Hhat)
+  }
+
   sandwich <- invH %*% Jhat %*% invH
 
   message('3. Computing the variances...')
@@ -247,6 +264,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
 
   return(
     list(
+      trJacob = trJacob,
       H = Hhat,
       J = Jhat,
       vcov = vcov,

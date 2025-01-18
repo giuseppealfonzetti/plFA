@@ -140,7 +140,7 @@ fit_plFA <- function(
       'fn' = Rwr_ncl,
       'gr' = Rwr_ngr,
       'control' = ifelse(is.null(CONTROL$ctrl), list(), CONTROL$ctrl),
-      'hessian' = ifelse(is.null(CONTROL$hessian), 0, CONTROL$hessian))
+      'hessian' = ifelse(is.null(CONTROL$hessian), 2, CONTROL$hessian))
 
     # optimisation
     opt <- do.call(ucminf::ucminf, args)

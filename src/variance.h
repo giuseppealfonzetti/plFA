@@ -26,14 +26,20 @@ Rcpp::List estimate_H(
     int N,
     int CORRFLAG
 ){
-  unsigned int p = A.rows();                                             // number of items
-  unsigned int q = A.cols();                                             // number of latents
-  unsigned int d = THETA.size();                                         // number of parameters
-  unsigned int ncorr = q*(q-1)/2;                                        // number of correlations
-  unsigned int c = C_VEC.sum();                                          // total number of categories
-  unsigned int nthr = c-p;                                               // number of thresholds
-  unsigned int nload = d - ncorr - nthr;                                 // number of loadings
+  const unsigned int p = A.rows();
+  const unsigned int q = A.cols();
+  const unsigned int d = THETA.size();
+  const unsigned int c = C_VEC.sum();
+  const unsigned int nthr = c-p;
+  unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
+  const unsigned int nload = d-nthr-ncorr;
   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
+
+  // rearrange parameters
+  Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, c, nload);
+  Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d, CORRFLAG);
+  Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
+  Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr, CORRFLAG);
 
 
   // Copy frequencies, and build pair dictionary
@@ -41,11 +47,6 @@ Rcpp::List estimate_H(
   pairs_table.conservativeResize(pairs_table.rows() + 1, Eigen::NoChange_t() );
 
 
-  // rearrange parameters
-  Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, q, d, c);
-  Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d);
-  Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
-  Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr);
 
   double ll = 0;
   Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
@@ -146,22 +147,23 @@ Rcpp::List estimate_J(
     Eigen::VectorXd &THETA,
     int CORRFLAG
 ){
-  unsigned int p = A.rows();                                             // number of items
-  unsigned int q = A.cols();                                             // number of latents
-  unsigned int d = THETA.size();                                         // number of parameters
-  unsigned int ncorr = q*(q-1)/2;                                        // number of correlations
-  unsigned int c = C_VEC.sum();                                          // total number of categories
-  unsigned int nthr = c-p;                                               // number of thresholds
-  unsigned int nload = d - ncorr - nthr;                                 // number of loadings
+
+
+  const unsigned int p = A.rows();
+  const unsigned int q = A.cols();
+  const unsigned int d = THETA.size();
+  const unsigned int c = C_VEC.sum();
+  const unsigned int nthr = c-p;
+  unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
+  const unsigned int nload = d-nthr-ncorr;
   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
   unsigned int n = Y.rows();
 
-
   // rearrange parameters
-  Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, q, d, c);
-  Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d);
+  Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, c, nload);
+  Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d, CORRFLAG);
   Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
-  Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr);
+  Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr, CORRFLAG);
 
   double ll = 0;
   Eigen::MatrixXd est_J = Eigen::MatrixXd::Zero(d,d);

@@ -48,7 +48,7 @@ Rcpp::List cpp_multiThread_completePairwise(
   const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
   const unsigned int c = C_VEC.sum();                                          // total number of categories
   const unsigned int nthr = c-p;                                        // number of thresholds
-  const unsigned int ncorr = q*(q-1)/2;                          // number of correlations
+  unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;                  // number of correlations
   const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
 
   unsigned int R = p*(p-1)/2;                                            // number of pairs of items

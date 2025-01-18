@@ -1,38 +1,39 @@
 test_that("check gradient from H",{
   set.seed(1)
-  p <- 6L; q <- 2L; n <- 500
+  p <- 8L; q <- 4L; n <- 100
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
   Load <- gen_loadings(CONSTRMAT = A)
-  thr <- c(-1, 0, 1)
-  S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
+  thr <- c(-1,1)
+  corrflag <- 1
+  S <- diag(1,q,q)
+  if(corrflag) S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q, CORRFLAG = corrflag)
   D <- sim_data(
     SAMPLE_SIZE = n,
     LOADINGS = Load,
     THRESHOLDS = thr,
     LATENT_COV = S)
   cat <- apply(D, 2, max) + 1
-  theta <- get_theta(rep(thr, p), Load, S, cat, A)
+  theta <- get_theta(rep(thr, p), Load, S, cat, A,CORRFLAG = corrflag)
   f <- compute_frequencies(Y = D, C_VEC = cat)
 
 
-  lambda0_init <- c()
-  s <- 0
 
-  for (i in 1:length(cat)) {
-    vec <- 1:(cat[i]-1)
-    vec <- (vec -min(vec))/(max(vec)-min(vec))*(2)-1
-    lambda0_init[(s + 1):(s + cat[i] - 1)] <- vec
-    s <- s + cat[i] - 1
-  }
-  lambda_init = rep(0, sum(A))
-  transformed_rhos_init = rep(0, q*(q-1)/2)
-  #get_Sigma_u2(constrMat, transformed_rhos_init)
+  D <- check_data(D)
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag))
+  dims <- check_dims(D, constr_list)
+  dims$d
+
+  lambda0_init <- init_thresholds(dims, constr_list)
+  lambda_init  <- init_loadings(dims, constr_list, FXD=0)
+  transformed_rhos_init <- init_transformed_latcorr(dims, constr_list)
 
   par_init <- c(lambda0_init, lambda_init, transformed_rhos_init)
+  length(par_init)
+
 
   # function for nll
   full_nll <- function(par_vec){
-    mod <- multiThread_completePairwise(
+    mod <- cpp_multiThread_completePairwise(
       N = n,
       C_VEC = cat,
       CONSTRMAT = A,
@@ -48,7 +49,7 @@ test_that("check gradient from H",{
 
   # function for gradient
   full_ngr <- function(par_vec){
-    mod <- multiThread_completePairwise(
+    mod <- cpp_multiThread_completePairwise(
       N = n,
       C_VEC = cat,
       CONSTRMAT = A,
@@ -69,7 +70,7 @@ test_that("check gradient from H",{
       THETA = par_vec,
       FREQ = f,
       N = n,
-      CORRFLAG = 1
+      CORRFLAG = corrflag
     )$gradient
     out <- -out/n
     return(out)
@@ -82,7 +83,7 @@ test_that("check gradient from H",{
       THETA = par_vec,
       FREQ = f,
       N = n,
-      CORRFLAG = 1
+      CORRFLAG = corrflag
     )$est_H
     return(out)
   }
