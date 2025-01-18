@@ -8,10 +8,15 @@ cpp_multiThread_completePairwise(
   N,
   C_VEC,
   CONSTRMAT,
+  CONSTRSD,
   THETA,
   FREQ,
   CORRFLAG,
-  GRFLAG = 1L,
+  NTHR,
+  NLOAD,
+  NCORR,
+  NVAR,
+  GRFLAG = 0L,
   SILENTFLAG = 1L
 )
 }

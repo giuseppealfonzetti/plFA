@@ -77,6 +77,22 @@ fit_plFA <- function(
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
 
+  if(1){
+    message(
+      paste0(
+        "Dimensions:\n",
+        " - Sample size: ", dims$n, "\n",
+        " - Items: ", dims$p,  " (", dims$pairs, " pairs)\n",
+        " - Latent traits: ", dims$q,"\n",
+        "Free parameters:\n",
+        " - Thresholds: ", dims$nthr, "\n",
+        " - Loadings: ", dims$nload, "\n",
+        " - Latent correlations: ", dims$ncorr, "\n",
+        " - Latent variances: ", dims$nvar
+      )
+    )
+  }
+
   tmp <- new('PlFaFit',
              cnstr = new('Constraints', loadings = constr_list$CONSTRMAT, corrflag = constr_list$CORRFLAG),
              dims = new('Dimensions', n = dims$n, p = dims$p, q = dims$q, cat = dims$cat, pairs = dims$pairs),
@@ -106,12 +122,17 @@ fit_plFA <- function(
 
     Rwr_ncl <- function(par_vec){
       mod <- cpp_multiThread_completePairwise(
-        N = dims$n,
-        C_VEC = dims$cat,
-        CONSTRMAT = constr_list$CONSTRMAT,
-        FREQ = tmp@freq,
-        THETA = par_vec,
-        CORRFLAG = constr_list$CORRFLAG,
+        N          = dims$n,
+        C_VEC      = dims$cat,
+        CONSTRMAT  = constr_list$CONSTRMAT,
+        CONSTRSD   = log(constr_list$CONSTRVAR),
+        FREQ       = tmp@freq,
+        THETA      = par_vec,
+        CORRFLAG   = constr_list$CORRFLAG,
+        NTHR       = dims$nthr,
+        NLOAD      = dims$nload,
+        NCORR      = dims$ncorr,
+        NVAR       = dims$nvar,
         SILENTFLAG = 1
       )
       out <- mod$iter_nll/n
@@ -121,12 +142,18 @@ fit_plFA <- function(
     # function for gradient
     Rwr_ngr <- function(par_vec){
       mod <- cpp_multiThread_completePairwise(
-        N = dims$n,
-        C_VEC = dims$cat,
-        CONSTRMAT = constr_list$CONSTRMAT,
-        FREQ = tmp@freq,
-        THETA = par_vec,
-        CORRFLAG = constr_list$CORRFLAG,
+        N          = dims$n,
+        C_VEC      = dims$cat,
+        CONSTRMAT  = constr_list$CONSTRMAT,
+        CONSTRSD   = log(constr_list$CONSTRVAR),
+        FREQ       = tmp@freq,
+        THETA      = par_vec,
+        CORRFLAG   = constr_list$CORRFLAG,
+        NTHR       = dims$nthr,
+        NLOAD      = dims$nload,
+        NCORR      = dims$ncorr,
+        NVAR       = dims$nvar,
+        GRFLAG     = 1,
         SILENTFLAG = 1
       )
 

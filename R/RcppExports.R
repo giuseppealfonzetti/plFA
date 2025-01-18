@@ -15,8 +15,26 @@
 #' @param PAIRS_TABLE output from [pairs_freq()]
 #' @param SILENTFLAG optional for verbose output
 #' @param GRADFLAG 1 to compute gradient
-cpp_compute_pair <- function(A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION = 0L) {
-    .Call(`_plFA_cpp_compute_pair`, A, C_VEC, THETA, CORRFLAG, k, l, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
+cpp_compute_pair_ext <- function(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION = 0L) {
+    .Call(`_plFA_cpp_compute_pair_ext`, CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
+}
+
+#' Single pair contribution
+#'
+#' @description
+#' Wrapper of pair_contribution() used for unit tests
+#'
+#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param THETA Parameter vector
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param k first index identifying the pair
+#' @param l second index identifying the pair
+#' @param PAIRS_TABLE output from [pairs_freq()]
+#' @param SILENTFLAG optional for verbose output
+#' @param GRADFLAG 1 to compute gradient
+cpp_compute_pair <- function(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION = 0L) {
+    .Call(`_plFA_cpp_compute_pair`, CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
 }
 
 #' @export
@@ -59,6 +77,51 @@ cpp_get_latvar_theta2vec <- function(THETA, NTHR, NLOAD, NCORR, CORRFLAG) {
     .Call(`_plFA_cpp_get_latvar_theta2vec`, THETA, NTHR, NLOAD, NCORR, CORRFLAG)
 }
 
+#' @export
+cpp_loadings_theta2vec <- function(THETA, NTHR, NLOAD) {
+    .Call(`_plFA_cpp_loadings_theta2vec`, THETA, NTHR, NLOAD)
+}
+
+#' @export
+cpp_loadings_theta2mat <- function(THETA, CONSTRMAT, NTHR, NLOAD) {
+    .Call(`_plFA_cpp_loadings_theta2mat`, THETA, CONSTRMAT, NTHR, NLOAD)
+}
+
+#' @export
+cpp_loadings_mat2vec <- function(LOADINGS, CONSTRMAT, NLOAD) {
+    .Call(`_plFA_cpp_loadings_mat2vec`, LOADINGS, CONSTRMAT, NLOAD)
+}
+
+#' @export
+cpp_latvar_vec2cmat <- function(VEC, NCORR, Q) {
+    .Call(`_plFA_cpp_latvar_vec2cmat`, VEC, NCORR, Q)
+}
+
+#' @export
+cpp_latvar_vec2dmat <- function(VEC, CONSTRLOGSD, NCORR, NVAR, Q) {
+    .Call(`_plFA_cpp_latvar_vec2dmat`, VEC, CONSTRLOGSD, NCORR, NVAR, Q)
+}
+
+#' @export
+cpp_latvar_theta2cmat <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q) {
+    .Call(`_plFA_cpp_latvar_theta2cmat`, THETA, NTHR, NLOAD, NCORR, NVAR, Q)
+}
+
+#' @export
+cpp_latvar_theta2mat <- function(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q) {
+    .Call(`_plFA_cpp_latvar_theta2mat`, THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q)
+}
+
+#' @export
+cpp_latvar_mat2vec <- function(S, CONSTRLOGSD, NCORR, NVAR) {
+    .Call(`_plFA_cpp_latvar_mat2vec`, S, CONSTRLOGSD, NCORR, NVAR)
+}
+
+#' @export
+cpp_latvar_mat2cmat <- function(S) {
+    .Call(`_plFA_cpp_latvar_mat2cmat`, S)
+}
+
 #' Compute pairwise frequencies
 #'
 #' It returns a 5-rows matrix with each combination of items and categories as columns.
@@ -91,26 +154,8 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
 #' @param SILENTFLAG optional for verbose output
 #'
-cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG = 1L, SILENTFLAG = 1L) {
-    .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, GRFLAG, SILENTFLAG)
-}
-
-#' Full pairwise likelihood
-#'
-#' @description
-#' Evaluate negative loglikelihood. Same structure of `multiThread_completePairwise`.
-#' Used to monitor validation log-likelihood. Multithreading options via `RcppParallel`.
-#'
-#' @param N Number of observations
-#' @param C_VEC Vector containing the number of categories for each item
-#' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
-#' @param THETA Parameter vector
-#' @param FREQ Frequency table
-#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
-#' @param SILENTFLAG optional for verbose output
-#'
-multiThread_completePairwise_nll <- function(N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, SILENTFLAG) {
-    .Call(`_plFA_multiThread_completePairwise_nll`, N, C_VEC, CONSTRMAT, THETA, FREQ, CORRFLAG, SILENTFLAG)
+cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRSD, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
+    .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRSD, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }
 
 sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER) {

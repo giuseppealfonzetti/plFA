@@ -4,7 +4,7 @@
 \alias{get_corr}
 \title{Extract vector of correlations from parameter vector}
 \usage{
-get_corr(THETA, Q)
+get_corr(THETA, Q, CORRFLAG)
 }
 \arguments{
 \item{THETA}{Parameter vector}

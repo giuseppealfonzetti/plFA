@@ -6,14 +6,20 @@
 \usage{
 cpp_compute_pair(
   A,
+  CONSTRSD,
   C_VEC,
   THETA,
   CORRFLAG,
+  NTHR,
+  NLOAD,
+  NCORR,
+  NVAR,
   k,
   l,
   PAIRS_TABLE,
   SILENTFLAG,
-  GRADFLAG
+  GRADFLAG,
+  OPTION = 0L
 )
 }
 \arguments{

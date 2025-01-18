@@ -65,6 +65,62 @@ namespace biprobs{
     return pi_sksl;
   }
 
+  double pi(
+      const Eigen::VectorXd C_VEC,
+      const Eigen::VectorXd PI_THRESHOLDS,
+      double RHO_KL,
+      const unsigned int K,
+      const unsigned int L,
+      const unsigned int SK,
+      const unsigned int SL
+  ){
+    unsigned int ck = C_VEC(K);
+    unsigned int cl = C_VEC(L);
+
+    // read pi related thresholds
+    double t_sk = PI_THRESHOLDS(0);
+    double t_sl = PI_THRESHOLDS(1);
+    double t_sk_prev = PI_THRESHOLDS(2);
+    double t_sl_prev = PI_THRESHOLDS(3);
+
+    // Phi(t_sk, t_sl; rho_kl)
+    double cum1;
+    if(SK == (ck-1) & SL == (cl-1)){
+      cum1 = 1;
+    } else if(SK == (ck-1)){
+      cum1 = R::pnorm(t_sl, 0, 1, 1, 0);
+    } else if(SL == (cl-1)){
+      cum1 = R::pnorm(t_sk, 0, 1, 1, 0);
+    } else {
+      cum1 = binorm::pbvnorm( t_sk, t_sl, RHO_KL);
+    }
+
+    // Phi(t_sk, t_sl-1; rho_kl)
+    double cum2;
+    if(SL == 0){
+      cum2 = 0;
+    } else {
+      cum2 = binorm::pbvnorm( t_sk, t_sl_prev, RHO_KL);
+    }
+    // Phi(t_sk-1, t_sl; rho_kl)
+    double cum3;
+    if(SK == 0){
+      cum3 = 0;
+    } else{
+      cum3 = binorm::pbvnorm( t_sk_prev, t_sl, RHO_KL);
+    }
+    // Phi(t_sk-1, t_sl-1; rho_kl)
+    double cum4;
+    if(SL == 0 | SK == 0){
+      cum4 = 0;
+    }else{
+      cum4 = binorm::pbvnorm( t_sk_prev, t_sl_prev, RHO_KL);
+    }
+
+    double pi_sksl = cum1 - cum2 - cum3 + cum4;
+
+    return pi_sksl;
+  }
   /* GRADIENT OF PI */
   // Compute gradient of specific pi_sksl
   Eigen::VectorXd compute_pi_grad(Eigen::Map<Eigen::MatrixXd> A,
