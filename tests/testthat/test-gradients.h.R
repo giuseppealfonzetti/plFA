@@ -1,7 +1,10 @@
-set.seed(123)
+set.seed(1)
 
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 6; q <- 3; n <- 100
+p <- 6; q <- 2; n <- 100
+
+stdlv <- FALSE
+corrflag <- TRUE
 
 # Thresholds vector for each item
 thr <- c(-.5, .5)
@@ -10,25 +13,24 @@ nthr <- sum(cat)-p
 
 # Simple loading matrix constraints
 A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+A <- check_cnstr_loadings(A, stdlv)
 
 # Draw some random loadings according to constraints
-Load <- gen_loadings(CONSTRMAT = A)
+Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
 nload <- sum(is.na(A))
 
 # Generate random latent correlation matrix
-corrflag <- 1
 tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
 ncorr <- if(corrflag)q*(q-1)/2 else 0
 R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
 
 
 # Generate random latent variances
-stdlv <- FALSE
-constr_sd <- rep(NA, q);
-if(stdlv)constr_sd[is.na(constr_sd)] <- 1
-nvar  <- sum(is.na(constr_sd))
-tsdvec <- log(constr_sd)
-tsdvec[is.na(constr_sd)] <- rnorm(sum(is.na(constr_sd)), 0, .1)
+constr_var <- rep(NA, q)
+constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+nvar  <- sum(is.na(constr_lsd))
+tsdvec <- constr_lsd
+tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
 Dmat <- diag(exp(tsdvec),q,q)
 
 S <- Dmat %*% R %*% Dmat
@@ -43,15 +45,16 @@ theta <- get_theta(
   LATENT_COV = S,
   CAT = cat,
   CONSTRMAT = A,
-  CONSTRVAR = constr_sd^2,
+  CONSTRVAR = exp(constr_lsd)^2,
   CORRFLAG = corrflag,
   STDLV=stdlv
 )
 length(theta)
 cpp_latvar_mat2vec(S=S,
-                   CONSTRLOGSD = log(sqrt(constr_sd^2)),
+                   CONSTRLOGSD = constr_lsd,
                    NCORR = ncorr,
-                   NVAR = sum(is.na(constr_sd^2)))
+                   NVAR = nvar)
+
 dat <- sim_data(
   SAMPLE_SIZE = n,
   LOADINGS = Load,
@@ -60,7 +63,7 @@ dat <- sim_data(
 f <- compute_frequencies(Y = dat, C_VEC = cat)
 
 dat <- check_data(dat)
-constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=constr_sd^2))
+constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
 dims <- check_dims(dat, constr_list)
 
 lambda0_init <- init_thresholds(dims, constr_list)
@@ -119,7 +122,7 @@ pair_ngr <- function(PAR, K, L){
 pair_nll_old <- function(PAR, K, L){
   pair <- cpp_compute_pair(
     CONSTRMAT   = constr_list$CONSTRMAT,
-    CONSTRLOGSD = log(sqrt(constr_list$CONSTRVAR)),
+    CONSTRLOGSD = constr_list$CONSTRLOGSD,
     C_VEC       = cat,
     THETA       = PAR,
     CORRFLAG    = corrflag,
@@ -140,7 +143,7 @@ pair_nll_old <- function(PAR, K, L){
 pair_ngr_old <- function(PAR, K, L){
   pair <- cpp_compute_pair(
     CONSTRMAT   = constr_list$CONSTRMAT,
-    CONSTRLOGSD = log(sqrt(constr_list$CONSTRVAR)),
+    CONSTRLOGSD = constr_list$CONSTRLOGSD,
     C_VEC       = cat,
     THETA       = PAR,
     CORRFLAG    = corrflag,
