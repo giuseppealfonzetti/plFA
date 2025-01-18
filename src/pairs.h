@@ -145,7 +145,6 @@ namespace pairs{
     Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
     // Eigen::VectorXd invDvec         = params::latvar::mat2edvec(Sigma_u).array().inverse();
     Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
-    // Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, NTHR, NLOAD, NCORR, CORRFLAG);
     // Identifies quantities related to pair (k,l)
     const unsigned int ck          = C_VEC(K);
     const unsigned int cl          = C_VEC(L);
@@ -235,6 +234,15 @@ namespace pairs{
       // (k,l)-pair likelihood derivative wrt loadings //
       ///////////////////////////////////////////////////
       grads::loadings(GRADIENT, A, Sigma_u, lambdak, lambdal, tmp_kl, p, q, K, L, iter);
+
+      //////////////////////////////////////////////////////////////
+      // (k,l)-pair likelihood derivative wrt latent correlations //
+      //////////////////////////////////////////////////////////////
+      if(CORRFLAG == 1){
+        Eigen::VectorXd transformed_rhos = params::latvar::theta2vec(THETA, NTHR, NLOAD, NCORR, NVAR).segment(0, NCORR);
+        grads::lat_corr(GRADIENT, A, lambdak, lambdal, transformed_rhos, tmp_kl, q, NCORR, iter);
+      }
+
     }
 
   }
