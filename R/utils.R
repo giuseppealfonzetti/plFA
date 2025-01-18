@@ -72,6 +72,7 @@ get_lambda <- function(THETA, C, P, Q){
 #' that the corresponding element in the loading matrix is free to be estimated.
 #' A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 #' to \eqn{0}.
+#' @param CORRFLAG Logical flag indicating whether the latent covariance matrix
 #'
 #' @export
 get_theta <- function(TAU, LOADINGS, LATENT_COV=NULL, CAT, CONSTRMAT, CORRFLAG){
