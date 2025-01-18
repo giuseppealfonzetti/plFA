@@ -40,8 +40,6 @@ cfa <- function(
   lavargs <- list(...)
 
   # Validate arguments
-  D <- sapply(data, as.numeric) - 1
-
   if (!is_ordinal_df(data)) {
     cli::cli_abort("Ordinal data required")
   }
@@ -79,6 +77,7 @@ cfa <- function(
   fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
 
   # Fit plFA -------------------------------------------------------------------
+  D <- fit0@Data@X[[1]] - 1  # FIXME: First group only!!
 
   # Build A matrix
   FREE <- lavaan::inspect(fit0, what = "free")

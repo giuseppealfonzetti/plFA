@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
-[![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The plFA package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
@@ -133,8 +133,34 @@ numse <- sqrt(numvar$asymptotic_variance)
 numse[1:10]
 ```
 
+## `{lavaan}` wrapper
+
+The package provides a user-friendly `{lavaan}`-style interface to estimate plFA models via the `cfa()` function.
 
 ```{r}
-sessionInfo()
+#| label: plFAlavaan
+dat <- as.data.frame(lapply(as.data.frame(D), ordered))
+names(dat) <- paste0("y", 1:p)
+
+# Model syntax
+mod <- "
+  eta1 =~ y1 + y2 + y3
+  eta2 =~ y4 + y5 + y6
+  eta3 =~ y7 + y8 + y9
+"
+
+# Fit the model
+fit <- cfa(model = mod, data = dat, std.lv = TRUE)
+summary(fit)
+```
+
+
+
+## Session Info
+
+
+```{r}
+#| label: sessioninfo
+sessioninfo::session_info()
 ```
 
