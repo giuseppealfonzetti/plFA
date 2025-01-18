@@ -128,7 +128,7 @@ extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'), C, P, Q
     S <- cpp_get_latvar_theta2mat(
       THETA = THETA,
       Q=Q,
-      D=length(theta),
+      D=length(THETA),
       CORRFLAG = CORRFLAG
     )
 
@@ -251,14 +251,14 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
   sandwich <- invH %*% Jhat %*% invH
 
   message('3. Computing the variances...')
+  vcov <- (trJacob %*% sandwich %*% t(trJacob)) / N
   if(METHOD =='ucminf'){
-    asy_var <- diag((trJacob%*% sandwich %*% t(trJacob))/N)
-  }else{
-    asy_var <- diag((trJacob%*% sandwich %*% t(trJacob))/N)
+    asy_var <- diag(vcov)
+  } else {
+    asy_var <- diag(vcov)
     a1 <- PAIRS*(PAIRS - PPI)/(PPI*(PAIRS-1))
     a2 <- (PAIRS-PPI)/(PPI*(PAIRS-1))
     opt_noise <- diag( trJacob %*% (invH%*%(a1*Hhat - a2*Jhat)%*%invH/(N*IT) ) %*% t(trJacob) )
-
   }
   message('Done!')
 
@@ -267,7 +267,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,  C
       trJacob = trJacob,
       H = Hhat,
       J = Jhat,
-      invH = invH,
+      vcov = vcov,
       asymptotic_variance = asy_var,
       optimisation_noise = opt_noise
     )
