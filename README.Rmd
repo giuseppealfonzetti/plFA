@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
 [![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/giuseppealfonzetti/plFA/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/plFA)
 <!-- badges: end -->
 
 The plFA package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 

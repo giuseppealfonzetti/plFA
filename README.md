@@ -10,6 +10,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![CRAN
 status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
 [![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/giuseppealfonzetti/plFA/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/plFA)
 <!-- badges: end -->
 
 The plFA package allows the estimation of confirmatory factor models for
@@ -107,7 +109,7 @@ numFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with ucminf...
-#> 4. Done! (23.88 secs)
+#> 4. Done! (22.43 secs)
 
 # extract estimated parameter vector
 numPar <- getPar(numFit, 'raw')
@@ -161,7 +163,7 @@ fit <- cfa(model = mod, data = dat, std.lv = TRUE)
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with ucminf...
-#> 4. Done! (0.07 secs)
+#> 4. Done! (0.06 secs)
 #> 2. Estimating J...
 #> 3. Computing the variances...
 #> Done!
@@ -272,48 +274,49 @@ sessioninfo::session_info()
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
 #>  package      * version    date (UTC) lib source
-#>  cli            3.6.3      2024-06-21 [1] CRAN (R 4.4.0)
-#>  colorspace     2.1-1      2024-07-26 [1] CRAN (R 4.4.0)
-#>  digest         0.6.37     2024-08-19 [1] CRAN (R 4.4.1)
-#>  dplyr          1.1.4      2023-11-17 [1] CRAN (R 4.4.0)
-#>  evaluate       1.0.1      2024-10-10 [1] CRAN (R 4.4.1)
-#>  fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.4.0)
-#>  generics       0.1.3      2022-07-05 [1] CRAN (R 4.4.0)
-#>  ggplot2        3.5.1      2024-04-23 [1] CRAN (R 4.4.0)
-#>  glue           1.8.0      2024-09-30 [1] CRAN (R 4.4.1)
-#>  gtable         0.3.6      2024-10-25 [1] CRAN (R 4.4.1)
-#>  htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.4.0)
-#>  knitr          1.49       2024-11-08 [1] CRAN (R 4.4.1)
-#>  lavaan       * 0.6-19     2024-09-26 [1] CRAN (R 4.4.1)
-#>  lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.4.0)
-#>  magrittr       2.0.3      2022-03-30 [1] CRAN (R 4.4.0)
-#>  mnormt         2.1.1      2022-09-26 [1] CRAN (R 4.4.0)
-#>  munsell        0.5.1      2024-04-01 [1] CRAN (R 4.4.0)
-#>  mvtnorm        1.3-3      2025-01-10 [1] CRAN (R 4.4.1)
-#>  numDeriv       2016.8-1.1 2019-06-06 [1] CRAN (R 4.4.0)
-#>  pbivnorm       0.6.0      2015-01-23 [1] CRAN (R 4.4.0)
-#>  pillar         1.10.1     2025-01-07 [1] CRAN (R 4.4.1)
-#>  pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.4.0)
+#>  cli            3.6.3      2024-06-21 [2] CRAN (R 4.4.0)
+#>  colorspace     2.1-1      2024-07-26 [2] CRAN (R 4.4.0)
+#>  digest         0.6.37     2024-08-19 [2] CRAN (R 4.4.1)
+#>  dplyr          1.1.4      2023-11-17 [2] CRAN (R 4.4.0)
+#>  evaluate       1.0.1      2024-10-10 [2] CRAN (R 4.4.1)
+#>  fastmap        1.2.0      2024-05-15 [2] CRAN (R 4.4.0)
+#>  generics       0.1.3      2022-07-05 [2] CRAN (R 4.4.0)
+#>  ggplot2        3.5.1      2024-04-23 [2] CRAN (R 4.4.0)
+#>  glue           1.8.0      2024-09-30 [2] CRAN (R 4.4.1)
+#>  gtable         0.3.6      2024-10-25 [2] CRAN (R 4.4.1)
+#>  htmltools      0.5.8.1    2024-04-04 [2] CRAN (R 4.4.0)
+#>  knitr          1.49       2024-11-08 [2] CRAN (R 4.4.1)
+#>  lavaan       * 0.6-19     2024-09-26 [2] CRAN (R 4.4.1)
+#>  lifecycle      1.0.4      2023-11-07 [2] CRAN (R 4.4.0)
+#>  magrittr       2.0.3      2022-03-30 [2] CRAN (R 4.4.0)
+#>  mnormt         2.1.1      2022-09-26 [2] CRAN (R 4.4.0)
+#>  munsell        0.5.1      2024-04-01 [2] CRAN (R 4.4.0)
+#>  mvtnorm        1.3-3      2025-01-10 [2] CRAN (R 4.4.1)
+#>  numDeriv       2016.8-1.1 2019-06-06 [2] CRAN (R 4.4.0)
+#>  pbivnorm       0.6.0      2015-01-23 [2] CRAN (R 4.4.0)
+#>  pillar         1.10.1     2025-01-07 [2] CRAN (R 4.4.1)
+#>  pkgconfig      2.0.3      2019-09-22 [2] CRAN (R 4.4.0)
 #>  plFA         * 0.0.0.9001 2025-01-18 [1] local
-#>  quadprog       1.5-8      2019-11-20 [1] CRAN (R 4.4.0)
-#>  R6             2.5.1      2021-08-19 [1] CRAN (R 4.4.0)
-#>  Rcpp           1.0.14     2025-01-12 [1] CRAN (R 4.4.1)
-#>  RcppClock      1.1        2021-11-06 [1] CRAN (R 4.4.0)
-#>  RcppEigen      0.3.4.0.2  2024-08-24 [1] CRAN (R 4.4.1)
-#>  RcppParallel   5.1.9      2024-08-19 [1] CRAN (R 4.4.1)
-#>  rlang          1.1.4      2024-06-04 [1] CRAN (R 4.4.0)
-#>  rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.4.1)
-#>  rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.4.1)
-#>  scales         1.3.0      2023-11-28 [1] CRAN (R 4.4.0)
-#>  sessioninfo    1.2.2      2021-12-06 [1] CRAN (R 4.4.0)
-#>  tibble         3.2.1      2023-03-20 [1] CRAN (R 4.4.0)
-#>  tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.4.0)
-#>  ucminf         1.2.2      2024-06-24 [1] CRAN (R 4.4.0)
-#>  vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.4.0)
-#>  xfun           0.49       2024-10-31 [1] CRAN (R 4.4.1)
-#>  yaml           2.3.10     2024-07-26 [1] CRAN (R 4.4.0)
+#>  quadprog       1.5-8      2019-11-20 [2] CRAN (R 4.4.0)
+#>  R6             2.5.1      2021-08-19 [2] CRAN (R 4.4.0)
+#>  Rcpp           1.0.14     2025-01-12 [2] CRAN (R 4.4.1)
+#>  RcppClock      1.1        2021-11-06 [2] CRAN (R 4.4.0)
+#>  RcppEigen      0.3.4.0.2  2024-08-24 [2] CRAN (R 4.4.1)
+#>  RcppParallel   5.1.9      2024-08-19 [2] CRAN (R 4.4.1)
+#>  rlang          1.1.4      2024-06-04 [2] CRAN (R 4.4.0)
+#>  rmarkdown      2.29       2024-11-04 [2] CRAN (R 4.4.1)
+#>  rstudioapi     0.17.1     2024-10-22 [2] CRAN (R 4.4.1)
+#>  scales         1.3.0      2023-11-28 [2] CRAN (R 4.4.0)
+#>  sessioninfo    1.2.2      2021-12-06 [2] CRAN (R 4.4.0)
+#>  tibble         3.2.1      2023-03-20 [2] CRAN (R 4.4.0)
+#>  tidyselect     1.2.1      2024-03-11 [2] CRAN (R 4.4.0)
+#>  ucminf         1.2.2      2024-06-24 [2] CRAN (R 4.4.0)
+#>  vctrs          0.6.5      2023-12-01 [2] CRAN (R 4.4.0)
+#>  xfun           0.49       2024-10-31 [2] CRAN (R 4.4.1)
+#>  yaml           2.3.10     2024-07-26 [2] CRAN (R 4.4.0)
 #> 
-#>  [1] /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library
+#>  [1] /private/var/folders/fz/09brpy8s1vj2tx_28dvcnpxm0000gn/T/RtmpdZA4jC/temp_libpathf5e25a9a669a
+#>  [2] /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library
 #> 
 #> ──────────────────────────────────────────────────────────────────────────────
 ```
