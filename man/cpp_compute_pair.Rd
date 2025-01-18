@@ -13,7 +13,8 @@ cpp_compute_pair(
   l,
   PAIRS_TABLE,
   SILENTFLAG,
-  GRADFLAG
+  GRADFLAG,
+  OPTION = 0L
 )
 }
 \arguments{

@@ -7,6 +7,7 @@
 cfa(
   model,
   data,
+  std.lv = TRUE,
   start = NULL,
   estimator = "PML",
   estimator.args = list(method = "ucminf", valdata = NULL, iterations_subset = NULL,

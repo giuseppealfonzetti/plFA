@@ -4,7 +4,15 @@
 \alias{extract_par}
 \title{Extract parameters}
 \usage{
-extract_par(THETA, OPTION = "transformed", C, P, Q, CONSTRMAT)
+extract_par(
+  THETA,
+  OPTION = c("list", "raw", "transformed"),
+  C,
+  P,
+  Q,
+  CONSTRMAT,
+  CORRFLAG
+)
 }
 \arguments{
 \item{THETA}{Raw theta vector.}

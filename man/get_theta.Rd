@@ -4,7 +4,7 @@
 \alias{get_theta}
 \title{Get full parameter vector}
 \usage{
-get_theta(TAU, LOADINGS, LATENT_COV, CAT, CONSTRMAT)
+get_theta(TAU, LOADINGS, LATENT_COV = NULL, CAT, CONSTRMAT, CORRFLAG)
 }
 \arguments{
 \item{TAU}{Numerical vector of thresholds parameters.
@@ -23,6 +23,8 @@ for each item. Values must be ordered following items order in the dataset.}
 that the corresponding element in the loading matrix is free to be estimated.
 A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 to \eqn{0}.}
+
+\item{CORRFLAG}{Logical flag indicating whether the latent covariance matrix}
 }
 \description{
 Assemble the parameter vector starting from the threshold vector,
