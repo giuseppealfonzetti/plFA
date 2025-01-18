@@ -23,6 +23,7 @@ is_ordinal_df <- function(D) {
 cfa <- function(
     model,
     data,
+    std.lv = TRUE,
     start = NULL,
     estimator = "PML",
     estimator.args = list(
@@ -44,15 +45,19 @@ cfa <- function(
   if (!is_ordinal_df(data)) {
     cli::cli_abort("Ordinal data required")
   }
-  # if (isFALSE(std.lv)) {
-  #   cli::cli_alert_warning("Non-standardised latent variable estimation not implemented yet. Setting `std.lv = TRUE`.")
-  #   std.lv <- TRUE
-  # }
-  # lavargs$std.lv <- std.lv
+  if (isFALSE(std.lv)) {
+    cli::cli_alert_warning("Non-standardised latent variable estimation not implemented yet. Setting `std.lv = TRUE`.")
+    std.lv <- TRUE
+  }
+  lavargs$std.lv <- std.lv
   lavargs$control <- control
   method <- estimator.args$method
   if (is.null(method)) {
-    cli::cli_alert_warning("No estimation method specified. Setting `method = 'hyper'.")
+    cli::cli_alert_warning("No estimation method specified. Setting `method = 'ucminf'`.")
+    method <- "ucminf"
+  }
+  if (method != "ucminf") {
+    cli::cli_alert_warning("Only 'ucminf' method implemented for now.")
     method <- "ucminf"
   }
   valdata <- estimator.args$valdata
@@ -121,7 +126,15 @@ cfa <- function(
 create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   # Get coefficients and standard errors
-  parlist <- getPar(fit1, OPTION = "list")
+  parlist <- extract_par(
+    THETA = fit1@theta,
+    OPTION = "list",
+    C = sum(fit1@dims@cat),
+    P = fit1@dims@p,
+    Q = fit1@dims@q,
+    CONSTRMAT = fit1@cnstr@loadings,
+    CORRFLAG = fit1@cnstr@corrflag
+  )
   FREE <- lavaan::inspect(fit0, what = "free")
   lambda <- parlist$loadings[FREE$lambda > 0]
   tau <- parlist$thresholds[FREE$tau > 0]

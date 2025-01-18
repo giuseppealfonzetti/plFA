@@ -128,7 +128,7 @@ extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'), C, P, Q
     S <- cpp_get_latvar_theta2mat(
       THETA = THETA,
       Q=Q,
-      D=length(theta),
+      D=length(THETA),
       CORRFLAG = CORRFLAG
     )
 
