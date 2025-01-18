@@ -9,6 +9,7 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
+[![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The plFA package allows the estimation of confirmatory factor models for
@@ -31,6 +32,14 @@ First, generate a synthetic dataset
 
 ``` r
 library(plFA)
+#> Loading required package: lavaan
+#> This is lavaan 0.6-19
+#> lavaan is FREE software! Please report any bugs.
+#> 
+#> Attaching package: 'plFA'
+#> The following object is masked from 'package:lavaan':
+#> 
+#>     cfa
 set.seed(123)
 
 # p = number of items, q = number of latent variables, n = number of observations
@@ -46,7 +55,7 @@ Load <- gen_loadings(CONSTRMAT = A)
 thr <- c(-1.5, 0, 1.5)
 
 # Generate random latent correlation matrix
-S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
+S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q, CORRFLAG = 1)
 
 # simulate the data
 D <- sim_data(
@@ -59,54 +68,34 @@ D <- sim_data(
 cat <- apply(D, 2, max) + 1
 
 # store true parameter vector (interpretable parameterisation)
-theta <- getPar(get_theta(rep(thr, p), Load, S, cat, A), C = sum(cat), P = p, Q = q, CONSTRMAT = A)
+theta <- get_theta(rep(thr, p), Load, S, cat, A, CORRFLAG = 1)
 ```
 
-Estimate the model with the stochastic optimiser
-
-``` r
-
-# Set options for cpp stochastic optimiser
-cpp_ctrl <- list(
-  MAXT = 2*n,
-  PAIRS_PER_ITERATION = 8
-)
-
-# Fit the model with stochastic optimiser
-stFit <- fit_plFA(
-  DATA = D,
-  VALDATA = D,
-  CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'= 1),
-  METHOD = 'hyper',
-  CONTROL = cpp_ctrl,
-  ITERATIONS_SUBSET = seq(0, cpp_ctrl$MAXT, 100)
-)
-#> 1. Initialising at default values
-#> 2. Computing frequencies...
-#> 3. Optimising with hyper...
-#> 4. Done! (1.7 secs)
-stFit
-#> - Stochastic estimate
-#> 
-#>      Sampling scheme: hyper 
-#>      Pairs per iteration: 8  out of  435 
-#>      Iterations: 2000 
-#>      Total time: 1.7 s (Data reduction: 0.02 s)
-#>      Cores used: 1 
-#>  
-#> - Use getPar() to extract parameter estimates.
-# extract estimated parameter vector
-stPar <- getPar(stFit)
-
-# extract list of parameter estimates
-stParList <- getPar(stFit, OPTION = 'list')
-matrixcalc::is.positive.definite(stParList$latent_correlations)
-#> [1] TRUE
-
-# mean square error
-mean((stPar-theta)^2)
-#> [1] 0.004670866
-```
+<!-- Estimate the model with the stochastic optimiser -->
+<!-- ```{r sto} -->
+<!-- # Set options for cpp stochastic optimiser -->
+<!-- cpp_ctrl <- list( -->
+<!--   MAXT = 2*n, -->
+<!--   PAIRS_PER_ITERATION = 8 -->
+<!-- ) -->
+<!-- # Fit the model with stochastic optimiser -->
+<!-- stFit <- fit_plFA( -->
+<!--   DATA = D, -->
+<!--   VALDATA = D, -->
+<!--   CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'= 1), -->
+<!--   METHOD = 'hyper', -->
+<!--   CONTROL = cpp_ctrl, -->
+<!--   ITERATIONS_SUBSET = seq(0, cpp_ctrl$MAXT, 100) -->
+<!-- ) -->
+<!-- stFit -->
+<!-- # extract estimated parameter vector -->
+<!-- stPar <- getPar(stFit) -->
+<!-- # extract list of parameter estimates -->
+<!-- stParList <- getPar(stFit, OPTION = 'list') -->
+<!-- matrixcalc::is.positive.definite(stParList$latent_correlations) -->
+<!-- # mean square error -->
+<!-- mean((stPar-theta)^2) -->
+<!-- ``` -->
 
 Numerical estimation as comparison
 
@@ -118,88 +107,74 @@ numFit <- fit_plFA(
 #> 1. Initialising at default values
 #> 2. Computing frequencies...
 #> 3. Optimising with ucminf...
-#> 4. Done! (31.7 secs)
+#> 4. Done! (22.59 secs)
 
 # extract estimated parameter vector
-numPar <- getPar(numFit)
+numPar <- getPar(numFit, 'raw')
 
 # extract list of parameter estimates
 numParList <- getPar(numFit, OPTION = 'list')
 
 # mean square error
 mean((numPar-theta)^2)
-#> [1] 0.003324634
+#> [1] 0.09474404
 ```
 
 Compute standard errors
 
-``` r
-stovar <- computeVar(OBJ = stFit, DATA = D, NUMDERIV = T)
-#> 1. Computing H numerically...
-#> 2. Estimating J...
-#> 3. Inverting H...
-#> 3. Computing the variances...
-#> Done!
-stose <- sqrt(stovar$optimisation_noise+stovar$asymptotic_variance)
-stose[1:10]
-#>  [1] 0.06241961 0.03966074 0.06040693 0.06736675 0.03962925 0.06303031
-#>  [7] 0.06558621 0.03968211 0.06241817 0.06179535
-```
+<!-- ```{r stovar} -->
+<!-- stovar <- computeVar(OBJ = stFit, DATA = D, NUMDERIV = T) -->
+<!-- stose <- sqrt(stovar$optimisation_noise+stovar$asymptotic_variance) -->
+<!-- stose[1:10] -->
+<!-- ``` -->
 
 ``` r
 
-numvar <- computeVar(OBJ = numFit, DATA = D, NUMDERIV = T)
-#> 1. Computing H numerically...
+numvar <- computeVar(OBJ = numFit, DATA = D)
 #> 2. Estimating J...
-#> 3. Inverting H...
 #> 3. Computing the variances...
 #> Done!
 numse <- sqrt(numvar$asymptotic_variance)
 numse[1:10]
-#>  [1] 0.06236862 0.03962693 0.06035836 0.06734567 0.03960554 0.06298093
-#>  [7] 0.06553732 0.03964214 0.06236992 0.06175864
+#>  [1] 0.06290281 0.03945790 0.06169743 0.06636763 0.03894489 0.06398055
+#>  [7] 0.06212953 0.03703314 0.06324520 0.06125982
 ```
 
 ``` r
 sessionInfo()
-#> R version 4.4.2 (2024-10-31)
-#> Platform: x86_64-pc-linux-gnu
-#> Running under: Ubuntu 22.04.5 LTS
+#> R version 4.4.1 (2024-06-14)
+#> Platform: aarch64-apple-darwin20
+#> Running under: macOS 15.2
 #> 
 #> Matrix products: default
-#> BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-#> LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+#> BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
+#> LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
 #> 
 #> locale:
-#>  [1] LC_CTYPE=it_IT.UTF-8       LC_NUMERIC=C              
-#>  [3] LC_TIME=it_IT.UTF-8        LC_COLLATE=it_IT.UTF-8    
-#>  [5] LC_MONETARY=it_IT.UTF-8    LC_MESSAGES=it_IT.UTF-8   
-#>  [7] LC_PAPER=it_IT.UTF-8       LC_NAME=C                 
-#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-#> [11] LC_MEASUREMENT=it_IT.UTF-8 LC_IDENTIFICATION=C       
+#> [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 #> 
-#> time zone: Europe/Rome
-#> tzcode source: system (glibc)
+#> time zone: Asia/Brunei
+#> tzcode source: internal
 #> 
 #> attached base packages:
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] plFA_0.0.0.9000
+#> [1] plFA_0.0.0.9001 lavaan_0.6-19  
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] vctrs_0.6.5         cli_3.6.3           knitr_1.48         
-#>  [4] rlang_1.1.4         xfun_0.47           generics_0.1.3     
-#>  [7] RcppParallel_5.1.8  glue_1.8.0          colorspace_2.1-1   
-#> [10] htmltools_0.5.8.1   matrixcalc_1.0-6    RcppClock_1.1      
-#> [13] scales_1.3.0        fansi_1.0.6         rmarkdown_2.28     
-#> [16] grid_4.4.2          evaluate_1.0.1      munsell_0.5.1      
-#> [19] tibble_3.2.1        fastmap_1.2.0       numDeriv_2016.8-1.1
-#> [22] mvtnorm_1.3-1       yaml_2.3.10         lifecycle_1.0.4    
-#> [25] compiler_4.4.2      dplyr_1.1.4         ucminf_1.2.2       
-#> [28] pkgconfig_2.0.3     Rcpp_1.0.13-1       RcppEigen_0.3.4.0.2
-#> [31] rstudioapi_0.16.0   digest_0.6.37       R6_2.5.1           
-#> [34] tidyselect_1.2.1    utf8_1.2.4          pillar_1.9.0       
-#> [37] magrittr_2.0.3      tools_4.4.2         gtable_0.3.6       
-#> [40] ggplot2_3.5.1
+#>  [1] vctrs_0.6.5         cli_3.6.3           knitr_1.49         
+#>  [4] rlang_1.1.4         xfun_0.49           generics_0.1.3     
+#>  [7] RcppParallel_5.1.9  glue_1.8.0          colorspace_2.1-1   
+#> [10] pbivnorm_0.6.0      htmltools_0.5.8.1   stats4_4.4.1       
+#> [13] RcppClock_1.1       scales_1.3.0        rmarkdown_2.29     
+#> [16] quadprog_1.5-8      grid_4.4.1          evaluate_1.0.1     
+#> [19] munsell_0.5.1       tibble_3.2.1        fastmap_1.2.0      
+#> [22] numDeriv_2016.8-1.1 mvtnorm_1.3-3       yaml_2.3.10        
+#> [25] lifecycle_1.0.4     compiler_4.4.1      dplyr_1.1.4        
+#> [28] ucminf_1.2.2        pkgconfig_2.0.3     Rcpp_1.0.14        
+#> [31] RcppEigen_0.3.4.0.2 rstudioapi_0.17.1   digest_0.6.37      
+#> [34] R6_2.5.1            tidyselect_1.2.1    pillar_1.10.1      
+#> [37] mnormt_2.1.1        magrittr_2.0.3      tools_4.4.1        
+#> [40] gtable_0.3.6        ggplot2_3.5.1
 ```
