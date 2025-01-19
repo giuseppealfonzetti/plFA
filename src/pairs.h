@@ -143,22 +143,14 @@ namespace pairs{
     Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
     Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
     Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-    // Eigen::VectorXd invDvec         = params::latvar::mat2edvec(Sigma_u).array().inverse();
     Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
+
     // Identifies quantities related to pair (k,l)
     const unsigned int ck          = C_VEC(K);
     const unsigned int cl          = C_VEC(L);
     const Eigen::VectorXd lambdak  = Lam.row(K);
     const Eigen::VectorXd lambdal  = Lam.row(L);
     const double rho_kl            = lambdak.transpose() * Sigma_u * lambdal;
-    // const double vark             = lambdak.transpose() * Sigma_u * lambdak;
-    // const double varl             = lambdal.transpose() * Sigma_u * lambdal;
-    // const double sdk              = sqrt(vark);
-    // const double sdl              = sqrt(varl);
-    // const double cov_kl           = lambdak.transpose() * Sigma_u * lambdal;
-    // const double rho_kl           = cov_kl / (sdk*sdl);
-
-    // Rcpp::Rcout << "var_k="<<vark<<", var_l="<<varl<<", sd_k="<<sdk<<", sd_l="<<sdl<<", cov_kl="<<cov_kl<<", rho_kl="<< rho_kl<<"\n";
 
     // Initialize pairs table
     Eigen::MatrixXd pairs_tab     = PAIRS_TABLE;
@@ -170,7 +162,6 @@ namespace pairs{
     if(K > 1){
       for(unsigned int u = 1; u < K; u++){
         const unsigned int cu = C_VEC(u);
-        //if(SILENTFLAG == 0)Rcpp::Rcout << "u: " << u << ", cu: "<< cu << "\n";
         i1 += cu * C_VEC.segment(0,u).sum();
       }
     }
@@ -240,7 +231,20 @@ namespace pairs{
       //////////////////////////////////////////////////////////////
       if(CORRFLAG == 1){
         Eigen::VectorXd transformed_rhos = params::latvar::theta2vec(THETA, NTHR, NLOAD, NCORR, NVAR).segment(0, NCORR);
-        grads::lat_corr(GRADIENT, A, lambdak, lambdal, transformed_rhos, tmp_kl, q, NCORR, iter);
+        grads::lat_corr(GRADIENT, A, lambdak.transpose()*Du, Du*lambdal, transformed_rhos, tmp_kl, q, NCORR, iter);
+      }
+
+      if(NVAR > 0){
+        for(int j=0; j<q; j++){
+          if(!std::isfinite(CONSTRLOGSD(j))){
+            // Eigen::VectorXd ej = Eigen::VectorXd::Zero(q); ej(j) = 1;
+            Eigen::MatrixXd dD = Eigen::MatrixXd::Zero(q,q); dD(j,j)=Du(j,j);
+            GRADIENT(iter) = tmp_kl*lambdak.transpose()*(dD*Ru*Du+Du*Ru*dD)*lambdal;
+            // Rcpp::Rcout<<"idx:"<<iter<<", gr:"<< GRADIENT(iter)<<"\n";
+            iter++;
+          }
+        }
+
       }
 
     }

@@ -1,7 +1,7 @@
-set.seed(1)
+set.seed(123)
 
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 6; q <- 2; n <- 100
+p <- 12; q <- 3; n <- 100
 
 stdlv <- FALSE
 corrflag <- TRUE
@@ -26,6 +26,7 @@ R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
 
 
 # Generate random latent variances
+set.seed(1)
 constr_var <- rep(NA, q)
 constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
 nvar  <- sum(is.na(constr_lsd))
@@ -162,8 +163,8 @@ pair_ngr_old <- function(PAR, K, L){
   return(out)
 }
 k <- 2; l <- 1
-pair_nll(theta, K=k, L=l)
-pair_nll_old(theta, K=k, L=l)
+pair_nll(par_init, K=k, L=l)
+pair_nll_old(par_init, K=k, L=l)
 
 numDeriv::grad(func = pair_nll, x=theta, K=k,L=l)
 pair_ngr(PAR=theta, K=k, L=l)
@@ -171,22 +172,29 @@ pair_ngr(PAR=theta, K=k, L=l)
 numDeriv::grad(func = pair_nll_old, x=theta, K=k,L=l)
 pair_ngr_old(PAR=theta, K=k, L=l)
 
+dD <- matrix(0,q,q); dD[1,1] <- sqrt(S[1])
+t(as.numeric(Load[k+1,]))%*%(dD%*%R%*%Dmat+Dmat%*%R%*%dD)%*%as.numeric(Load[l+1,])/n
 
 
 
+for (l in 2:p) {
+  for (k in 1:(l-1)) {
+    test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+      expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+    })
 
+    # test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+    #   expect_equal(pair_ngr(theta, OPTION=1), numDeriv::grad(pair_nll, theta, OPTION=1), tolerance = 1e-4)
+    # })
+  }
+}
 
+k <- 5; l <- 2
+pair_nll(par_init, K=k, L=l)
+pair_nll_old(par_init, K=k, L=l)
 
-
-
-
-
-
-
-
-
-
-
+numDeriv::grad(func = pair_nll, x=theta, K=k,L=l)
+pair_ngr(PAR=theta, K=k, L=l)
 
 
 
