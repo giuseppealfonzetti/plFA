@@ -213,6 +213,8 @@ if(0){
     CONSTR_LIST = constr_list,
     METHOD = 'ucminf')
 
+  numFit
+
   # extract estimated parameter vector
   numPar <- getPar(numFit, OPTION="raw")
   # extract list of parameter estimates

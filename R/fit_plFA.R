@@ -77,22 +77,6 @@ fit_plFA <- function(
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
 
-  if(1){
-    message(
-      paste0(
-        "Dimensions:\n",
-        " - Sample size: ", dims$n, "\n",
-        " - Items: ", dims$p,  " (", dims$pairs, " pairs)\n",
-        " - Latent traits: ", dims$q,"\n",
-        "Free parameters:\n",
-        " - Thresholds: ", dims$nthr, "\n",
-        " - Loadings: ", dims$nload, "\n",
-        " - Latent correlations: ", dims$ncorr, "\n",
-        " - Latent variances: ", dims$nvar
-      )
-    )
-  }
-
   tmp <- new('PlFaFit',
              cnstr = new('Constraints',
                          loadings = constr_list$CONSTRMAT,

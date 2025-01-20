@@ -1,7 +1,20 @@
 #' Show method for the output of fit_plFA()
 #' @param object Object of class StoFit
 setMethod('show', 'PlFaFit', function(object){
+
+  cat( "- Dimensions:\n",
+       "  - Sample size: ", object@dims@n, "\n",
+       "  - Items: ", object@dims@p,  " (", object@dims@pairs, " pairs)\n",
+       "  - Latent traits: ", object@dims@q,"\n\n",
+       "- Free parameters:\n",
+       "  - Thresholds: ", object@dims@nthr, "\n",
+       "  - Loadings: ", object@dims@nload, "\n",
+       "  - Latent correlations: ", object@dims@ncorr, "\n",
+       "  - Latent variances: ", object@dims@nvar, "\n",
+       "  - Total: ", object@dims@npar, "\n\n")
+
   if(object@method == 'ucminf'){
+
     cat(
       "- Numerical estimate obtained via ucminf.\n\n",
       "   Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
