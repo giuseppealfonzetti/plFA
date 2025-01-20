@@ -144,7 +144,7 @@
 # })
 
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 6; q <- 2; n <- 1000
+p <- 30; q <- 8; n <- 1000
 
 # Thresholds vector for each item
 thr <- c(-1.5, 0, 1.5)
@@ -155,7 +155,7 @@ nthr <- sum(cat)-p
 #### free correlation matrix and latent variances ######
 if(0){
   set.seed(123)
-  stdlv <- FALSE
+  stdlv <- TRUE
   corrflag <- TRUE
 
   # Simple loading matrix constraints
@@ -221,7 +221,9 @@ if(0){
   numParList <- getPar(numFit, OPTION = 'list')
 
   # mean square error
-  mean((numPar-theta)^2)
+  mean((numFit@theta-theta)^2)
+  mean((numFit@init-theta)^2)
+
 
   modcov <- numParList$loadings%*%numParList$latent_correlations%*%t(numParList$loadings)
   abs(modcov[upper.tri(modcov)])>1

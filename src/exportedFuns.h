@@ -55,7 +55,12 @@ Rcpp::List cpp_compute_pair_ext(
                                          NTHR, NLOAD, NCORR, NVAR, K, L,
                                          PAIRS_TABLE, SILENTFLAG, GRADFLAG,
                                          ll, gradient);
-   }
+       }else if(OPTION==2){
+         // pairs::pair_contribution( CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
+         //                           NTHR, NLOAD, NCORR, NVAR, K, L,
+         //                           PAIRS_TABLE, SILENTFLAG, GRADFLAG,
+         //                           ll, gradient);
+       }
 
 
    Rcpp::List output =

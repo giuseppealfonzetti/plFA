@@ -193,12 +193,20 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
+      # test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+      #   expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=2), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      # })
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
     }
   }
+
+  # microbenchmark::microbenchmark(
+  #   new=pair_ngr(PAR=theta, K=k, L=l),
+  #   old=pair_ngr(PAR=theta, K=k, L=l, OPTION=2)
+  # )
 }
 
 #### (STDLV=TRUE, CORRFLAG=TRUE) ####

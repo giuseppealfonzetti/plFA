@@ -239,7 +239,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
   opt_noise <- NA
   Hhat <- NA
   if(NUMDERIV){
-    message('1. Computing H numerically...')
+    message('- Computing H numerically...')
     # function for gradient
     Rwr_ngr <- function(par_vec){
       mod <- cpp_multiThread_completePairwise(
@@ -261,7 +261,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
   }else{
     if(is.null(INVHAPPRX)){
-      message('1. Estimating H...')
+      message('- Estimating H...')
       # Hhat <- estimate_H(
       #   C_VEC = C_VEC,
       #   A = CONSTRMAT,
@@ -274,7 +274,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   }
 
-  message('2. Estimating J...')
+  message('- Estimating J...')
   Jhat <- estimate_J(
     Y           = DATA,
     C_VEC       = C_VEC,
@@ -297,7 +297,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   sandwich <- invH %*% Jhat %*% invH
 
-  message('3. Computing the variances...')
+  message('- Computing the variances...')
   if(METHOD =='ucminf'){
     asy_var <- diag((trJacob%*% sandwich %*% t(trJacob))/N)
   }else{

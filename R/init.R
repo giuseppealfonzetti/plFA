@@ -27,5 +27,5 @@ init_transformed_latcorr <- function(DIMS, CONSTR_LIST){
 }
 
 init_transformed_latsd <- function(DIMS, CONSTR_LIST){
-  rep(-1, sum(is.na(CONSTR_LIST$CONSTRLOGSD)))
+  rep(0, sum(is.na(CONSTR_LIST$CONSTRLOGSD)))
 }
