@@ -33,7 +33,6 @@ check_cnstr_loadings <- function(MAT, STDLV){
 
   return(MAT)
 }
-
 check_cnstr_latvar <- function(VEC, Q, STDLV){
   if(is.null(VEC) & STDLV) VEC <- rep(1, Q)
   if(is.null(VEC) & !STDLV) VEC <- rep(NA, Q)
@@ -48,7 +47,6 @@ check_cnstr_latvar <- function(VEC, Q, STDLV){
 
   return(log(sqrt(VEC)))
 }
-
 check_cnstr <- function(LIST){
   ls <- list()
   ls$CORRFLAG <- check_cnstr_corrflag(LIST$CORRFLAG)
@@ -60,28 +58,24 @@ check_cnstr <- function(LIST){
   stopifnot(q==length(ls$CONSTRLOGSD))
   return(ls)
 }
-
 check_p <- function(P){
   stopifnot(is.numeric(P))
   stopifnot(is.finite(P))
   stopifnot(P>1)
   return(as.integer(P))
 }
-
 check_q <- function(Q){
   stopifnot(is.numeric(Q))
   stopifnot(is.finite(Q))
   stopifnot(Q>0)
   return(as.integer(Q))
 }
-
 check_n <- function(N){
   stopifnot(is.numeric(N))
   stopifnot(is.finite(N))
   stopifnot(N>0)
   return(as.integer(N))
 }
-
 check_loadings <- function(MAT){
   stopifnot(is.matrix(MAT))
   stopifnot(is.numeric(MAT))
@@ -89,14 +83,12 @@ check_loadings <- function(MAT){
   stopifnot(nrow(MAT)>ncol(MAT))
   return(MAT)
 }
-
 check_thresholds_j <- function(TH){
   stopifnot(is.vector(TH))
   stopifnot(is.numeric(TH))
   stopifnot(!is.unsorted(TH))
   return(TH)
 }
-
 check_thresholds <- function(THF, CAT){
   s <- 0
   for(j in 1:length(CAT)){
@@ -105,7 +97,6 @@ check_thresholds <- function(THF, CAT){
   }
   return(THF)
 }
-
 check_latcov <- function(MAT){
   stopifnot(is.matrix(MAT))
   stopifnot(is.numeric(MAT))
@@ -125,7 +116,7 @@ check_dims <- function(DATA, CONSTR_LIST){
   nthr <- sum(categories)-p
   nload <- sum(is.na(CONSTR_LIST$CONSTRMAT))
   ncorr <- 0; if(CONSTR_LIST$CORRFLAG==1) ncorr <- q*(q-1)/2
-  nvar  <- sum(is.na(CONSTR_LIST$CONSTRVAR))
+  nvar  <- sum(is.na(CONSTR_LIST$CONSTRLOGSD))
   d <- nthr + nload + ncorr + nvar
   stopifnot(q<p)
   stopifnot(categories>1)
@@ -165,15 +156,20 @@ check_init <- function(INIT, DIMS, CONSTR_LIST){
     lambda0_init <- init_thresholds(DIMS, CONSTR_LIST)
     lambda_init  <- init_loadings(DIMS, CONSTR_LIST)
     transformed_rhos_init  <- init_transformed_latcorr(DIMS, CONSTR_LIST)
-    return(c(lambda0_init, lambda_init, transformed_rhos_init))
-
-  }else{
+    transformed_latsd_init <- init_transformed_latsd(DIMS, CONSTR_LIST)
+    INIT <- c(lambda0_init, lambda_init, transformed_rhos_init, transformed_latsd_init)
+   }else{
     stopifnot(is.vector(INIT))
     stopifnot(is.numeric(INIT))
     stopifnot(is.finite(INIT))
     stopifnot(length(INIT)==DIMS$d)
     message('1. Initialising at INIT vector.')
-    return(INIT)
-  }
+   }
+
+  stopifnot(length(INIT)==DIMS$d)
+  return(INIT)
+
+
+
 
 }

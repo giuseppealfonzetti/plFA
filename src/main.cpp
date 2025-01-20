@@ -35,7 +35,7 @@ Rcpp::List cpp_multiThread_completePairwise(
     const unsigned int N,
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
-    Eigen::Map<Eigen::VectorXd> CONSTRSD,
+    Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
     const int CORRFLAG,
@@ -81,7 +81,7 @@ Rcpp::List cpp_multiThread_completePairwise(
   double iter_ll = 0;
   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
-  pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRSD, C_VEC, pairs_table, items_pairs, CORRFLAG, NTHR, NLOAD, NCORR, NVAR,
+  pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, C_VEC, pairs_table, items_pairs, CORRFLAG, NTHR, NLOAD, NCORR, NVAR,
                                        SILENTFLAG, GRFLAG, theta, vector_pairs);
   RcppParallel::parallelReduce(0, R, iteration_subset);
   iter_ll = iteration_subset.subset_ll;

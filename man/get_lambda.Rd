@@ -4,7 +4,7 @@
 \alias{get_lambda}
 \title{Extract free loadings from parameter vector}
 \usage{
-get_lambda(THETA, C, P, Q)
+get_lambda(THETA, NTHR, NLOAD)
 }
 \arguments{
 \item{THETA}{Raw vector of parameters.}

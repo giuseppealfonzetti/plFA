@@ -8,7 +8,7 @@ cpp_multiThread_completePairwise(
   N,
   C_VEC,
   CONSTRMAT,
-  CONSTRSD,
+  CONSTRLOGSD,
   THETA,
   FREQ,
   CORRFLAG,

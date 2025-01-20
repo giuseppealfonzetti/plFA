@@ -337,53 +337,53 @@ namespace grads{
     }
   }
 
-  void samplepi(Eigen::VectorXd &GRADIENT,
-          const Eigen::Ref<const Eigen::MatrixXd> PAIRS_TAB,
-          const Eigen::Ref<const Eigen::MatrixXd> A,
-          const Eigen::Ref<const Eigen::VectorXd> C_VEC,
-          const Eigen::Ref<const Eigen::VectorXd> TAU,
-          const Eigen::Ref<const Eigen::MatrixXd> SIGMA_U,
-          const Eigen::Ref<const Eigen::VectorXd> LAMBDAK,
-          const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
-          const Eigen::Ref<const Eigen::VectorXd> TRANSFORMED_RHOS,
-          const double RHO_KL,
-          const unsigned int P,
-          const unsigned int Q,
-          const unsigned int K,
-          const unsigned int L,
-          const unsigned int CK,
-          const unsigned int CL,
-          const unsigned int I1,
-          const unsigned int I2,
-          const unsigned int NCORR,
-          const unsigned int CORRFLAG){
-
-    unsigned int iter = 0;
-
-    /////////////////////////////////////////////////////
-    // (k,l)-pair likelihood derivative wrt thresholds //
-    /////////////////////////////////////////////////////
-    grads::thresholds(GRADIENT, PAIRS_TAB, C_VEC, TAU, RHO_KL, K, L, CK, CL, I1, I2, iter);
-
-    ///////////////////////////////////////////////////////////
-    // (k,l)-pair likelihood derivative wrt URV correlation: //
-    // intermediate step for derivatives wrt                 //
-    // loadings and factor correlations                      //
-    ///////////////////////////////////////////////////////////
-    double tmp_kl = grads::rho_urv(PAIRS_TAB, C_VEC, TAU, RHO_KL, K, L, CK, CL, I1, I2);
-
-    ///////////////////////////////////////////////////
-    // (k,l)-pair likelihood derivative wrt loadings //
-    ///////////////////////////////////////////////////
-    grads::loadings(GRADIENT, A, SIGMA_U, LAMBDAK, LAMBDAL, tmp_kl, P, Q, K, L, iter);
-
-    //////////////////////////////////////////////////////////////
-    // (k,l)-pair likelihood derivative wrt latent correlations //
-    //////////////////////////////////////////////////////////////
-    if(CORRFLAG == 1){
-      grads::lat_corr(GRADIENT, A, LAMBDAK, LAMBDAL, TRANSFORMED_RHOS, tmp_kl, Q, NCORR, iter);
-    }
-  }
+  // void samplepi(Eigen::VectorXd &GRADIENT,
+  //         const Eigen::Ref<const Eigen::MatrixXd> PAIRS_TAB,
+  //         const Eigen::Ref<const Eigen::MatrixXd> A,
+  //         const Eigen::Ref<const Eigen::VectorXd> C_VEC,
+  //         const Eigen::Ref<const Eigen::VectorXd> TAU,
+  //         const Eigen::Ref<const Eigen::MatrixXd> SIGMA_U,
+  //         const Eigen::Ref<const Eigen::VectorXd> LAMBDAK,
+  //         const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
+  //         const Eigen::Ref<const Eigen::VectorXd> TRANSFORMED_RHOS,
+  //         const double RHO_KL,
+  //         const unsigned int P,
+  //         const unsigned int Q,
+  //         const unsigned int K,
+  //         const unsigned int L,
+  //         const unsigned int CK,
+  //         const unsigned int CL,
+  //         const unsigned int I1,
+  //         const unsigned int I2,
+  //         const unsigned int NCORR,
+  //         const unsigned int CORRFLAG){
+  //
+  //   unsigned int iter = 0;
+  //
+  //   /////////////////////////////////////////////////////
+  //   // (k,l)-pair likelihood derivative wrt thresholds //
+  //   /////////////////////////////////////////////////////
+  //   grads::thresholds(GRADIENT, PAIRS_TAB, C_VEC, TAU, RHO_KL, K, L, CK, CL, I1, I2, iter);
+  //
+  //   ///////////////////////////////////////////////////////////
+  //   // (k,l)-pair likelihood derivative wrt URV correlation: //
+  //   // intermediate step for derivatives wrt                 //
+  //   // loadings and factor correlations                      //
+  //   ///////////////////////////////////////////////////////////
+  //   double tmp_kl = grads::rho_urv(PAIRS_TAB, C_VEC, TAU, RHO_KL, K, L, CK, CL, I1, I2);
+  //
+  //   ///////////////////////////////////////////////////
+  //   // (k,l)-pair likelihood derivative wrt loadings //
+  //   ///////////////////////////////////////////////////
+  //   grads::loadings(GRADIENT, A, SIGMA_U, LAMBDAK, LAMBDAL, tmp_kl, P, Q, K, L, iter);
+  //
+  //   //////////////////////////////////////////////////////////////
+  //   // (k,l)-pair likelihood derivative wrt latent correlations //
+  //   //////////////////////////////////////////////////////////////
+  //   if(CORRFLAG == 1){
+  //     grads::lat_corr(GRADIENT, A, LAMBDAK, LAMBDAL, TRANSFORMED_RHOS, tmp_kl, Q, NCORR, iter);
+  //   }
+  // }
 
   Eigen::VectorXd pi(
       const Eigen::Ref<const Eigen::VectorXd> THETA,

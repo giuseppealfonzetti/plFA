@@ -94,8 +94,22 @@ fit_plFA <- function(
   }
 
   tmp <- new('PlFaFit',
-             cnstr = new('Constraints', loadings = constr_list$CONSTRMAT, corrflag = constr_list$CORRFLAG),
-             dims = new('Dimensions', n = dims$n, p = dims$p, q = dims$q, cat = dims$cat, pairs = dims$pairs),
+             cnstr = new('Constraints',
+                         loadings = constr_list$CONSTRMAT,
+                         corrflag = constr_list$CORRFLAG,
+                         stdlv    = constr_list$STDLV,
+                         loglatsd = constr_list$CONSTRLOGSD),
+             dims = new('Dimensions',
+                        n     = dims$n,
+                        p     = dims$p,
+                        q     = dims$q,
+                        cat   = dims$cat,
+                        pairs = dims$pairs,
+                        nthr  = dims$nthr,
+                        nload = dims$nload,
+                        ncorr = dims$ncorr,
+                        nvar  = dims$nvar,
+                        npar  = dims$d),
              method = METHOD)
 
   # Check Initialisation
@@ -117,6 +131,7 @@ fit_plFA <- function(
   if(METHOD == 'ucminf'){
 
     message('3. Optimising with ucminf...')
+    tmp@method <- "ucminf"
 
     # Compute frequency table bivariate patterns
 
@@ -125,7 +140,7 @@ fit_plFA <- function(
         N          = dims$n,
         C_VEC      = dims$cat,
         CONSTRMAT  = constr_list$CONSTRMAT,
-        CONSTRSD   = log(constr_list$CONSTRVAR),
+        CONSTRLOGSD= constr_list$CONSTRLOGSD,
         FREQ       = tmp@freq,
         THETA      = par_vec,
         CORRFLAG   = constr_list$CORRFLAG,
@@ -145,7 +160,7 @@ fit_plFA <- function(
         N          = dims$n,
         C_VEC      = dims$cat,
         CONSTRMAT  = constr_list$CONSTRMAT,
-        CONSTRSD   = log(constr_list$CONSTRVAR),
+        CONSTRLOGSD= constr_list$CONSTRLOGSD,
         FREQ       = tmp@freq,
         THETA      = par_vec,
         CORRFLAG   = constr_list$CORRFLAG,

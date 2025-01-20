@@ -11,7 +11,8 @@ get_theta(
   CAT,
   CONSTRMAT,
   CONSTRVAR,
-  CORRFLAG
+  CORRFLAG,
+  STDLV
 )
 }
 \arguments{

@@ -19,64 +19,6 @@ cpp_compute_pair_ext <- function(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
     .Call(`_plFA_cpp_compute_pair_ext`, CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
 }
 
-#' Single pair contribution
-#'
-#' @description
-#' Wrapper of pair_contribution() used for unit tests
-#'
-#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
-#' @param C_VEC Vector containing the number of categories for each item
-#' @param THETA Parameter vector
-#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
-#' @param k first index identifying the pair
-#' @param l second index identifying the pair
-#' @param PAIRS_TABLE output from [pairs_freq()]
-#' @param SILENTFLAG optional for verbose output
-#' @param GRADFLAG 1 to compute gradient
-cpp_compute_pair <- function(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION = 0L) {
-    .Call(`_plFA_cpp_compute_pair`, CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
-}
-
-#' @export
-cpp_get_thresholds_theta2vec <- function(THETA, P, C) {
-    .Call(`_plFA_cpp_get_thresholds_theta2vec`, THETA, P, C)
-}
-
-#' @export
-cpp_get_loadings_mat2vec <- function(LOADINGS, CONSTRMAT, NLOAD) {
-    .Call(`_plFA_cpp_get_loadings_mat2vec`, LOADINGS, CONSTRMAT, NLOAD)
-}
-
-#' @export
-cpp_get_loadings_vec2mat <- function(LOADINGS, CONSTRMAT) {
-    .Call(`_plFA_cpp_get_loadings_vec2mat`, LOADINGS, CONSTRMAT)
-}
-
-#' @export
-cpp_get_latvar_mat2vec <- function(S) {
-    .Call(`_plFA_cpp_get_latvar_mat2vec`, S)
-}
-
-#' @export
-cpp_get_latvar_vec2mat <- function(SVEC, Q) {
-    .Call(`_plFA_cpp_get_latvar_vec2mat`, SVEC, Q)
-}
-
-#' @export
-cpp_get_loadings_theta2mat <- function(THETA, CONSTRMAT, P, C, NLOAD) {
-    .Call(`_plFA_cpp_get_loadings_theta2mat`, THETA, CONSTRMAT, P, C, NLOAD)
-}
-
-#' @export
-cpp_get_latvar_theta2mat <- function(THETA, Q, D, CORRFLAG) {
-    .Call(`_plFA_cpp_get_latvar_theta2mat`, THETA, Q, D, CORRFLAG)
-}
-
-#' @export
-cpp_get_latvar_theta2vec <- function(THETA, NTHR, NLOAD, NCORR, CORRFLAG) {
-    .Call(`_plFA_cpp_get_latvar_theta2vec`, THETA, NTHR, NLOAD, NCORR, CORRFLAG)
-}
-
 #' @export
 cpp_loadings_theta2vec <- function(THETA, NTHR, NLOAD) {
     .Call(`_plFA_cpp_loadings_theta2vec`, THETA, NTHR, NLOAD)
@@ -159,8 +101,8 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
 #' @param SILENTFLAG optional for verbose output
 #'
-cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRSD, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
-    .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRSD, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
+cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
+    .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }
 
 sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER) {
@@ -194,7 +136,7 @@ estimate_H <- function(C_VEC, A, THETA, FREQ, N, CORRFLAG) {
 #' @param THETA Parameter vector
 #' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 #' @param Y data matrix
-estimate_J <- function(Y, C_VEC, A, THETA, CORRFLAG) {
-    .Call(`_plFA_estimate_J`, Y, C_VEC, A, THETA, CORRFLAG)
+estimate_J <- function(Y, C_VEC, A, CONSTRLOGSD, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_plFA_estimate_J`, Y, C_VEC, A, CONSTRLOGSD, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
