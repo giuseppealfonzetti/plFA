@@ -134,7 +134,7 @@ fit_plFA <- function(
         NVAR       = dims$nvar,
         SILENTFLAG = 1
       )
-      out <- mod$iter_nll/n
+      out <- mod$iter_nll/dims$n
       return(out)
     }
 
@@ -156,7 +156,7 @@ fit_plFA <- function(
         SILENTFLAG = 1
       )
 
-      out <- mod$iter_ngradient/n
+      out <- mod$iter_ngradient/dims$n
       return(out)
     }
 
