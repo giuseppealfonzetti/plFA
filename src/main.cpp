@@ -47,6 +47,7 @@ Rcpp::List cpp_multiThread_completePairwise(
     const int SILENTFLAG = 1
 ){
 
+  Rcpp::checkUserInterrupt();
   const unsigned int d = THETA.size();
   const unsigned int n = N;                                             // number of units
   const unsigned int p = CONSTRMAT.rows();                                             // number of items

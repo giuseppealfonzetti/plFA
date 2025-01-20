@@ -173,6 +173,7 @@ Rcpp::List estimate_J(
 
   for(unsigned int i = 0; i < n; i++){
     Eigen::VectorXd gradienti = Eigen::VectorXd::Zero(d);
+    Rcpp::checkUserInterrupt();
 
     for(unsigned int k = 1; k < p; k++){
       const unsigned int ck = C_VEC(k);

@@ -155,7 +155,7 @@ nthr <- sum(cat)-p
 #### free correlation matrix and latent variances ######
 if(0){
   set.seed(123)
-  stdlv <- TRUE
+  stdlv <- FALSE
   corrflag <- TRUE
 
   # Simple loading matrix constraints
@@ -177,7 +177,7 @@ if(0){
   constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
   nvar  <- sum(is.na(constr_lsd))
   tsdvec <- constr_lsd
-  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.25, .1)
   Dmat <- diag(exp(tsdvec),q,q)
 
   S <- Dmat %*% R %*% Dmat
@@ -221,12 +221,15 @@ if(0){
   numParList <- getPar(numFit, OPTION = 'list')
 
   # mean square error
-  mean((numFit@theta-theta)^2)
-  mean((numFit@init-theta)^2)
+  ## thresholds
+  mean((numParList$thresholds-rep(thr,p))^2)
+  ## loadings
+  mean((numParList$loadings[is.na(constr_list$CONSTRMAT)]-Load[is.na(constr_list$CONSTRMAT)])^2)
+  ## covariances
+  mean((numParList$latent_correlations[lower.tri(S)]-S[lower.tri(S)])^2)
+  ## variances
+  mean((diag(numParList$latent_correlations)-diag(S))^2)
 
-
-  modcov <- numParList$loadings%*%numParList$latent_correlations%*%t(numParList$loadings)
-  abs(modcov[upper.tri(modcov)])>1
   #
   numVar <- computeVar(OBJ=numFit, DATA = dat)
   numVar$asymptotic_variance
