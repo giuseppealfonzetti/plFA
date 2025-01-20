@@ -84,7 +84,7 @@ get_lambda <- function(THETA, NTHR, NLOAD){
 get_theta <- function(THRESHOLDS, LOADINGS, LATENT_COV, CAT, CONSTRMAT, CONSTRVAR, CORRFLAG, STDLV){
 
   CONSTRMAT <- check_cnstr_loadings(CONSTRMAT, STDLV=STDLV)
-  CONSTRVAR <- check_cnstr_latvar(CONSTRVAR, Q=ncol(CONSTRMAT), STDLV=STDLV)
+  CONSTRLOGSD <- check_cnstr_latvar(CONSTRVAR, Q=ncol(CONSTRMAT), STDLV=STDLV)
   THRESHOLDS <- check_thresholds(THRESHOLDS, CAT)
   LOADINGS <- check_loadings(LOADINGS)
   LATENT_COV <- check_latcov(LATENT_COV)
@@ -105,9 +105,9 @@ get_theta <- function(THRESHOLDS, LOADINGS, LATENT_COV, CAT, CONSTRMAT, CONSTRVA
   ncorr <- if(CORRFLAG) q*(q-1)/2 else 0
 
   lat_vec <- cpp_latvar_mat2vec(S=LATENT_COV,
-                                CONSTRLOGSD = log(sqrt(CONSTRVAR)),
+                                CONSTRLOGSD = CONSTRLOGSD,
                                 NCORR = ncorr,
-                                NVAR = sum(is.na(CONSTRVAR)))
+                                NVAR = sum(is.na(CONSTRLOGSD)))
 
   theta <- c(THRESHOLDS, load_vec, lat_vec)
   return(theta)

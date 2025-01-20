@@ -108,6 +108,11 @@ cpp_latvar_theta2cmat <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q) {
 }
 
 #' @export
+cpp_latvar_theta2dmat <- function(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q) {
+    .Call(`_plFA_cpp_latvar_theta2dmat`, THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q)
+}
+
+#' @export
 cpp_latvar_theta2mat <- function(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q) {
     .Call(`_plFA_cpp_latvar_theta2mat`, THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q)
 }

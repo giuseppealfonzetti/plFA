@@ -152,6 +152,7 @@ namespace pairs{
     const Eigen::VectorXd lambdal  = Lam.row(L);
     const double rho_kl            = lambdak.transpose() * Sigma_u * lambdal;
 
+    // Rcpp::Rcout<<"rho_kl:"<<Ru<<"\n";
     // Initialize pairs table
     Eigen::MatrixXd pairs_tab     = PAIRS_TABLE;
     pairs_tab.conservativeResize(PAIRS_TABLE.rows() + 1, Eigen::NoChange_t() );
@@ -226,15 +227,18 @@ namespace pairs{
       ///////////////////////////////////////////////////
       grads::loadings(GRADIENT, A, Sigma_u, lambdak, lambdal, tmp_kl, p, q, K, L, iter);
 
-      //////////////////////////////////////////////////////////////
-      // (k,l)-pair likelihood derivative wrt latent correlations //
-      //////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////
+      // (k,l)-pair likelihood derivative wrt reparametrised latent correlations //
+      /////////////////////////////////////////////////////////////////////////////
       if(CORRFLAG == 1){
         Eigen::VectorXd transformed_rhos = params::latvar::theta2vec(THETA, NTHR, NLOAD, NCORR, NVAR).segment(0, NCORR);
         grads::lat_corr(GRADIENT, A, lambdak.transpose()*Du, Du*lambdal, transformed_rhos, tmp_kl, q, NCORR, iter);
       }
 
-      if(NVAR > 0){
+      ///////////////////////////////////////////////////////////////////////////
+      // (k,l)-pair likelihood derivative wrt reparameterised latent variances //
+      ///////////////////////////////////////////////////////////////////////////
+      if(NVAR >=1){
         for(int j=0; j<q; j++){
           if(!std::isfinite(CONSTRLOGSD(j))){
             // Eigen::VectorXd ej = Eigen::VectorXd::Zero(q); ej(j) = 1;
@@ -254,66 +258,65 @@ namespace pairs{
   // 1. Log-likelihood
   // 2. Gradient
   void pair_contribution2(
-      // Parameters
-      Eigen::Map<Eigen::MatrixXd> A,
-      Eigen::Map<Eigen::VectorXd> C_VEC,
+      const Eigen::Ref<const Eigen::MatrixXd> A,
+      const Eigen::Ref<const Eigen::VectorXd> CONSTRLOGSD,
+      const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> THETA,
       const int CORRFLAG,
-
-      // Input:
-      const unsigned int k,
-      const unsigned int l,
+      const int NTHR,
+      const int NLOAD,
+      const int NCORR,
+      const int NVAR,
+      const unsigned int K,
+      const unsigned int L,
       const Eigen::MatrixXd &PAIRS_TABLE,
-
-      // Options:
       const unsigned int SILENTFLAG,
       const unsigned int GRADFLAG,
-
-      // Outputs:
-      double &ll,
-      Eigen::VectorXd &gradient
+      double &LL,
+      Eigen::VectorXd &GRADIENT
   ){
     const unsigned int p = A.rows();
     const unsigned int q = A.cols();
-    const unsigned int d = THETA.size();
+    const unsigned int d = NTHR+NLOAD+NCORR+NVAR;
     const unsigned int c = C_VEC.sum();
-    const unsigned int nthr = c-p;
-    unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
-    const unsigned int nload = d-nthr-ncorr;
 
     // rearrange parameters
-    Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, c, nload);
-    Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d, CORRFLAG);
-    Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
-    Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr, CORRFLAG);
+    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
+    Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
+    Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
+    Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+    Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
 
     // Identifies quantities related to pair (k,l)
-    const unsigned int ck = C_VEC(k);
-    const unsigned int cl = C_VEC(l);
-    const Eigen::VectorXd lambdak = Lam.row(k);
-    const Eigen::VectorXd lambdal = Lam.row(l);
-    const double rho_kl = lambdak.transpose() * Sigma_u * lambdal;
-    Eigen::MatrixXd pairs_tab = PAIRS_TABLE;
+    const unsigned int ck          = C_VEC(K);
+    const unsigned int cl          = C_VEC(L);
+    const Eigen::VectorXd lambdak  = Lam.row(K);
+    const Eigen::VectorXd lambdal  = Lam.row(L);
+    const double rho_kl            = lambdak.transpose() * Sigma_u * lambdal;
+
+    // Initialize pairs table
+    Eigen::MatrixXd pairs_tab     = PAIRS_TABLE;
     pairs_tab.conservativeResize(PAIRS_TABLE.rows() + 1, Eigen::NoChange_t() );
+
     // identify column index in freq table
     // i1: starting index item k
     unsigned int i1 = 0;
-    if(k > 1){
-      for(unsigned int u = 1; u < k; u++){
+    if(K > 1){
+      for(unsigned int u = 1; u < K; u++){
         const unsigned int cu = C_VEC(u);
-        //if(SILENTFLAG == 0)Rcpp::Rcout << "u: " << u << ", cu: "<< cu << "\n";
         i1 += cu * C_VEC.segment(0,u).sum();
       }
     }
 
     // i2 starting index from i1 for item l
     unsigned int i2 = 0;
-    if(l > 0){
-      i2 = C_VEC.segment(0,l).sum() * C_VEC(k);
+    if(L > 0){
+      i2 = C_VEC.segment(0,L).sum() * C_VEC(K);
     }
 
+
     ////////////////////////////
-    /* LIKELIHOOD COMPUTATION */
+    /* LIKELIHOOD AND GRADIENT COMPUTATION */
     ////////////////////////////
     for(unsigned int sk = 0; sk < ck; sk ++){
 
@@ -329,40 +332,46 @@ namespace pairs{
         const unsigned int n_sksl = PAIRS_TABLE(4, r);
 
         // identify thresholds
-        const Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, k, l, sk, sl);
+        const Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, K, L, sk, sl);
 
         // compute pi
-        const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
-        if(SILENTFLAG == 0)Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
+        const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, K, L, sk, sl);
+        if(SILENTFLAG == 0)Rcpp::Rcout << "("<<K<<","<<L<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
         pairs_tab(5,r) = pi_sksl;
 
 
         // update ll
-        ll += n_sksl * log(pi_sksl+1e-8);
+        LL += n_sksl * log(pi_sksl+1e-8);
 
         if(GRADFLAG == 1){
 
-          gradient += (n_sksl/(pi_sksl+1e-8))* grads::pi(A,
+          GRADIENT += (n_sksl/(pi_sksl+1e-8))* grads::pi(THETA,
+                       A,
+                       CONSTRLOGSD,
                        C_VEC,
                        pi_thresholds,
                        Sigma_u,
+                       Du,
+                       Ru,
                        lambdak,
                        lambdal,
-                       transformed_rhos,
                        rho_kl,
                        d,
                        p,
                        q,
-                       k,
-                       l,
+                       K,
+                       L,
                        ck,
                        cl,
                        sk,
                        sl,
                        i1,
                        i2,
-                       ncorr,
-                       CORRFLAG);
+                       CORRFLAG,
+                       NTHR,
+                       NLOAD,
+                       NCORR,
+                       NVAR);
 
         }
       }

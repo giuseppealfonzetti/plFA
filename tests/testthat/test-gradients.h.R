@@ -1,82 +1,19 @@
+###################################################
+# Test file for gradients.h based on wrappers for #
+# pair contributions in pairs.h as exported by    #
+# exportedFuns.h                                  #
+###################################################
+
 set.seed(123)
 
 # p = number of items, q = number of latent variables, n = number of observations
 p <- 12; q <- 3; n <- 100
 
-stdlv <- FALSE
-corrflag <- TRUE
-
 # Thresholds vector for each item
-thr <- c(-.5, .5)
+thr <- c(-1.5, 0, 1.5)
 cat <- rep(length(thr)+1, p)
 nthr <- sum(cat)-p
-
-# Simple loading matrix constraints
-A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-A <- check_cnstr_loadings(A, stdlv)
-
-# Draw some random loadings according to constraints
-Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
-nload <- sum(is.na(A))
-
-# Generate random latent correlation matrix
-tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
-ncorr <- if(corrflag)q*(q-1)/2 else 0
-R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
-
-
-# Generate random latent variances
-set.seed(1)
-constr_var <- rep(NA, q)
-constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
-nvar  <- sum(is.na(constr_lsd))
-tsdvec <- constr_lsd
-tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
-Dmat <- diag(exp(tsdvec),q,q)
-
-S <- Dmat %*% R %*% Dmat
-
-# Dimensions
-d <- nthr + nload + ncorr + nvar
-d
-#
-theta <- get_theta(
-  THRESHOLDS = rep(thr, p),
-  LOADINGS = Load,
-  LATENT_COV = S,
-  CAT = cat,
-  CONSTRMAT = A,
-  CONSTRVAR = exp(constr_lsd)^2,
-  CORRFLAG = corrflag,
-  STDLV=stdlv
-)
-length(theta)
-cpp_latvar_mat2vec(S=S,
-                   CONSTRLOGSD = constr_lsd,
-                   NCORR = ncorr,
-                   NVAR = nvar)
-
-dat <- sim_data(
-  SAMPLE_SIZE = n,
-  LOADINGS = Load,
-  THRESHOLDS = thr,
-  LATENT_COV = S)
-f <- compute_frequencies(Y = dat, C_VEC = cat)
-
-dat <- check_data(dat)
-constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
-dims <- check_dims(dat, constr_list)
-
-lambda0_init <- init_thresholds(dims, constr_list)
-lambda_init  <- init_loadings(dims, constr_list, FXD=0.5)
-transformed_rhos_init <- init_transformed_latcorr(dims, constr_list)
-transformed_sd_init <- init_transformed_latsd(dims, constr_list)
-
-par_init <- c(lambda0_init, lambda_init, transformed_rhos_init, transformed_sd_init)
-length(par_init)
-
-
-pair_nll <- function(PAR, K, L){
+pair_nll <- function(PAR, K, L, OPTION=0){
   pair <- cpp_compute_pair_ext(
     CONSTRMAT   = constr_list$CONSTRMAT,
     CONSTRLOGSD = constr_list$CONSTRLOGSD,
@@ -92,13 +29,13 @@ pair_nll <- function(PAR, K, L){
     PAIRS_TABLE = f,
     SILENTFLAG  = 1,
     GRADFLAG    = 0,
-    OPTION      = 0
+    OPTION      = OPTION
   )
   out <- pair$nll/n
   return(out)
 }
 
-pair_ngr <- function(PAR, K, L){
+pair_ngr <- function(PAR, K, L, OPTION=0){
   pair <- cpp_compute_pair_ext(
     CONSTRMAT   = constr_list$CONSTRMAT,
     CONSTRLOGSD = constr_list$CONSTRLOGSD,
@@ -114,7 +51,7 @@ pair_ngr <- function(PAR, K, L){
     PAIRS_TABLE = f,
     SILENTFLAG  = 1,
     GRADFLAG    = 1,
-    OPTION      = 0
+    OPTION      = OPTION
   )
   out <- pair$ngr/n
   return(out)
@@ -162,39 +99,444 @@ pair_ngr_old <- function(PAR, K, L){
   out <- pair$ngr/n
   return(out)
 }
-k <- 2; l <- 1
-pair_nll(par_init, K=k, L=l)
-pair_nll_old(par_init, K=k, L=l)
 
-numDeriv::grad(func = pair_nll, x=theta, K=k,L=l)
-pair_ngr(PAR=theta, K=k, L=l)
+#### (STDLV=FALSE, CORRFLAG=TRUE) ####
+#### free correlation matrix and latent variances ######
+{
+  stdlv <- FALSE
+  corrflag <- TRUE
 
-numDeriv::grad(func = pair_nll_old, x=theta, K=k,L=l)
-pair_ngr_old(PAR=theta, K=k, L=l)
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
 
-dD <- matrix(0,q,q); dD[1,1] <- sqrt(S[1])
-t(as.numeric(Load[k+1,]))%*%(dD%*%R%*%Dmat+Dmat%*%R%*%dD)%*%as.numeric(Load[l+1,])/n
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
 
 
+  # Generate random latent variances
+  constr_var <- rep(NA, q)
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
 
-for (l in 2:p) {
-  for (k in 1:(l-1)) {
-    test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
-      expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
-    })
+  S <- Dmat %*% R %*% Dmat
 
-    # test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
-    #   expect_equal(pair_ngr(theta, OPTION=1), numDeriv::grad(pair_nll, theta, OPTION=1), tolerance = 1e-4)
-    # })
+  # Dimensions
+
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+
+
+  dat <- sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S)
+  f <- compute_frequencies(Y = dat, C_VEC = cat)
+
+  dat <- check_data(dat)
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  dims <- check_dims(dat, constr_list)
+
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+
+      test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+    }
   }
 }
 
-k <- 5; l <- 2
-pair_nll(par_init, K=k, L=l)
-pair_nll_old(par_init, K=k, L=l)
+#### (STDLV=TRUE, CORRFLAG=TRUE) ####
+#### free correlation matrix but all latent variances fixed ######
+{
+  stdlv <- TRUE
+  corrflag <- TRUE
 
-numDeriv::grad(func = pair_nll, x=theta, K=k,L=l)
-pair_ngr(PAR=theta, K=k, L=l)
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q)
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+
+  dat <- sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S)
+  f <- compute_frequencies(Y = dat, C_VEC = cat)
+
+  dat <- check_data(dat)
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  dims <- check_dims(dat, constr_list)
+
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+
+      test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+    }
+  }
+}
+
+#### (STDLV=TRUE, CORRFLAG=TRUE) ####
+#### free correlation matrix but all latent variances fixed ######
+#### some variances specified by the user ####
+{
+  stdlv <- TRUE
+  corrflag <- TRUE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q); constr_var[1:2] <- .5
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+
+  dat <- sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S)
+  f <- compute_frequencies(Y = dat, C_VEC = cat)
+
+  dat <- check_data(dat)
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  dims <- check_dims(dat, constr_list)
+
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+
+      test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+    }
+  }
+}
+
+
+{
+  stdlv <- TRUE
+  corrflag <- TRUE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q); constr_var[2] <- .5
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -1, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+
+  dat <- sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S)
+  f <- compute_frequencies(Y = dat, C_VEC = cat)
+
+  dat <- check_data(dat)
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  dims <- check_dims(dat, constr_list)
+
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+
+      test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+    }
+  }
+}
+
+#### (STDLV=FALSE, CORRFLAG=FALSE) ####
+#### no correlation matrix but some free latent variances ######
+{
+  stdlv <- FALSE
+  corrflag <- FALSE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q); constr_var[2] <- .5
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -1, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+
+  dat <- sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S)
+  f <- compute_frequencies(Y = dat, C_VEC = cat)
+
+  dat <- check_data(dat)
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  dims <- check_dims(dat, constr_list)
+
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+
+      test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+    }
+  }
+}
+
+#### (STDLV=FALSE, CORRFLAG=TRUE) ####
+#### no correlation matrix but all free latent variances ######
+{
+  stdlv <- FALSE
+  corrflag <- FALSE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q);
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -1, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+
+  dat <- sim_data(
+    SAMPLE_SIZE = n,
+    LOADINGS = Load,
+    THRESHOLDS = thr,
+    LATENT_COV = S)
+  f <- compute_frequencies(Y = dat, C_VEC = cat)
+
+  dat <- check_data(dat)
+  constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv))
+  dims <- check_dims(dat, constr_list)
+
+  for (l in 2:p) {
+    for (k in 1:(l-1)) {
+      test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+
+      test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
+      })
+    }
+  }
+}
+
+
+
+
+
 
 
 

@@ -45,10 +45,18 @@ Rcpp::List cpp_compute_pair_ext(
 
    double ll = 0;
    Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
-   pairs::pair_contribution_extended(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
-                                     NTHR, NLOAD, NCORR, NVAR, K, L,
-                                     PAIRS_TABLE, SILENTFLAG, GRADFLAG,
-                                     ll, gradient);
+   if(OPTION==0){
+     pairs::pair_contribution_extended(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
+                                       NTHR, NLOAD, NCORR, NVAR, K, L,
+                                       PAIRS_TABLE, SILENTFLAG, GRADFLAG,
+                                       ll, gradient);
+     }else if(OPTION==1){
+       pairs::pair_contribution2(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
+                                         NTHR, NLOAD, NCORR, NVAR, K, L,
+                                         PAIRS_TABLE, SILENTFLAG, GRADFLAG,
+                                         ll, gradient);
+   }
+
 
    Rcpp::List output =
      Rcpp::List::create(
@@ -106,7 +114,7 @@ Rcpp::List cpp_compute_pair(
                               NTHR, NLOAD, NCORR, NVAR, K, L,
                               PAIRS_TABLE, SILENTFLAG, GRADFLAG, ll, gradient);
    }else if(OPTION==1){
-     pairs::pair_contribution2(CONSTRMAT, C_VEC, THETA, CORRFLAG, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, ll, gradient);
+     // pairs::pair_contribution2(CONSTRMAT, C_VEC, THETA, CORRFLAG, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, ll, gradient);
    }
 
    Rcpp::List output =
@@ -247,6 +255,20 @@ Eigen::MatrixXd cpp_latvar_theta2cmat(
   return params::latvar::vec2cmat(vec, NCORR, Q);
 }
 
+//' @export
+// [[Rcpp::export]]
+Eigen::MatrixXd cpp_latvar_theta2dmat(
+    Eigen::Map<Eigen::VectorXd> THETA,
+    Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const int NTHR,
+    const int NLOAD,
+    const int NCORR,
+    const int NVAR,
+    const int Q){
+
+
+  return params::latvar::theta2dmat(THETA,CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q);
+}
 
 //' @export
 // [[Rcpp::export]]

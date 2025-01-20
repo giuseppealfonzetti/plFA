@@ -222,28 +222,28 @@ Rcpp::List estimate_J(
 
         // compute pi gradient contribution
         // Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
-        // Eigen::VectorXd pi_grad = Eigen::VectorXd::Zero(d);
-        Eigen::VectorXd pi_grad = grads::pi(A,
-                                            C_VEC,
-                                            pi_thresholds,
-                                            Sigma_u,
-                                            lambdak,
-                                            lambdal,
-                                            transformed_rhos,
-                                            rho_kl,
-                                            d,
-                                            p,
-                                            q,
-                                            k,
-                                            l,
-                                            ck,
-                                            cl,
-                                            sk,
-                                            sl,
-                                            i1,
-                                            i2,
-                                            ncorr,
-                                            CORRFLAG);
+        Eigen::VectorXd pi_grad = Eigen::VectorXd::Zero(d);
+        // Eigen::VectorXd pi_grad = grads::pi(A,
+        //                                     C_VEC,
+        //                                     pi_thresholds,
+        //                                     Sigma_u,
+        //                                     lambdak,
+        //                                     lambdal,
+        //                                     transformed_rhos,
+        //                                     rho_kl,
+        //                                     d,
+        //                                     p,
+        //                                     q,
+        //                                     k,
+        //                                     l,
+        //                                     ck,
+        //                                     cl,
+        //                                     sk,
+        //                                     sl,
+        //                                     i1,
+        //                                     i2,
+        //                                     ncorr,
+        //                                     CORRFLAG);
 
 
 

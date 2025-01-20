@@ -250,6 +250,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_latvar_theta2dmat
+Eigen::MatrixXd cpp_latvar_theta2dmat(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int Q);
+RcppExport SEXP _plFA_cpp_latvar_theta2dmat(SEXP THETASEXP, SEXP CONSTRLOGSDSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type CONSTRLOGSD(CONSTRLOGSDSEXP);
+    Rcpp::traits::input_parameter< const int >::type NTHR(NTHRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
+    Rcpp::traits::input_parameter< const int >::type NCORR(NCORRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NVAR(NVARSEXP);
+    Rcpp::traits::input_parameter< const int >::type Q(QSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_latvar_theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cpp_latvar_theta2mat
 Eigen::MatrixXd cpp_latvar_theta2mat(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int Q);
 RcppExport SEXP _plFA_cpp_latvar_theta2mat(SEXP THETASEXP, SEXP CONSTRLOGSDSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
@@ -394,6 +411,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_cpp_latvar_vec2cmat", (DL_FUNC) &_plFA_cpp_latvar_vec2cmat, 3},
     {"_plFA_cpp_latvar_vec2dmat", (DL_FUNC) &_plFA_cpp_latvar_vec2dmat, 5},
     {"_plFA_cpp_latvar_theta2cmat", (DL_FUNC) &_plFA_cpp_latvar_theta2cmat, 6},
+    {"_plFA_cpp_latvar_theta2dmat", (DL_FUNC) &_plFA_cpp_latvar_theta2dmat, 7},
     {"_plFA_cpp_latvar_theta2mat", (DL_FUNC) &_plFA_cpp_latvar_theta2mat, 7},
     {"_plFA_cpp_latvar_mat2vec", (DL_FUNC) &_plFA_cpp_latvar_mat2vec, 4},
     {"_plFA_cpp_latvar_mat2cmat", (DL_FUNC) &_plFA_cpp_latvar_mat2cmat, 1},

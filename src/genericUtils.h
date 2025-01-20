@@ -435,9 +435,14 @@ namespace params{
         const int NVAR,
         const int Q){
 
-      Eigen::VectorXd vec = params::latvar::theta2vec(THETA, NTHR, NLOAD, NCORR, NVAR);
-      return params::latvar::vec2dmat(vec, CONSTRLOGSD, NCORR, NVAR, Q);
-    }
+        if(NVAR>0){
+          Eigen::VectorXd vec = params::latvar::theta2vec(THETA, NTHR, NLOAD, NCORR, NVAR);
+          return params::latvar::vec2dmat(vec, CONSTRLOGSD, NCORR, NVAR, Q);
+        }else{
+
+          return Eigen::VectorXd(CONSTRLOGSD.array().exp()).asDiagonal();
+        }
+      }
 
     Eigen::MatrixXd theta2mat(const Eigen::Ref<const Eigen::VectorXd> THETA,
                               const Eigen::Ref<const Eigen::VectorXd> CONSTRLOGSD,
