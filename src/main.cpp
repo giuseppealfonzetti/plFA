@@ -97,72 +97,6 @@ Rcpp::List cpp_multiThread_completePairwise(
   return(output);
 }
 
-// //' Full pairwise likelihood
-// //'
-// //' @description
-// //' Evaluate negative loglikelihood. Same structure of `multiThread_completePairwise`.
-// //' Used to monitor validation log-likelihood. Multithreading options via `RcppParallel`.
-// //'
-// //' @param N Number of observations
-// //' @param C_VEC Vector containing the number of categories for each item
-// //' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a 1.
-// //' @param THETA Parameter vector
-// //' @param FREQ Frequency table
-// //' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
-// //' @param SILENTFLAG optional for verbose output
-// //'
-// // [[Rcpp::export]]
-// double multiThread_completePairwise_nll(
-//     const unsigned int N,
-//     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
-//     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
-//     Eigen::VectorXd THETA,
-//     Eigen::Map<Eigen::MatrixXd> FREQ,
-//     const unsigned int CORRFLAG,
-//     const unsigned int SILENTFLAG
-// ){
-//
-//   const unsigned int d = THETA.size();
-//   const unsigned int n = N;                                             // number of units
-//   const unsigned int p = CONSTRMAT.rows();                                             // number of items
-//   const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
-//   const unsigned int c = C_VEC.sum();                                          // total number of categories
-//   const unsigned int nthr = c-p;                                        // number of thresholds
-//   const unsigned int ncorr = q*(q-1)/2;                          // number of correlations
-//   const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
-//
-//   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
-//   unsigned int DFLAG, gradFLAG = 0;
-//
-//   // Copy frequencies, and build pair dictionary
-//   Eigen::MatrixXd pairs_table = FREQ;
-//   Eigen::MatrixXd items_pairs(2,R);
-//   unsigned int r = 0;
-//   for(unsigned int k = 1; k < p; k ++){
-//     for(unsigned int l = 0; l < k; l++){
-//       items_pairs(0, r) = k;
-//       items_pairs(1, r) = l;
-//       r++;
-//     }
-//   }
-//
-//   // Rearrange parameters
-//   Eigen::VectorXd theta(d);
-//   theta << THETA;                                 // Complete parameters vector
-//
-//   // Initialize vector of indeces for entries in pairs_table
-//   std::vector<int> vector_pairs(items_pairs.cols()) ;
-//   std::iota (std::begin(vector_pairs), std::end(vector_pairs), 0);
-//
-//   double iter_ll = 0;
-//   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
-//
-//   pairs::SubsetWorker iteration_subset(CONSTRMAT, C_VEC, pairs_table, items_pairs, CORRFLAG, SILENTFLAG, 0, theta, vector_pairs);
-//   RcppParallel::parallelReduce(0, R, iteration_subset);
-//   iter_ll = -iteration_subset.subset_ll;
-//
-//   return(iter_ll/n);
-// }
 
 // //' Stochastic optimiser
 // //'
@@ -467,4 +401,136 @@ Rcpp::List cpp_multiThread_completePairwise(
 
 
 
+// [[Rcpp::export]]
+Rcpp::List plSA(
+    Eigen::Map<Eigen::MatrixXd> FREQ,
+    Eigen::Map<Eigen::MatrixXd> VALFREQ,
+    const int N,
+    Eigen::Map<Eigen::VectorXd> C_VEC,
+    Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+    Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    Eigen::Map<Eigen::VectorXd> THETA_INIT,
+    const int NTHR,
+    const int NLOAD,
+    const int NCORR,
+    const int NVAR,
+    const int SAMPLER,
+    const int PAIRS_PER_ITERATION,
+    const int STEP_SCHEDULE,
+    const double STEP0,
+    const double STEP1,
+    const double STEP2,
+    const double STEP3,
+    const int BURN,
+    const int MAXT,
+    const int TOLCOUNT,
+    const double TOL,
+    const int CHECKCONV,
+    const int EACHCHECK,
+    const int EACHPATH,
+    const int EACHCLOCK,
+    const int SEED,
+    const bool VERBOSE
+){
+
+    // Set up clock monitor to export to R session trough RcppClock
+    Rcpp::Clock clock;
+    clock.tick("Main");
+
+    if(VERBOSE) Rcpp::Rcout << "Started!\n";
+
+
+    const int d = THETA_INIT.size();
+    const int n = N;
+    const int p = CONSTRMAT.rows();
+    const int q = CONSTRMAT.cols();
+    const int c = C_VEC.sum();
+    const int pairs = p*(p-1)/2;
+    if(d!=NTHR+NLOAD+NCORR+NVAR) Rcpp::stop("check theta dimensions");
+
+    const double prob = static_cast<double>(PAIRS_PER_ITERATION)/static_cast<double>(pairs);
+    bool convergence = false;
+    int tolObj_counter = 0;
+
+    // Read frequencies, and initialise items_pairs
+    Eigen::MatrixXd pairs_table = FREQ;
+    Eigen::MatrixXd items_pairs(2,pairs);
+    unsigned int idx = 0;
+    for(unsigned int k = 1; k < p; k++){
+      const unsigned int ck = C_VEC(k);
+      for(unsigned int l = 0; l < k; l ++){
+        items_pairs(0, idx) = k;
+        items_pairs(1, idx) = l;
+        idx++;
+      }
+    }
+
+    // Initialize vector of indexes for entries in pairs_table
+    std::vector<int> outloop_pool;
+    std::vector<int> full_pool(pairs) ;
+    std::iota (std::begin(full_pool), std::end(full_pool), 0);
+    std::vector<int> chosen_pairs;
+
+    // Initialize storage for iterations quantities
+    std::vector<Eigen::VectorXd> path_theta;
+    std::vector<Eigen::VectorXd> path_avtheta;
+    std::vector<Eigen::VectorXd> path_grad;
+    std::vector<double>          path_nll;
+    std::vector<int>             path_iters;
+    std::vector<int>             post_index;
+
+
+    // Initialize single iteration quantities
+    double nll = 0;
+    Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
+    int last_iter = MAXT;
+
+    // Compute scaling constant
+    double scale;
+    switch(SAMPLER){
+    case 0:
+      scale = static_cast<double>(pairs)/static_cast<double>(n*PAIRS_PER_ITERATION) ;
+      break;
+    case 1:
+      scale = prob/static_cast<double>(n);
+      break;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    clock.tock("Main");
+    clock.stop("clock");
+
+
+    Rcpp::List output =
+      Rcpp::List::create(
+        Rcpp::Named("scale") = 0
+      // Rcpp::Named("path_theta") = path_theta,
+      // Rcpp::Named("path_av_theta") = path_av_theta,
+      // Rcpp::Named("path_grad") = path_grad,
+      // Rcpp::Named("check_val_nll") = check_val_nll,
+      // Rcpp::Named("check_val_iter") = check_val_iter,
+      // Rcpp::Named("path_nll") = path_nll,
+      // Rcpp::Named("post_index") = post_index,
+      // Rcpp::Named("last_iter") = last_iter,
+      // Rcpp::Named("theta") = theta,
+      // Rcpp::Named("convergence") = convergence
+      );
+    return(output);
+
+
+
+}
 

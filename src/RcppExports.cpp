@@ -214,6 +214,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// plSA
+Rcpp::List plSA(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, Eigen::Map<Eigen::VectorXd> THETA_INIT, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int SAMPLER, const int PAIRS_PER_ITERATION, const int STEP_SCHEDULE, const double STEP0, const double STEP1, const double STEP2, const double STEP3, const int BURN, const int MAXT, const int TOLCOUNT, const double TOL, const int CHECKCONV, const int EACHCHECK, const int EACHPATH, const int EACHCLOCK, const int SEED, const bool VERBOSE);
+RcppExport SEXP _plFA_plSA(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP THETA_INITSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP SAMPLERSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP STEP_SCHEDULESEXP, SEXP STEP0SEXP, SEXP STEP1SEXP, SEXP STEP2SEXP, SEXP STEP3SEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOLCOUNTSEXP, SEXP TOLSEXP, SEXP CHECKCONVSEXP, SEXP EACHCHECKSEXP, SEXP EACHPATHSEXP, SEXP EACHCLOCKSEXP, SEXP SEEDSEXP, SEXP VERBOSESEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type VALFREQ(VALFREQSEXP);
+    Rcpp::traits::input_parameter< const int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type CONSTRLOGSD(CONSTRLOGSDSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA_INIT(THETA_INITSEXP);
+    Rcpp::traits::input_parameter< const int >::type NTHR(NTHRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
+    Rcpp::traits::input_parameter< const int >::type NCORR(NCORRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NVAR(NVARSEXP);
+    Rcpp::traits::input_parameter< const int >::type SAMPLER(SAMPLERSEXP);
+    Rcpp::traits::input_parameter< const int >::type PAIRS_PER_ITERATION(PAIRS_PER_ITERATIONSEXP);
+    Rcpp::traits::input_parameter< const int >::type STEP_SCHEDULE(STEP_SCHEDULESEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP0(STEP0SEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP1(STEP1SEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP2(STEP2SEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP3(STEP3SEXP);
+    Rcpp::traits::input_parameter< const int >::type BURN(BURNSEXP);
+    Rcpp::traits::input_parameter< const int >::type MAXT(MAXTSEXP);
+    Rcpp::traits::input_parameter< const int >::type TOLCOUNT(TOLCOUNTSEXP);
+    Rcpp::traits::input_parameter< const double >::type TOL(TOLSEXP);
+    Rcpp::traits::input_parameter< const int >::type CHECKCONV(CHECKCONVSEXP);
+    Rcpp::traits::input_parameter< const int >::type EACHCHECK(EACHCHECKSEXP);
+    Rcpp::traits::input_parameter< const int >::type EACHPATH(EACHPATHSEXP);
+    Rcpp::traits::input_parameter< const int >::type EACHCLOCK(EACHCLOCKSEXP);
+    Rcpp::traits::input_parameter< const int >::type SEED(SEEDSEXP);
+    Rcpp::traits::input_parameter< const bool >::type VERBOSE(VERBOSESEXP);
+    rcpp_result_gen = Rcpp::wrap(plSA(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA_INIT, NTHR, NLOAD, NCORR, NVAR, SAMPLER, PAIRS_PER_ITERATION, STEP_SCHEDULE, STEP0, STEP1, STEP2, STEP3, BURN, MAXT, TOLCOUNT, TOL, CHECKCONV, EACHCHECK, EACHPATH, EACHCLOCK, SEED, VERBOSE));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sampling_step
 std::vector<int> sampling_step(std::vector<int>& FULL_POOL, const unsigned int METHODFLAG, const double PROB, const int PAIRS_PER_ITERATION, const unsigned int N_ITEMS, const unsigned int SEED, const int SILENTFLAG, const unsigned int ITER);
 RcppExport SEXP _plFA_sampling_step(SEXP FULL_POOLSEXP, SEXP METHODFLAGSEXP, SEXP PROBSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP N_ITEMSSEXP, SEXP SEEDSEXP, SEXP SILENTFLAGSEXP, SEXP ITERSEXP) {
@@ -283,6 +321,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_cpp_latvar_mat2cmat", (DL_FUNC) &_plFA_cpp_latvar_mat2cmat, 1},
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
     {"_plFA_cpp_multiThread_completePairwise", (DL_FUNC) &_plFA_cpp_multiThread_completePairwise, 13},
+    {"_plFA_plSA", (DL_FUNC) &_plFA_plSA, 28},
     {"_plFA_sampling_step", (DL_FUNC) &_plFA_sampling_step, 8},
     {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 6},
     {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 10},

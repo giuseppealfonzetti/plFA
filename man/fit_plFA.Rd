@@ -8,11 +8,11 @@ fit_plFA(
   DATA,
   CONSTR_LIST,
   VALDATA = NULL,
-  METHOD = c("ucminf"),
+  METHOD = c("ucminf", "SA"),
   CONTROL = list(),
   INIT = NULL,
   ITERATIONS_SUBSET = NULL,
-  VERBOSEFLAG = 0,
+  VERBOSE = FALSE,
   NCORES = 1
 )
 }
@@ -72,9 +72,9 @@ fit_plFA(
 
 \item{ITERATIONS_SUBSET}{Vector with the indexes of iterations used to store trajectories.}
 
-\item{VERBOSEFLAG}{TRUE verbose output}
-
 \item{NCORES}{Integer value setting the number of threads to carry out the estimation.}
+
+\item{VERBOSEFLAG}{TRUE verbose output}
 }
 \description{
 fit_plFA() allows to fit models both numerically and stochastically
