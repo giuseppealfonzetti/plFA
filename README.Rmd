@@ -18,6 +18,8 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
+[![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/giuseppealfonzetti/plFA/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/plFA)
 <!-- badges: end -->
 
 The plFA package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
@@ -52,7 +54,7 @@ Load <- gen_loadings(CONSTRMAT = A)
 thr <- c(-1.5, 0, 1.5)
 
 # Generate random latent correlation matrix
-S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q)
+S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q, CORRFLAG = 1)
 
 # simulate the data
 D <- sim_data(
@@ -65,39 +67,39 @@ D <- sim_data(
 cat <- apply(D, 2, max) + 1
 
 # store true parameter vector (interpretable parameterisation)
-theta <- getPar(get_theta(rep(thr, p), Load, S, cat, A), C = sum(cat), P = p, Q = q, CONSTRMAT = A)
+theta <- get_theta(rep(thr, p), Load, S, cat, A, CORRFLAG = 1)
 ```
 
-Estimate the model with the stochastic optimiser
+<!-- Estimate the model with the stochastic optimiser -->
 
-```{r sto}
+<!-- ```{r sto} -->
 
-# Set options for cpp stochastic optimiser
-cpp_ctrl <- list(
-  MAXT = 2*n,
-  PAIRS_PER_ITERATION = 8
-)
+<!-- # Set options for cpp stochastic optimiser -->
+<!-- cpp_ctrl <- list( -->
+<!--   MAXT = 2*n, -->
+<!--   PAIRS_PER_ITERATION = 8 -->
+<!-- ) -->
 
-# Fit the model with stochastic optimiser
-stFit <- fit_plFA(
-  DATA = D,
-  VALDATA = D,
-  CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'= 1),
-  METHOD = 'hyper',
-  CONTROL = cpp_ctrl,
-  ITERATIONS_SUBSET = seq(0, cpp_ctrl$MAXT, 100)
-)
-stFit
-# extract estimated parameter vector
-stPar <- getPar(stFit)
+<!-- # Fit the model with stochastic optimiser -->
+<!-- stFit <- fit_plFA( -->
+<!--   DATA = D, -->
+<!--   VALDATA = D, -->
+<!--   CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'= 1), -->
+<!--   METHOD = 'hyper', -->
+<!--   CONTROL = cpp_ctrl, -->
+<!--   ITERATIONS_SUBSET = seq(0, cpp_ctrl$MAXT, 100) -->
+<!-- ) -->
+<!-- stFit -->
+<!-- # extract estimated parameter vector -->
+<!-- stPar <- getPar(stFit) -->
 
-# extract list of parameter estimates
-stParList <- getPar(stFit, OPTION = 'list')
-matrixcalc::is.positive.definite(stParList$latent_correlations)
+<!-- # extract list of parameter estimates -->
+<!-- stParList <- getPar(stFit, OPTION = 'list') -->
+<!-- matrixcalc::is.positive.definite(stParList$latent_correlations) -->
 
-# mean square error
-mean((stPar-theta)^2)
-```
+<!-- # mean square error -->
+<!-- mean((stPar-theta)^2) -->
+<!-- ``` -->
 
 Numerical estimation as comparison
 ```{r num}
@@ -107,7 +109,7 @@ numFit <- fit_plFA(
   METHOD = 'ucminf')
 
 # extract estimated parameter vector
-numPar <- getPar(numFit)
+numPar <- getPar(numFit, 'raw')
 
 # extract list of parameter estimates
 numParList <- getPar(numFit, OPTION = 'list')
@@ -117,22 +119,49 @@ mean((numPar-theta)^2)
 ```
 
 Compute standard errors
-```{r stovar}
-stovar <- computeVar(OBJ = stFit, DATA = D, NUMDERIV = T)
-stose <- sqrt(stovar$optimisation_noise+stovar$asymptotic_variance)
-stose[1:10]
 
-```
+<!-- ```{r stovar} -->
+<!-- stovar <- computeVar(OBJ = stFit, DATA = D, NUMDERIV = T) -->
+<!-- stose <- sqrt(stovar$optimisation_noise+stovar$asymptotic_variance) -->
+<!-- stose[1:10] -->
+
+<!-- ``` -->
 
 ```{r numvar}
 
-numvar <- computeVar(OBJ = numFit, DATA = D, NUMDERIV = T)
+numvar <- computeVar(OBJ = numFit, DATA = D)
 numse <- sqrt(numvar$asymptotic_variance)
 numse[1:10]
 ```
 
+## `{lavaan}` wrapper
+
+The package provides a user-friendly `{lavaan}`-style interface to estimate plFA models via the `cfa()` function.
 
 ```{r}
-sessionInfo()
+#| label: plFAlavaan
+dat <- as.data.frame(lapply(as.data.frame(D), ordered))
+names(dat) <- paste0("y", 1:p)
+
+# Model syntax
+mod <- "
+  eta1 =~ y1 + y2 + y3
+  eta2 =~ y4 + y5 + y6
+  eta3 =~ y7 + y8 + y9
+"
+
+# Fit the model
+fit <- cfa(model = mod, data = dat, std.lv = TRUE)
+summary(fit)
+```
+
+
+
+## Session Info
+
+
+```{r}
+#| label: sessioninfo
+sessioninfo::session_info()
 ```
 

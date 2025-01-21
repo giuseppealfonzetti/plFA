@@ -120,6 +120,7 @@ fit_plFA <- function(
     # Compute frequency table bivariate patterns
 
     Rwr_ncl <- function(par_vec){
+      n <- dims$n
       mod <- cpp_multiThread_completePairwise(
         N          = dims$n,
         C_VEC      = dims$cat,
@@ -140,6 +141,7 @@ fit_plFA <- function(
 
     # function for gradient
     Rwr_ngr <- function(par_vec){
+      n <- dims$n
       mod <- cpp_multiThread_completePairwise(
         N          = dims$n,
         C_VEC      = dims$cat,

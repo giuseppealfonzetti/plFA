@@ -299,13 +299,12 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   message('- Computing the variances...')
   if(METHOD =='ucminf'){
-    asy_var <- diag((trJacob%*% sandwich %*% t(trJacob))/N)
-  }else{
-    asy_var <- diag((trJacob%*% sandwich %*% t(trJacob))/N)
+    asy_var <- diag(vcov)
+  } else {
+    asy_var <- diag(vcov)
     a1 <- PAIRS*(PAIRS - PPI)/(PPI*(PAIRS-1))
     a2 <- (PAIRS-PPI)/(PPI*(PAIRS-1))
     opt_noise <- diag( trJacob %*% (invH%*%(a1*Hhat - a2*Jhat)%*%invH/(N*IT) ) %*% t(trJacob) )
-
   }
   message('Done!')
 
@@ -314,7 +313,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
       trJacob = trJacob,
       H = Hhat,
       J = Jhat,
-      invH = invH,
+      vcov = vcov,
       asymptotic_variance = asy_var,
       optimisation_noise = opt_noise
     )
