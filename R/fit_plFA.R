@@ -78,8 +78,22 @@ fit_plFA <- function(
   dims <- check_dims(dat, constr_list)
 
   tmp <- new('PlFaFit',
-             cnstr = new('Constraints', loadings = constr_list$CONSTRMAT, corrflag = constr_list$CORRFLAG),
-             dims = new('Dimensions', n = dims$n, p = dims$p, q = dims$q, cat = dims$cat, pairs = dims$pairs),
+             cnstr = new('Constraints',
+                         loadings = constr_list$CONSTRMAT,
+                         corrflag = constr_list$CORRFLAG,
+                         stdlv    = constr_list$STDLV,
+                         loglatsd = constr_list$CONSTRLOGSD),
+             dims = new('Dimensions',
+                        n     = dims$n,
+                        p     = dims$p,
+                        q     = dims$q,
+                        cat   = dims$cat,
+                        pairs = dims$pairs,
+                        nthr  = dims$nthr,
+                        nload = dims$nload,
+                        ncorr = dims$ncorr,
+                        nvar  = dims$nvar,
+                        npar  = dims$d),
              method = METHOD)
 
   # Check Initialisation
@@ -101,21 +115,27 @@ fit_plFA <- function(
   if(METHOD == 'ucminf'){
 
     message('3. Optimising with ucminf...')
+    tmp@method <- "ucminf"
 
     # Compute frequency table bivariate patterns
 
     Rwr_ncl <- function(par_vec){
       n <- dims$n
       mod <- cpp_multiThread_completePairwise(
-        N = n,
-        C_VEC = dims$cat,
-        CONSTRMAT = constr_list$CONSTRMAT,
-        FREQ = tmp@freq,
-        THETA = par_vec,
-        CORRFLAG = constr_list$CORRFLAG,
+        N          = dims$n,
+        C_VEC      = dims$cat,
+        CONSTRMAT  = constr_list$CONSTRMAT,
+        CONSTRLOGSD= constr_list$CONSTRLOGSD,
+        FREQ       = tmp@freq,
+        THETA      = par_vec,
+        CORRFLAG   = constr_list$CORRFLAG,
+        NTHR       = dims$nthr,
+        NLOAD      = dims$nload,
+        NCORR      = dims$ncorr,
+        NVAR       = dims$nvar,
         SILENTFLAG = 1
       )
-      out <- mod$iter_nll/n
+      out <- mod$iter_nll/dims$n
       return(out)
     }
 
@@ -123,16 +143,22 @@ fit_plFA <- function(
     Rwr_ngr <- function(par_vec){
       n <- dims$n
       mod <- cpp_multiThread_completePairwise(
-        N = n,
-        C_VEC = dims$cat,
-        CONSTRMAT = constr_list$CONSTRMAT,
-        FREQ = tmp@freq,
-        THETA = par_vec,
-        CORRFLAG = constr_list$CORRFLAG,
+        N          = dims$n,
+        C_VEC      = dims$cat,
+        CONSTRMAT  = constr_list$CONSTRMAT,
+        CONSTRLOGSD= constr_list$CONSTRLOGSD,
+        FREQ       = tmp@freq,
+        THETA      = par_vec,
+        CORRFLAG   = constr_list$CORRFLAG,
+        NTHR       = dims$nthr,
+        NLOAD      = dims$nload,
+        NCORR      = dims$ncorr,
+        NVAR       = dims$nvar,
+        GRFLAG     = 1,
         SILENTFLAG = 1
       )
 
-      out <- mod$iter_ngradient/n
+      out <- mod$iter_ngradient/dims$n
       return(out)
     }
 

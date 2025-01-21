@@ -4,13 +4,18 @@
 \alias{get_theta}
 \title{Get full parameter vector}
 \usage{
-get_theta(TAU, LOADINGS, LATENT_COV = NULL, CAT, CONSTRMAT, CORRFLAG)
+get_theta(
+  THRESHOLDS,
+  LOADINGS,
+  LATENT_COV,
+  CAT,
+  CONSTRMAT,
+  CONSTRVAR,
+  CORRFLAG,
+  STDLV
+)
 }
 \arguments{
-\item{TAU}{Numerical vector of thresholds parameters.
-If all the \eqn{p} items have \eqn{c} possible categories, it contains
-\eqn{p(c-1)} elements.}
-
 \item{LOADINGS}{Numerical matrix of dimension \eqn{p*q},
 where \eqn{q} is the number of latent variables.}
 
@@ -24,7 +29,9 @@ that the corresponding element in the loading matrix is free to be estimated.
 A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 to \eqn{0}.}
 
-\item{CORRFLAG}{Logical flag indicating whether the latent covariance matrix}
+\item{TAU}{Numerical vector of thresholds parameters.
+If all the \eqn{p} items have \eqn{c} possible categories, it contains
+\eqn{p(c-1)} elements.}
 }
 \description{
 Assemble the parameter vector starting from the threshold vector,

@@ -91,8 +91,8 @@ build_constrMat <- function(P, Q, STRUCT = c('simple', 'triangular', 'crossed'),
 #' @param LB Lower bound for uniform random generator. Default set to 0.
 #' @param UB Upper bound for uniform random generator. Default set to 1.
 #' @export
-gen_loadings <- function(CONSTRMAT, FIXED = NULL,  SEED = 123, LB = 0, UB = 1){
-  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT)
+gen_loadings <- function(CONSTRMAT, FIXED = NULL,  SEED = 123, LB = 0, UB = 1, STDLV=TRUE){
+  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT, STDLV = STDLV)
 
   set.seed(SEED)
   p <- check_p(nrow(CONSTRMAT));

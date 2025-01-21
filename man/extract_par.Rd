@@ -7,11 +7,12 @@
 extract_par(
   THETA,
   OPTION = c("list", "raw", "transformed"),
-  C,
-  P,
-  Q,
   CONSTRMAT,
-  CORRFLAG
+  CONSTRLOGSD,
+  NTHR,
+  NLOAD,
+  NCORR,
+  NVAR
 )
 }
 \arguments{
@@ -25,13 +26,13 @@ extract_par(
 \code{'list'} \tab List containing the ordered thresholds vector, the loading matrix and the latent correlation matrix. \cr
 }}
 
+\item{CONSTRMAT}{Matrix of dimension \eqn{p * q} with binary loading constraints. 1 for free loadings, 0 otherwise.}
+
 \item{C}{Sum of the number of categories for each item.}
 
 \item{P}{Number if items}
 
 \item{Q}{Number of latent variables}
-
-\item{CONSTRMAT}{Matrix of dimension \eqn{p * q} with binary loading constraints. 1 for free loadings, 0 otherwise.}
 }
 \description{
 Extract parameters

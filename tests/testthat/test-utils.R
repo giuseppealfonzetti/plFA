@@ -1,172 +1,769 @@
+############################################
+# Test file for utils.R and generalUtils.h #
+# functions as exported by exportedFuns.h  #                                 #
+############################################
+
+
 set.seed(123)
 
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 10; q <- 2
-
-# Simple loading matrix constraints
-A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-
-# Draw some random loadings according to constraints
-Load <- gen_loadings(CONSTRMAT = A)
-cpp_get_loadings_mat2vec(LOADINGS = Load, CONSTRMAT = A, NLOAD = sum(is.na(A)))
-
-test_that("Loadings mat2vec/vec2mat", {
-  expect_identical(
-    cpp_get_loadings_vec2mat(
-      LOADINGS = cpp_get_loadings_mat2vec(LOADINGS = Load, CONSTRMAT = A, NLOAD = sum(is.na(A))),
-      CONSTRMAT = A
-    ),
-    Load
-  )
-})
-
+p <- 12; q <- 3
 
 # Thresholds vector for each item
 thr <- c(-1.5, 0, 1.5)
 cat <- rep(length(thr)+1, p)
+nthr <- sum(cat)-p
 
-# Generate random latent correlation matrix
-tcorrvec <- rnorm(q*(q-1)/2)
-S <- cpp_get_latvar_vec2mat(SVEC=tcorrvec, Q=q)
-cpp_get_latvar_vec2mat(tcorrvec, q)
-test_that("Lat corr vec2mat/mat2vec", {
-  expect_equal(
-    cpp_get_latvar_mat2vec(
-      S=S
-    ),
-    tcorrvec
+#### (STDLV=FALSE, CORRFLAG=TRUE) ####
+#### free correlation matrix and latent variances ######
+{
+  stdlv <- FALSE
+  corrflag <- TRUE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q)
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
   )
-})
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Dimension of parameter vector"), {
+    expect_equal(length(theta), d)
+  })
 
-corrflag <- 0
-theta <- get_theta(
-  TAU = rep(thr, p),
-  LOADINGS = Load,
-  LATENT_COV = S,
-  CAT = cat,
-  CONSTRMAT = A,
-  CORRFLAG = corrflag
-)
 
-test_that("Loadings theta2mat", {
-  expect_equal(
-    cpp_get_loadings_theta2mat(
-      THETA = theta,
-      CONSTRMAT = A,
-      P = p,
-      C = sum(cat),
-      NLOAD = sum(is.na(A))
-    ),
-    Load
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_lambda"), {
+    expect_equal(
+      get_lambda(
+        THETA = theta,
+        NTHR = nthr,
+        NLOAD = nload
+      ),
+      Load[is.na(A)]
 
+    )
+  })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Loadings theta2mat"), {
+    expect_equal(
+      cpp_loadings_theta2mat(
+        THETA = theta,
+        CONSTRMAT = A,
+        NTHR = nthr,
+        NLOAD = nload
+      ),
+      Load
+
+    )
+  })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Latvar theta2mat"), {
+    expect_equal(
+      cpp_latvar_theta2mat(
+        THETA = theta,
+        CONSTRLOGSD = constr_lsd,
+        NTHR = nthr,
+        NLOAD=nload,
+        NCORR = ncorr,
+        NVAR = nvar,
+        Q=q
+      ),
+      S
+    )
+  })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_S"), {
+    expect_equal(
+      get_S(
+        THETA = theta,
+        CONSTRLOGSD = constr_lsd,
+        NTHR = nthr,
+        NLOAD=nload,
+        NCORR = ncorr,
+        NVAR = nvar,
+        Q=q
+      ),
+      S
+    )
+  })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_R"), {
+    expect_equal(
+      get_R(
+        THETA = theta,
+        NTHR = nthr,
+        NLOAD=nload,
+        NCORR = ncorr,
+        NVAR = nvar,
+        Q=q
+      ),
+      R
+    )
+  })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_corr"), {
+    expect_equal(
+      get_corr(
+        THETA = theta,
+        NTHR = nthr,
+        NLOAD=nload,
+        NCORR = ncorr,
+        NVAR = nvar,
+        Q=q
+      ),
+      R[upper.tri(R)]
+    )
+  })
+
+}
+
+#### (STDLV=TRUE, CORRFLAG=TRUE) ####
+#### free correlation matrix but all latent variances fixed ######
+{
+  stdlv <- TRUE
+  corrflag <- TRUE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q)
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
   )
-})
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Dimension of parameter vector"), {
+                     expect_equal(length(theta), d)
+                   })
 
-test_that("Latvar theta2mat", {
-  expect_equal(
-    cpp_get_latvar_theta2mat(
-      THETA = theta,
-      Q=q,
-      D=length(theta),
-      CORRFLAG = corrflag
-    ),
-    if(corrflag) S else diag(1,q,q)
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_lambda"), {
+                     expect_equal(
+                       get_lambda(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load[is.na(A)]
+
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Loadings theta2mat"), {
+                     expect_equal(
+                       cpp_loadings_theta2mat(
+                         THETA = theta,
+                         CONSTRMAT = A,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load
+
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Latvar theta2mat"), {
+                     expect_equal(
+                       cpp_latvar_theta2mat(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_S"), {
+                     expect_equal(
+                       get_S(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_R"), {
+                     expect_equal(
+                       get_R(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", cpp_latvar_theta2dmat"), {
+                     expect_equal(
+                       cpp_latvar_theta2dmat(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       Dmat
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_corr"), {
+                     expect_equal(
+                       get_corr(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R[upper.tri(R)]
+                     )
+                   })
+
+}
+
+#### (STDLV=TRUE, CORRFLAG=TRUE) ####
+#### free correlation matrix but all latent variances fixed ######
+#### some variances specified by the user ####
+{
+  stdlv <- TRUE
+  corrflag <- TRUE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q); constr_var[1:2] <- .5
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
   )
-})
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Dimension of parameter vector"), {
+                     expect_equal(length(theta), d)
+                   })
 
 
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_lambda"), {
+                     expect_equal(
+                       get_lambda(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load[is.na(A)]
 
-# #### Test get_corr() ####
-# test_that("get_corr() input type", {
-#   expect_error(get_corr(THETA = rep(0, 10), Q = '10'), 'Q not numeric.')
-#   expect_error(get_corr(THETA = rep('0', 10), Q = 10), 'THETA not numeric.')
-#   expect_error(get_corr(THETA = c(rep(0, 10), NaN), Q = 10), 'THETA not numeric.')
-#   expect_error(get_corr(THETA = c(rep(0, 10), NA), Q = 10), 'THETA not numeric.')
-#   expect_error(get_corr(THETA = c(rep(0, 10), Inf), Q = 10), 'THETA not numeric.')
-#   expect_error(get_corr(THETA = rep(0, 10), Q = NA), 'Q not numeric.')
-# })
-#
-# test_that("get_corr() input dimensions", {
-#   set.seed(123)
-#   expect_error(get_corr(THETA = rep(0, 10), Q = 10), 'Check THETA dimensions')
-# })
-#
-# test_that("Extracted correlation vector length", {
-#   set.seed(123)
-#   q <- 10
-#   expect_equal(length(get_corr(THETA = rnorm(q*(q-1)/2), Q = q)), q*(q-1)/2)
-# })
-#
-# test_that("Extracted correlation range", {
-#   set.seed(123)
-#   q <- 10; corr <- get_corr(THETA = rnorm(q*(q-1)/2), Q = q)
-#   expect_equal(sum(corr > -1 & corr < 1), q*(q-1)/2)
-# })
-#
-# test_that("Extracted correlation positive definiteness", {
-#   set.seed(123)
-#   q <- 10; corr <- get_corr(THETA = rnorm(q*(q-1)/2), Q = q)
-#   R <- diag(1, q, q); R[upper.tri(R)] <- corr; R <- R + t(R)
-#   expect_identical(matrixcalc::is.positive.definite(R), T)
-# })
-#
-#
-#
-#
-# #### Test get_lambda() ####
-#
-# test_that("get_lambda() input type", {
-#   expect_error(get_lambda(THETA = rep(0, 10), C = '30', P = 10, Q = 3), 'C not numeric.')
-#   expect_error(get_lambda(THETA = rep(0, 10), C = 30, P = NA, Q = 3), 'P not numeric.')
-#   expect_error(get_lambda(THETA = rep(0, 10), C = 30, P = 10, Q = Inf), 'Q not numeric.')
-#   expect_error(get_lambda(THETA = c(rep(0, 10), NaN), C = 30, P = 10, Q = 3), 'THETA not numeric.')
-#   expect_error(get_lambda(THETA = c(rep(0, 10), NA), C = 30, P = 10, Q = 3), 'THETA not numeric.')
-# })
-#
-# test_that("get_lambda() input dimensions", {
-#   expect_error(get_lambda(THETA = rep(0, 10), C = 30, P = 10, Q = 3), 'Check THETA dimensions')
-# })
-#
-# #### Test get_theta() ####
-# test_that("get_theta() input type", {
-#   set.seed(123)
-#   p <- 10; q <- 5; cat <- rep(2,p)
-#   tau <- rep(0, sum(cat)-p)
-#   A <- matrix(rbinom(p*q, 1, 1/q), p, q)
-#   load <- A*matrix(rnorm(p*q), p, q)
-#   latent_cov <- diag(1, q, q)
-#
-#   expect_error(get_theta(TAU = rep(NA, sum(cat)-p),
-#                          LOADINGS = load, LATENT_COV = latent_cov,
-#                          CAT = cat, CONSTRMAT = A), 'TAU not numeric.')
-#   expect_error(get_theta(TAU = tau,
-#                          LOADINGS = NA, LATENT_COV = latent_cov,
-#                          CAT = cat, CONSTRMAT = A), 'LOADINGS not numeric.')
-#   expect_error(get_theta(TAU = tau,
-#                          LOADINGS = load, LATENT_COV = Inf,
-#                          CAT = cat, CONSTRMAT = A), 'LATENT_COV not numeric.')
-#   expect_error(get_theta(TAU = tau,
-#                          LOADINGS = load, LATENT_COV = latent_cov,
-#                          CAT = NaN, CONSTRMAT = A), 'CAT not numeric.')
-#
-#   theta <- get_theta(TAU = tau,
-#                      LOADINGS = load, LATENT_COV = latent_cov,
-#                      CAT = cat, CONSTRMAT = A)
-#
-# })
-#
-# test_that("get_theta() basic output checks", {
-#   set.seed(123)
-#   p <- 10; q <- 5; cat <- rep(2,p)
-#   tau <- rep(0, sum(cat)-p)
-#   A <- matrix(rbinom(p*q, 1, 1/q), p, q)
-#   load <- A*matrix(rnorm(p*q), p, q)
-#   latent_cov <- diag(1, q, q)
-#
-#   theta <- get_theta(TAU = tau,
-#                      LOADINGS = load, LATENT_COV = latent_cov,
-#                      CAT = cat, CONSTRMAT = A)
-#   expect_identical(sum(theta[1:(sum(cat)-p)]-tau), 0)
-#   expect_identical(sum(!(theta[(sum(cat)-p+1):(q*(q-1)/2)]%in%load)), 0L)
-# })
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Loadings theta2mat"), {
+                     expect_equal(
+                       cpp_loadings_theta2mat(
+                         THETA = theta,
+                         CONSTRMAT = A,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load
+
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Latvar theta2mat"), {
+                     expect_equal(
+                       cpp_latvar_theta2mat(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_S"), {
+                     expect_equal(
+                       get_S(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_R"), {
+                     expect_equal(
+                       get_R(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", cpp_latvar_theta2dmat"), {
+                     expect_equal(
+                       cpp_latvar_theta2dmat(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       Dmat
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_corr"), {
+                     expect_equal(
+                       get_corr(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R[upper.tri(R)]
+                     )
+                   })
+
+}
+
+#### (STDLV=FALSE, CORRFLAG=FALSE) ####
+#### no correlation matrix but some free latent variances ######
+{
+  stdlv <- FALSE
+  corrflag <- FALSE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q); constr_var[2] <- 1.5
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Dimension of parameter vector"), {
+                     expect_equal(length(theta), d)
+                   })
+
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_lambda"), {
+                     expect_equal(
+                       get_lambda(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load[is.na(A)]
+
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Loadings theta2mat"), {
+                     expect_equal(
+                       cpp_loadings_theta2mat(
+                         THETA = theta,
+                         CONSTRMAT = A,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load
+
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Latvar theta2mat"), {
+                     expect_equal(
+                       cpp_latvar_theta2mat(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_S"), {
+                     expect_equal(
+                       get_S(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_R"), {
+                     expect_equal(
+                       get_R(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_corr"), {
+                     expect_equal(
+                       get_corr(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R[upper.tri(R)]
+                     )
+                   })
+
+}
+
+#### (STDLV=FALSE, CORRFLAG=TRUE) ####
+#### no correlation matrix but all free latent variances ######
+{
+  stdlv <- FALSE
+  corrflag <- FALSE
+
+  # Simple loading matrix constraints
+  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+  A <- check_cnstr_loadings(A, stdlv)
+
+  # Draw some random loadings according to constraints
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  nload <- sum(is.na(A))
+
+  # Generate random latent correlation matrix
+  tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
+  ncorr <- if(corrflag)q*(q-1)/2 else 0
+  R <- cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+
+
+  # Generate random latent variances
+  constr_var <- rep(NA, q)
+  constr_lsd <- check_cnstr_latvar(constr_var, q, stdlv)
+  nvar  <- sum(is.na(constr_lsd))
+  tsdvec <- constr_lsd
+  tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.5, .1)
+  Dmat <- diag(exp(tsdvec),q,q)
+
+  S <- Dmat %*% R %*% Dmat
+
+  # Dimensions
+
+  d <- nthr + nload + ncorr + nvar
+  d
+
+
+  #
+  theta <- get_theta(
+    THRESHOLDS = rep(thr, p),
+    LOADINGS = Load,
+    LATENT_COV = S,
+    CAT = cat,
+    CONSTRMAT = A,
+    CONSTRVAR = exp(constr_lsd)^2,
+    CORRFLAG = corrflag,
+    STDLV = stdlv
+  )
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Dimension of parameter vector"), {
+                     expect_equal(length(theta), d)
+                   })
+
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_lambda"), {
+                     expect_equal(
+                       get_lambda(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load[is.na(A)]
+
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Loadings theta2mat"), {
+                     expect_equal(
+                       cpp_loadings_theta2mat(
+                         THETA = theta,
+                         CONSTRMAT = A,
+                         NTHR = nthr,
+                         NLOAD = nload
+                       ),
+                       Load
+
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", Latvar theta2mat"), {
+                     expect_equal(
+                       cpp_latvar_theta2mat(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_S"), {
+                     expect_equal(
+                       get_S(
+                         THETA = theta,
+                         CONSTRLOGSD = constr_lsd,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       S
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_R"), {
+                     expect_equal(
+                       get_R(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R
+                     )
+                   })
+
+  test_that(paste0("CORRFLAG:", corrflag, ", STDLV:", stdlv,
+                   ", get_corr"), {
+                     expect_equal(
+                       get_corr(
+                         THETA = theta,
+                         NTHR = nthr,
+                         NLOAD=nload,
+                         NCORR = ncorr,
+                         NVAR = nvar,
+                         Q=q
+                       ),
+                       R[upper.tri(R)]
+                     )
+                   })
+
+}
 

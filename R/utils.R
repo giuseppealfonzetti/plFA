@@ -1,10 +1,9 @@
 #' @export
-get_S <- function(THETA, Q, CORRFLAG){
+get_S <- function(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q){
   THETA <- check_theta(THETA)
 
-  return(cpp_get_latvar_theta2mat(THETA, Q, length(THETA), CORRFLAG))
+  return(cpp_latvar_theta2mat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q))
 }
-
 
 
 #' Extract vector of correlations from parameter vector
@@ -16,13 +15,30 @@ get_S <- function(THETA, Q, CORRFLAG){
 #' @param Q Number of latent variables.
 #' @param THETA Parameter vector
 #' @export
-get_corr <- function(THETA, Q, CORRFLAG){
+get_R <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q){
   Q <- check_q(Q)
   THETA <- check_theta(THETA)
-  # if(length(THETA)<(Q*(Q-1)/2))stop('Check THETA dimensions.')
 
-  s <- get_S(THETA = THETA, Q = Q, CORRFLAG = CORRFLAG)
-  out <- s[upper.tri(s)]
+  R <- cpp_latvar_theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, Q)
+
+  return(R)
+}
+
+#' Extract vector of correlations from parameter vector
+#'
+#' get_corr() extracts the latent correlations from the
+#' parameter vector. The vector has length \eqn{q*(q-1)/2},
+#' where \eqn{q} is the number of latent variables.
+#'
+#' @param Q Number of latent variables.
+#' @param THETA Parameter vector
+#' @export
+get_corr <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q){
+  Q <- check_q(Q)
+  THETA <- check_theta(THETA)
+
+  R <- cpp_latvar_theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, Q)
+  out <- R[upper.tri(R)]
 
   return(out)
 }
@@ -38,21 +54,12 @@ get_corr <- function(THETA, Q, CORRFLAG){
 #' @param Q Number of latent variables
 #'
 #'@export
-get_lambda <- function(THETA, C, P, Q){
+get_lambda <- function(THETA, NTHR, NLOAD){
   THETA <- check_theta(THETA)
-  P     <- check_p(P)
-  Q     <- check_q(Q)
-  if(!is.finite(C))stop('C not numeric.')
 
+  lambda <- cpp_loadings_theta2vec(THETA, NTHR, NLOAD)
 
-  d <- length(THETA)
-  ncorr <- Q*(Q-1)/2
-
-  if(length(THETA)<=(C-P+ncorr))stop('Check THETA dimensions.')
-  if(C<(2*P))stop('Check THETA dimensions.')
-
-  lambda <- THETA[(C-P+1):(d-ncorr)]
-  lambda
+  return(lambda)
 }
 
 #' Get full parameter vector
@@ -75,25 +82,35 @@ get_lambda <- function(THETA, C, P, Q){
 #' @param CORRFLAG Logical flag indicating whether the latent covariance matrix
 #'
 #' @export
-get_theta <- function(TAU, LOADINGS, LATENT_COV=NULL, CAT, CONSTRMAT, CORRFLAG){
+get_theta <- function(THRESHOLDS, LOADINGS, LATENT_COV, CAT, CONSTRMAT, CONSTRVAR, CORRFLAG, STDLV){
 
-  TAU <- check_thresholds(TAU, CAT)
+  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT, STDLV=STDLV)
+  CONSTRLOGSD <- check_cnstr_latvar(CONSTRVAR, Q=ncol(CONSTRMAT), STDLV=STDLV)
+  THRESHOLDS <- check_thresholds(THRESHOLDS, CAT)
   LOADINGS <- check_loadings(LOADINGS)
-  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT)
+  LATENT_COV <- check_latcov(LATENT_COV)
 
-  if(CORRFLAG)LATENT_COV <- check_latcov(LATENT_COV)
 
   stopifnot(dim(LOADINGS)==dim(CONSTRMAT))
   stopifnot(ncol(LOADINGS)==ncol(LATENT_COV))
-  stopifnot(length(TAU)==(sum(CAT)-nrow(CONSTRMAT)))
+  stopifnot(length(THRESHOLDS)==(sum(CAT)-nrow(CONSTRMAT)))
 
 
 
-  load_vec <- cpp_get_loadings_mat2vec(LOADINGS, CONSTRMAT, sum(is.na(CONSTRMAT)))
+  load_vec <- cpp_loadings_mat2vec(LOADINGS, CONSTRMAT, sum(is.na(CONSTRMAT)))
 
-  corr_vec <- NULL
-  if(CORRFLAG)  corr_vec <- cpp_get_latvar_mat2vec(LATENT_COV)
-  theta <- c(TAU, load_vec, corr_vec)
+  # corr_vec <- NULL
+  # if(CORRFLAG)  corr_vec <- cpp_get_latvar_mat2vec(LATENT_COV)
+
+  q <- ncol(CONSTRMAT)
+  ncorr <- if(CORRFLAG) q*(q-1)/2 else 0
+
+  lat_vec <- cpp_latvar_mat2vec(S=LATENT_COV,
+                                CONSTRLOGSD = CONSTRLOGSD,
+                                NCORR = ncorr,
+                                NVAR = sum(is.na(CONSTRLOGSD)))
+
+  theta <- c(THRESHOLDS, load_vec, lat_vec)
   return(theta)
 }
 

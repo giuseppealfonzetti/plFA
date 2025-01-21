@@ -4,7 +4,7 @@
 \alias{estimate_J}
 \title{Estimate of J}
 \usage{
-estimate_J(Y, C_VEC, A, THETA, CORRFLAG)
+estimate_J(Y, C_VEC, A, CONSTRLOGSD, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 \arguments{
 \item{Y}{data matrix}

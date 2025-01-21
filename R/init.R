@@ -25,3 +25,7 @@ init_transformed_latcorr <- function(DIMS, CONSTR_LIST){
   if(CONSTR_LIST$CORRFLAG==1) out <- rep(0, DIMS$q*(DIMS$q-1)/2)
   return(out)
 }
+
+init_transformed_latsd <- function(DIMS, CONSTR_LIST){
+  rep(0, sum(is.na(CONSTR_LIST$CONSTRLOGSD)))
+}
