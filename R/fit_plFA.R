@@ -59,11 +59,11 @@ fit_plFA <- function(
     DATA,
     CONSTR_LIST,
     VALDATA = NULL,
-    METHOD = c('ucminf'),
+    METHOD = c('ucminf', "SA"),
     CONTROL = list(),
     INIT = NULL,
     ITERATIONS_SUBSET = NULL,
-    VERBOSEFLAG = 0,
+    VERBOSE = FALSE,
     NCORES = 1
 ){
 
@@ -97,10 +97,10 @@ fit_plFA <- function(
              method = METHOD)
 
   # Check Initialisation
-  tmp@init <- check_init(INIT, dims, constr_list)
+  tmp@init <- check_init(INIT, dims, constr_list, VERBOSE)
 
 
-  message('2. Computing frequencies...')
+  if(VERBOSE) message('2. Computing frequencies...')
   freq_start_time <- Sys.time()
   tmp@freq <- pairs_freq(DATA, dims$cat)
   freq_end_time <- Sys.time()
@@ -114,7 +114,7 @@ fit_plFA <- function(
   # Numerical optimisation
   if(METHOD == 'ucminf'){
 
-    message('3. Optimising with ucminf...')
+    if(VERBOSE) message('3. Optimising with ucminf...')
     tmp@method <- "ucminf"
 
     # Compute frequency table bivariate patterns
@@ -180,7 +180,12 @@ fit_plFA <- function(
     tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
 
 
-    message('4. Done! (', round(tmp@RTime,2),' secs)')
+    if(VERBOSE) message('4. Done! (', round(tmp@RTime,2),' secs)')
     return(tmp)
+  }
+
+  if(METHOD=="SA"){
+    if(VERBOSE) message('3. Optimising with SA...')
+
   }
 }

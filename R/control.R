@@ -148,9 +148,9 @@ check_theta <- function(THETA){
 }
 
 
-check_init <- function(INIT, DIMS, CONSTR_LIST){
+check_init <- function(INIT, DIMS, CONSTR_LIST, VERBOSE=FALSE){
   if(is.null(INIT)){
-    message('1. Initialising at default values')
+    if(VERBOSE) message('1. Initialising at default values')
 
     # initialise thresholds
     lambda0_init <- init_thresholds(DIMS, CONSTR_LIST)
@@ -163,7 +163,7 @@ check_init <- function(INIT, DIMS, CONSTR_LIST){
     stopifnot(is.numeric(INIT))
     stopifnot(is.finite(INIT))
     stopifnot(length(INIT)==DIMS$d)
-    message('1. Initialising at INIT vector.')
+    if(VERBOSE) message('1. Initialising at INIT vector.')
    }
 
   stopifnot(length(INIT)==DIMS$d)
