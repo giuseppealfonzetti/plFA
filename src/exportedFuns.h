@@ -2,6 +2,7 @@
 #define exportedFuns_H
 
 #include "pairs.h"
+#include "optimisationUtils.h"
 
 //' Single pair contribution
 //'
@@ -302,4 +303,37 @@ Eigen::VectorXd cpp_latvar_mat2vec(Eigen::Map<Eigen::MatrixXd> S,
 Eigen::MatrixXd cpp_latvar_mat2cmat(Eigen::Map<Eigen::MatrixXd> S){
   return params::latvar::mat2cmat(S);
 }
+
+
+//' @export
+// [[Rcpp::export]]
+Eigen::VectorXd cpp_sa_proj(
+    Eigen::Map<Eigen::VectorXd> THETA,
+    Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+    Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    Eigen::Map<Eigen::VectorXd> C_VEC,
+    const int CORRFLAG,
+    const int NTHR,
+    const int NLOAD,
+    const int NCORR,
+    const int NVAR
+){
+  bool flag = false;
+  Eigen::VectorXd theta = THETA;
+  sa::proj(CONSTRMAT,
+           CONSTRLOGSD,
+           C_VEC,
+           CORRFLAG,
+           NTHR,
+           NLOAD,
+           NCORR,
+           NVAR,
+           theta,
+           flag);
+  return theta;
+}
+
+
+
+
 #endif

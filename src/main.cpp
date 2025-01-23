@@ -402,7 +402,7 @@ Rcpp::List cpp_multiThread_completePairwise(
 
 
 // [[Rcpp::export]]
-Rcpp::List plSA(
+Rcpp::List cpp_plSA(
     Eigen::Map<Eigen::MatrixXd> FREQ,
     Eigen::Map<Eigen::MatrixXd> VALFREQ,
     const int N,
@@ -416,19 +416,19 @@ Rcpp::List plSA(
     const int NVAR,
     const int SAMPLER,
     const int PAIRS_PER_ITERATION,
-    const int STEP_SCHEDULE,
+    const int SCHEDULE,
     const double STEP0,
     const double STEP1,
     const double STEP2,
     const double STEP3,
     const int BURN,
     const int MAXT,
-    const int TOLCOUNT,
+    const int TOL_WINDOW,
     const double TOL,
-    const int CHECKCONV,
-    const int EACHCHECK,
-    const int EACHPATH,
-    const int EACHCLOCK,
+    const int CHECK_TOL,
+    const int CHECK_WINDOW,
+    const int PATH_WINDOW,
+    const int CLOCK_WINDOW,
     const int SEED,
     const bool VERBOSE
 ){
@@ -446,11 +446,16 @@ Rcpp::List plSA(
     const int q = CONSTRMAT.cols();
     const int c = C_VEC.sum();
     const int pairs = p*(p-1)/2;
+    const int corrflag = NCORR>0;
     if(d!=NTHR+NLOAD+NCORR+NVAR) Rcpp::stop("check theta dimensions");
+    if(PAIRS_PER_ITERATION>pairs)Rcpp::stop("too many pairs per iterations");
 
+    int maxt          = MAXT;
+    int burn          = BURN;
     const double prob = static_cast<double>(PAIRS_PER_ITERATION)/static_cast<double>(pairs);
-    bool convergence = false;
-    int tolObj_counter = 0;
+    bool convergence  = false;
+    int tol_counter   = 0;
+    double stepsize   = STEP0;
 
     // Read frequencies, and initialise items_pairs
     Eigen::MatrixXd pairs_table = FREQ;
@@ -472,6 +477,10 @@ Rcpp::List plSA(
     std::vector<int> chosen_pairs;
 
     // Initialize storage for iterations quantities
+    Eigen::VectorXd theta   = THETA_INIT;
+    Eigen::VectorXd avtheta = THETA_INIT;
+
+    double          nll   = std::numeric_limits<double>::infinity();
     std::vector<Eigen::VectorXd> path_theta;
     std::vector<Eigen::VectorXd> path_avtheta;
     std::vector<Eigen::VectorXd> path_grad;
@@ -481,19 +490,154 @@ Rcpp::List plSA(
 
 
     // Initialize single iteration quantities
-    double nll = 0;
     Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
-    int last_iter = MAXT;
+    int last_iter = maxt;
 
     // Compute scaling constant
-    double scale;
-    switch(SAMPLER){
-    case 0:
-      scale = static_cast<double>(pairs)/static_cast<double>(n*PAIRS_PER_ITERATION) ;
-      break;
-    case 1:
-      scale = prob/static_cast<double>(n);
-      break;
+    double scale = prob/static_cast<double>(n);
+
+    for(int t = 0; t <= maxt; t++){
+      Rcpp::checkUserInterrupt();
+
+      if(t % CLOCK_WINDOW == 0) clock.tick("Iteration");
+
+
+
+      /////////////////////////
+      // STORE PREVIOUS ITER //
+      /////////////////////////
+      if(((t)%PATH_WINDOW == 0) | (CHECK_TOL && tol_counter==CHECK_WINDOW) | (t==maxt)){
+        path_iters.push_back(t);
+        path_theta.push_back(theta);
+        path_avtheta.push_back(avtheta);
+        path_nll.push_back(nll);
+      }
+
+      // Initialize empty contributions for iteration
+      Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
+
+      ///////////////////////
+      // COMPUTE FULL NLL //
+      ///////////////////////
+      if((CHECK_TOL && (t%CHECK_WINDOW == 0)) | (t==maxt)){
+        if(t % CLOCK_WINDOW == 0) clock.tick("Obj eval");
+
+        double prev_nll = nll;
+        pairs::SubsetWorker fullpool_worker(CONSTRMAT, CONSTRLOGSD, C_VEC, pairs_table, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
+                                             1, 0, theta, full_pool);
+        RcppParallel::parallelReduce(0, pairs, fullpool_worker);
+        nll = -fullpool_worker.subset_ll/n;
+
+
+        // Check convergence
+        double pdiff = - (nll - prev_nll)/prev_nll;
+        if(pdiff<TOL){tol_counter++;}else{tol_counter=0;}
+
+        // Verbose
+        if(VERBOSE){
+          Rcpp::Rcout << "Iter: " << t << " | step: " << stepsize << " | full npll: "<< nll << " | pdiff: " << pdiff << " | tol_counter:" << tol_counter<< "\n";
+        }
+
+        if((t>0) && !std::isfinite(nll)){
+          last_iter=t;
+          convergence=-1;
+          break;
+        }
+        if(t % CLOCK_WINDOW == 0) clock.tock("Obj eval");
+      }
+
+      ////////////
+      // BURNIN //
+      ////////////
+      if(t==burn){
+        Rcpp::Rcout << "Burn-in ended at iter " << t << "\n";
+      }
+
+
+
+
+      /////////////
+      // EXITING //
+      /////////////
+      if(CHECK_TOL && (tol_counter>=TOL_WINDOW) && ( t>=(burn+CHECK_WINDOW))){
+        Rcpp::Rcout << "Converged at iter " << t << " | full npll: "<< nll << "\n";
+        convergence = true;
+        last_iter = t;
+        break;
+      }else if(t==maxt){
+        Rcpp::Rcout << "Reached iter " << t << " | full npll: "<< nll << "\n";
+        convergence = false;
+        last_iter = t;
+      }
+
+      /////////////////////
+      // SAMPLING SCHEME //
+      /////////////////////
+      if(t % CLOCK_WINDOW == 0) clock.tick("Sampling_step");
+      std::vector<int> iter_chosen_pairs;
+      iter_chosen_pairs = sa::sampling_step(full_pool, SAMPLER, prob, PAIRS_PER_ITERATION, p, SEED, false, t);
+      if(t % CLOCK_WINDOW == 0) clock.tock("Sampling_step");
+
+
+
+      ///////////////////////////
+      // GRADIENT COMPUTATION  //
+      ///////////////////////////
+      if(t % CLOCK_WINDOW == 0) clock.tick("Stochastic_gradient");
+      pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, C_VEC, pairs_table, items_pairs, corrflag,
+                                           NTHR, NLOAD, NCORR, NVAR,
+                                           1, 1, theta, iter_chosen_pairs);
+      RcppParallel::parallelReduce(0, iter_chosen_pairs.size(), iteration_subset);
+
+      // iter_nll = -iteration_subset.subset_ll;
+      iter_gradient = -iteration_subset.subset_gradient;
+      // iter_nll *= scale;
+      iter_gradient *= scale;
+      if(t % CLOCK_WINDOW == 0) clock.tock("Stochastic_gradient");
+
+
+      //////////////////////////
+      //   PARAMETERS UPDATE  //
+      //////////////////////////
+      if(t % CLOCK_WINDOW == 0) clock.tick("Update");
+      switch(SCHEDULE){
+      case 0:
+        stepsize *= pow(t+1, -STEP3);
+        break;
+      case 1:
+        stepsize *= STEP1 * pow(1 + STEP2*stepsize*(t+1), -STEP3);
+        break;
+      }
+
+
+      // iter_gradient.segment(0, NTHR) /=10;
+      iter_gradient.segment(NTHR, NLOAD) *= 5;
+      if(NCORR>0) iter_gradient.segment(NTHR+NLOAD, NCORR) *= 5;
+      if(NVAR>0)  iter_gradient.segment(NTHR+NLOAD+NCORR, NVAR) *= pow(exp(stepsize),2)/stepsize;
+
+
+      theta -= stepsize * iter_gradient;
+      if(t % CLOCK_WINDOW == 0) clock.tock("Update");
+
+      ////////////////////////////////////////////////
+      // Post update loadings projection, if needed //
+      ///////////////////////////////////////////////
+
+      bool checkevent = false;
+      sa::proj(CONSTRMAT, CONSTRLOGSD, C_VEC, corrflag, NTHR, NLOAD, NCORR, NVAR, theta, checkevent);
+      if(checkevent) post_index.push_back(t);
+      if(VERBOSE && checkevent && t>burn) Rcpp::warning("Projection performed after the burn-in. Try increasing burn-in period.");
+
+
+      if(t <= burn){
+        avtheta = theta;
+      }else{
+        avtheta = ( (t - burn) * avtheta + theta ) / (t - burn + 1);
+      }
+
+      if(t % CLOCK_WINDOW == 0) clock.tock("Iteration");
+
+
     }
 
 
@@ -516,17 +660,17 @@ Rcpp::List plSA(
 
     Rcpp::List output =
       Rcpp::List::create(
-        Rcpp::Named("scale") = 0
-      // Rcpp::Named("path_theta") = path_theta,
-      // Rcpp::Named("path_av_theta") = path_av_theta,
-      // Rcpp::Named("path_grad") = path_grad,
-      // Rcpp::Named("check_val_nll") = check_val_nll,
-      // Rcpp::Named("check_val_iter") = check_val_iter,
-      // Rcpp::Named("path_nll") = path_nll,
-      // Rcpp::Named("post_index") = post_index,
-      // Rcpp::Named("last_iter") = last_iter,
-      // Rcpp::Named("theta") = theta,
-      // Rcpp::Named("convergence") = convergence
+        Rcpp::Named("scale") = scale,
+        Rcpp::Named("path_theta") = path_theta,
+        Rcpp::Named("path_av_theta") = path_avtheta,
+        // Rcpp::Named("check_val_nll") = check_val_nll,
+        // Rcpp::Named("check_val_iter") = check_val_iter,
+        Rcpp::Named("path_nll") = path_nll,
+        Rcpp::Named("post_index") = post_index,
+        Rcpp::Named("last_iter") = last_iter,
+        Rcpp::Named("theta") = theta,
+        Rcpp::Named("avtheta") = avtheta,
+        Rcpp::Named("convergence") = convergence
       );
     return(output);
 

@@ -14,7 +14,7 @@ init_thresholds <- function(DIMS, CONSTR_LIST){
   return(out)
 }
 
-init_loadings <- function(DIMS, CONSTR_LIST, FXD=0.5){
+init_loadings <- function(DIMS, CONSTR_LIST, FXD=0.25){
   out <-  rep(FXD, sum(is.na(CONSTR_LIST$CONSTRMAT)))
   return(out)
 }
@@ -28,4 +28,45 @@ init_transformed_latcorr <- function(DIMS, CONSTR_LIST){
 
 init_transformed_latsd <- function(DIMS, CONSTR_LIST){
   rep(0, sum(is.na(CONSTR_LIST$CONSTRLOGSD)))
+}
+
+init_par_with_plSA <- function(DIMS, CONSTR_LIST, CPP_ARGS=NULL){
+  lambda0_init <- init_thresholds(DIMS, CONSTR_LIST)
+  lambda_init  <- init_loadings(DIMS, CONSTR_LIST)
+  transformed_rhos_init  <- init_transformed_latcorr(DIMS, CONSTR_LIST)
+  transformed_latsd_init <- init_transformed_latsd(DIMS, CONSTR_LIST)
+  start_par <- c(lambda0_init, lambda_init, transformed_rhos_init, transformed_latsd_init)
+  start_par <- cpp_sa_proj(THETA=start_par,
+                          CONSTRMAT=CONSTR_LIST$CONSTRMAT,
+                          CONSTRLOGSD=CONSTR_LIST$CONSTRLOGSD,
+                          C_VEC=DIMS$cat,
+                          CORRFLAG=CONSTR_LIST$CORRFLAG,
+                          NTHR=DIMS$nthr,
+                          NLOAD=DIMS$nload,
+                          NCORR=DIMS$ncorr,
+                          NVAR=DIMS$nvar)
+
+  cpp_args <- c(list(N           = DIMS$n,
+                     C_VEC       = DIMS$cat,
+                     CONSTRMAT   = constr_list$CONSTRMAT,
+                     CONSTRLOGSD = constr_list$CONSTRLOGSD,
+                     THETA_INIT  = start_par,
+                     NTHR        = DIMS$nthr,
+                     NLOAD       = DIMS$nload,
+                     NCORR       = DIMS$ncorr,
+                     NVAR        = DIMS$nvar
+  ), CPP_ARGS)
+
+  sto_init <- do.call(cpp_plSA, cpp_args)
+
+  init_par <- cpp_sa_proj( THETA=sto_init$avtheta,
+                           CONSTRMAT=CONSTR_LIST$CONSTRMAT,
+                           CONSTRLOGSD=CONSTR_LIST$CONSTRLOGSD,
+                           C_VEC=DIMS$cat,
+                           CORRFLAG=CONSTR_LIST$CORRFLAG,
+                           NTHR=DIMS$nthr,
+                           NLOAD=DIMS$nload,
+                           NCORR=DIMS$ncorr,
+                           NVAR=DIMS$nvar)
+  return(init_par)
 }

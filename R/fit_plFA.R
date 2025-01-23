@@ -61,7 +61,9 @@ fit_plFA <- function(
     VALDATA = NULL,
     METHOD = c('ucminf', "SA"),
     CONTROL = list(),
+    CPP_CONTROL = NULL,
     INIT = NULL,
+    INIT_METHOD = NULL,
     ITERATIONS_SUBSET = NULL,
     VERBOSE = FALSE,
     NCORES = 1
@@ -96,19 +98,24 @@ fit_plFA <- function(
                         npar  = dims$d),
              method = METHOD)
 
-  # Check Initialisation
-  tmp@init <- check_init(INIT, dims, constr_list, VERBOSE)
+
+
+  # Set up multi-threads computations
+  tmp@cores <- NCORES
+  RcppParallel::setThreadOptions(numThreads = NCORES)
 
 
   if(VERBOSE) message('2. Computing frequencies...')
   freq_start_time <- Sys.time()
   tmp@freq <- pairs_freq(DATA, dims$cat)
   freq_end_time <- Sys.time()
-
   tmp@freqTime <- as.numeric(difftime(freq_end_time, freq_start_time, units = 'secs')[1])
 
-  tmp@cores <- NCORES
-  RcppParallel::setThreadOptions(numThreads = NCORES)
+  # Check Initialisation
+  tmp@init <- check_init(INIT, tmp@freq, dims, constr_list, INIT_METHOD, VERBOSE, CPP_ARGS = CPP_CONTROL)
+
+
+
 
 
   # Numerical optimisation

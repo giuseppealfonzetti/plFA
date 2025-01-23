@@ -3,15 +3,15 @@
 setMethod('show', 'PlFaFit', function(object){
 
   cat( "- Dimensions:\n",
-       "  - Sample size: ", object@dims@n, "\n",
-       "  - Items: ", object@dims@p,  " (", object@dims@pairs, " pairs)\n",
-       "  - Latent traits: ", object@dims@q,"\n\n",
+       "  - Sample size:", object@dims@n, "\n",
+       "  - Items:", object@dims@p,  "(", object@dims@pairs, " pairs)\n",
+       "  - Latent traits:", object@dims@q,"\n\n",
        "- Free parameters:\n",
-       "  - Thresholds: ", object@dims@nthr, "\n",
-       "  - Loadings: ", object@dims@nload, "\n",
-       "  - Latent correlations: ", object@dims@ncorr, "\n",
-       "  - Latent variances: ", object@dims@nvar, "\n",
-       "  - Total: ", object@dims@npar, "\n\n")
+       "  - Thresholds:", object@dims@nthr, "\n",
+       "  - Loadings:", object@dims@nload, "\n",
+       "  - Latent correlations:", object@dims@ncorr, "\n",
+       "  - Latent variances:", object@dims@nvar, "\n",
+       "  - Total:", object@dims@npar, "\n\n")
 
   if(object@method == 'ucminf'){
 
