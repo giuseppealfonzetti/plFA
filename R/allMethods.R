@@ -299,7 +299,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   message('- Computing the variances...')
   if(METHOD =='ucminf'){
-    asy_var <- diag(vcov)
+    asy_var <- diag(sandwich)
   } else {
     asy_var <- diag(vcov)
     a1 <- PAIRS*(PAIRS - PPI)/(PPI*(PAIRS-1))

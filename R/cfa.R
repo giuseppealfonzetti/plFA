@@ -94,14 +94,24 @@ cfa <- function(
   psi <- FREE$psi
   LTpsi <- psi[lower.tri(psi)]
   if (length(LTpsi) > 0 & any(LTpsi > 0)) {
-    corrflag <- 1
+    corrflag <- TRUE
   } else {
-    corrflag <- 0
+    corrflag <- FALSE
   }
+  constrvar <- diag(psi)
+  constrvar[constrvar > 0] <- NA
+
+  # Build constraint list
+  constr_list <- list(
+    CONSTRMAT = A,
+    CORRFLAG = corrflag,
+    CONSTRVAR = exp(sqrt(constrvar)) ^ 2,
+    STDLV = std.lv
+  )
 
   fit1 <- fit_plFA(
     DATA = D,
-    CONSTR_LIST = list(CONSTRMAT = A, CORRFLAG = corrflag),
+    CONSTR_LIST = constr_list,
     VALDATA = valdata,
     METHOD = method,
     CONTROL = control,
@@ -125,16 +135,18 @@ cfa <- function(
 create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   # Get coefficients and standard errors
+  FREE <- lavaan::inspect(fit0, what = "free")
+
   parlist <- extract_par(
     THETA = fit1@theta,
     OPTION = "list",
-    C = sum(fit1@dims@cat),
-    P = fit1@dims@p,
-    Q = fit1@dims@q,
     CONSTRMAT = fit1@cnstr@loadings,
-    CORRFLAG = fit1@cnstr@corrflag
+    CONSTRLOGSD = fit1@cnstr@loglatsd,
+    NTHR = length(FREE$tau),
+    NLOAD = sum(FREE$lambda > 0),
+    NCORR = sum(FREE$psi > 0 & lower.tri(FREE$psi)),
+    NVAR = sum(diag(FREE$psi) > 0)
   )
-  FREE <- lavaan::inspect(fit0, what = "free")
   lambda <- parlist$loadings[FREE$lambda > 0]
   tau <- parlist$thresholds[FREE$tau > 0]
   psi <- parlist$latent_correlations[FREE$psi > 0 & lower.tri(FREE$psi)]
