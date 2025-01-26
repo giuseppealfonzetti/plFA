@@ -126,8 +126,8 @@ cpp_plSA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA_INIT
 #' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 #' @param FREQ output from [pairs_freq()]
 #' @param N sample size
-estimate_H <- function(C_VEC, A, THETA, FREQ, N, CORRFLAG) {
-    .Call(`_plFA_estimate_H`, C_VEC, A, THETA, FREQ, N, CORRFLAG)
+estimate_H <- function(C_VEC, A, CONSTRLOGSD, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_plFA_estimate_H`, C_VEC, A, CONSTRLOGSD, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
 #' Estimate of J

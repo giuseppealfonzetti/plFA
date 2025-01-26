@@ -21,19 +21,24 @@
 Rcpp::List estimate_H(
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
     Eigen::Map<Eigen::MatrixXd> A,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
+    Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
     int N,
-    int CORRFLAG
+    int CORRFLAG,
+    const int NTHR,
+    const int NLOAD,
+    const int NCORR,
+    const int NVAR
 ){
-  const unsigned int p = A.rows();
-  const unsigned int q = A.cols();
-  const unsigned int d = THETA.size();
-  const unsigned int c = C_VEC.sum();
-  const unsigned int nthr = c-p;
-  unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
-  const unsigned int nload = d-nthr-ncorr;
-  unsigned int R = p*(p-1)/2;                                            // number of pairs of items
+  // const unsigned int p = A.rows();
+  // const unsigned int q = A.cols();
+  // const unsigned int d = THETA.size();
+  // const unsigned int c = C_VEC.sum();
+  // const unsigned int nthr = c-p;
+  // unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
+  // const unsigned int nload = d-nthr-ncorr;
+  // unsigned int R = p*(p-1)/2;                                            // number of pairs of items
 
   // // rearrange parameters
   // Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, c, nload);
@@ -42,79 +47,111 @@ Rcpp::List estimate_H(
   // Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr, CORRFLAG);
   //
   //
-  // // Copy frequencies, and build pair dictionary
-  // Eigen::MatrixXd pairs_table = FREQ;
-  // pairs_table.conservativeResize(pairs_table.rows() + 1, Eigen::NoChange_t() );
+  // Copy frequencies, and build pair dictionary
+  Eigen::MatrixXd pairs_table = FREQ;
+  pairs_table.conservativeResize(pairs_table.rows() + 1, Eigen::NoChange_t() );
 
 
+  const int p = A.rows();
+  const int q = A.cols();
+  const int d = NTHR+NLOAD+NCORR+NVAR;
+  const int c = C_VEC.sum();
+
+  // rearrange parameters
+  Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
+  Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
+  Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
+  Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+  Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
 
   double ll = 0;
   Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
   Eigen::MatrixXd est_H = Eigen::MatrixXd::Zero(d,d);
-  // for(unsigned int k = 1; k < p; k++){
-  //   unsigned int ck = C_VEC(k);
-  //   Eigen::VectorXd lambdak = Lam.row(k);
-  //
-  //   // identify column index in freq table
-  //   // i1: starting index item k
-  //   int i1 = 0;
-  //   if(k > 1){
-  //     for(int u = 1; u < k; u++){
-  //       int cu = C_VEC(u);
-  //       //if(silentFLAG == 0)Rcpp::Rcout << "u: " << u << ", cu: "<< cu << "\n";
-  //       i1 += cu * C_VEC.segment(0,u).sum();
-  //     }
-  //   }
-  //
-  //   for(unsigned int l = 0; l < k; l++){
-  //     unsigned int cl = C_VEC(l);
-  //     Eigen::VectorXd lambdal = Lam.row(l);
-  //
-  //     double rho_kl = lambdak.transpose() * Sigma_u * lambdal;
-  //
-  //
-  //     // i2 starting index from i1 dor item l
-  //     int i2 = 0;
-  //     if(l > 0){
-  //       i2 = C_VEC.segment(0,l).sum() * C_VEC(k);
-  //     }
-  //     for(unsigned int sk = 0; sk < ck; sk ++){
-  //
-  //       // i3: starting index from i2 for cat sk
-  //       unsigned int i3 = sk * cl;
-  //
-  //       for(unsigned int sl = 0; sl < cl; sl ++){
-  //
-  //         // final column index for pairs_tab. Print to check
-  //         unsigned int r = i1 + i2 + i3 + sl;
-  //
-  //         // read frequency
-  //         unsigned int n_sksl = pairs_table(4, r);
-  //
-  //         // identify thresholds
-  //         Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, k, l, sk, sl);
-  //
-  //         // compute pi
-  //         double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
-  //         //if(SILENTFLAG == 0)Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
-  //         pairs_table(5,r) = pi_sksl;
-  //         Eigen::VectorXd pi_grad = Eigen::VectorXd::Zero(THETA.size());
-  //         // grads::samplepi(pi_grad, pairs_table, A, C_VEC, tau, Sigma_u,
-  //         //                 lambdak, lambdal, transformed_rhos, rho_kl,
-  //         //                 p, q, k, l, ck, cl, i1, i2, ncorr,
-  //         //                 CORRFLAG);
-  //         // Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
-  //
-  //         gradient += (n_sksl/(pi_sksl+1e-8))*pi_grad;
-  //         // Eigen::MatrixXd tempH = pi_grad*pi_grad.transpose();
-  //         est_H +=  (n_sksl/(pow(pi_sksl,2)+1e-8))*pi_grad*pi_grad.transpose();
-  //
-  //         // update ll
-  //         ll += n_sksl * log(pi_sksl+1e-8);
-  //       }
-  //     }
-  //   }
-  // }
+
+  for(unsigned int k = 1; k < p; k++){
+    unsigned int ck = C_VEC(k);
+    Eigen::VectorXd lambdak = Lam.row(k);
+
+    // identify column index in freq table
+    // i1: starting index item k
+    int i1 = 0;
+    if(k > 1){
+      for(int u = 1; u < k; u++){
+        int cu = C_VEC(u);
+        //if(silentFLAG == 0)Rcpp::Rcout << "u: " << u << ", cu: "<< cu << "\n";
+        i1 += cu * C_VEC.segment(0,u).sum();
+      }
+    }
+
+    for(unsigned int l = 0; l < k; l++){
+      unsigned int cl = C_VEC(l);
+      Eigen::VectorXd lambdal = Lam.row(l);
+
+      double rho_kl = lambdak.transpose() * Sigma_u * lambdal;
+
+
+      // i2 starting index from i1 dor item l
+      int i2 = 0;
+      if(l > 0){
+        i2 = C_VEC.segment(0,l).sum() * C_VEC(k);
+      }
+      for(unsigned int sk = 0; sk < ck; sk ++){
+
+        // i3: starting index from i2 for cat sk
+        unsigned int i3 = sk * cl;
+
+        for(unsigned int sl = 0; sl < cl; sl ++){
+
+          // final column index for pairs_tab. Print to check
+          unsigned int r = i1 + i2 + i3 + sl;
+
+          // read frequency
+          unsigned int n_sksl = pairs_table(4, r);
+
+          // identify thresholds
+          Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, k, l, sk, sl);
+
+          // compute pi
+          double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
+          //if(SILENTFLAG == 0)Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
+          pairs_table(5,r) = pi_sksl;
+          Eigen::VectorXd pi_grad = grads::pi(THETA,
+                                              A,
+                                              CONSTRLOGSD,
+                                              C_VEC,
+                                              pi_thresholds,
+                                              Sigma_u,
+                                              Du,
+                                              Ru,
+                                              lambdak,
+                                              lambdal,
+                                              rho_kl,
+                                              d,
+                                              p,
+                                              q,
+                                              k,
+                                              l,
+                                              ck,
+                                              cl,
+                                              sk,
+                                              sl,
+                                              i1,
+                                              i2,
+                                              CORRFLAG,
+                                              NTHR,
+                                              NLOAD,
+                                              NCORR,
+                                              NVAR);
+          gradient += (n_sksl/(pi_sksl+1e-8))*pi_grad;
+          // Eigen::MatrixXd tempH = pi_grad*pi_grad.transpose();
+          est_H +=  (n_sksl/(pow(pi_sksl,2)+1e-8))*pi_grad*pi_grad.transpose();
+
+          // update ll
+          ll += n_sksl * log(pi_sksl+1e-8);
+        }
+      }
+    }
+  }
 
 
   est_H /=N;

@@ -211,6 +211,8 @@ fit_plFA <- function(
                                LIST        = CPP_CONTROL_MAIN,
                                SETTING     = "main")
 
+    stoFit@control <- sa_args
+
     sa_args <-  c(list(N           = dims$n,
                        C_VEC       = dims$cat,
                        CONSTRMAT   = constr_list$CONSTRMAT,

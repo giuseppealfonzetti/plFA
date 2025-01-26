@@ -272,18 +272,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // estimate_H
-Rcpp::List estimate_H(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG);
-RcppExport SEXP _plFA_estimate_H(SEXP C_VECSEXP, SEXP ASEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP) {
+Rcpp::List estimate_H(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
+RcppExport SEXP _plFA_estimate_H(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type A(ASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type CONSTRLOGSD(CONSTRLOGSDSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
     Rcpp::traits::input_parameter< int >::type N(NSEXP);
     Rcpp::traits::input_parameter< int >::type CORRFLAG(CORRFLAGSEXP);
-    rcpp_result_gen = Rcpp::wrap(estimate_H(C_VEC, A, THETA, FREQ, N, CORRFLAG));
+    Rcpp::traits::input_parameter< const int >::type NTHR(NTHRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
+    Rcpp::traits::input_parameter< const int >::type NCORR(NCORRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NVAR(NVARSEXP);
+    rcpp_result_gen = Rcpp::wrap(estimate_H(C_VEC, A, CONSTRLOGSD, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -324,7 +329,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
     {"_plFA_cpp_multiThread_completePairwise", (DL_FUNC) &_plFA_cpp_multiThread_completePairwise, 13},
     {"_plFA_cpp_plSA", (DL_FUNC) &_plFA_cpp_plSA, 28},
-    {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 6},
+    {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 11},
     {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 10},
     {NULL, NULL, 0}
 };
