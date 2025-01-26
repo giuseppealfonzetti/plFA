@@ -63,7 +63,7 @@ fit_plFA <- function(
     VALDATA = NULL,
     METHOD = c('ucminf', "SA"),
     INIT = NULL,
-    INIT_METHOD = NULL,
+    INIT_METHOD = c("plSA", "custom", "standard"),
     CONTROL = list(),
     CPP_CONTROL_MAIN = NULL,
     CPP_CONTROL_INIT = NULL,
@@ -77,6 +77,9 @@ fit_plFA <- function(
   constr_list <- check_cnstr(CONSTR_LIST)
   method <- match.arg(METHOD)
 
+
+  if(!is.null(INIT)) INIT_METHOD <- "custom"
+  INIT_METHOD <- match.arg(INIT_METHOD)
 
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
