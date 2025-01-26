@@ -235,16 +235,16 @@ fit_plFA <- function(
     if(opt$neg_pdiff)         warning("Possible divergent trajectories detected. Try decreasing STEP0.")
 
 
-    # stoFit@path_iters   <- opt$path_iters
-    # stoFit@path_theta   <- opt$path_theta
-    # stoFit@path_avtheta <- opt$path_avtheta
-    # stoFit@path_nll     <- opt$path_nll
-    stoFit@nll    <- opt$nll
+    stoFit@path$iters   <- opt$path_iters
+    stoFit@path$theta   <- opt$path_theta
+    stoFit@path$avtheta <- opt$path_avtheta
+    stoFit@path$nll     <- opt$path_nll
+    stoFit@nll          <- opt$nll
     stoFit@last_iter    <- opt$last_iter
-    # stoFit@convergence  <- opt$convergence
-    stoFit@cppTime <- summary(clock, units = 's')
-    tmp@stoFit <- stoFit
-    tmp@theta <- opt$avtheta
+    stoFit@convergence  <- opt$convergence
+    stoFit@cppTime      <- summary(clock, units = 's')
+    tmp@stoFit          <- stoFit
+    tmp@theta           <- opt$avtheta
 
 
     if(VERBOSE) message('Done! (', round(tmp@RTime,2),' secs)')

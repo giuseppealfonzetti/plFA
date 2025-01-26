@@ -14,14 +14,11 @@ setClass('Dimensions', slots = c(n     = 'numeric',
                                  npar  = 'numeric'))
 
 #' Quantities specific for stochastic estimation
-setClass('StoFit', slots = c( path_iters   = 'vector',
-                              path_theta   = 'list',
-                              path_avtheta = 'list',
-                              path_nll     = 'vector',
+setClass('StoFit', slots = c( path         = 'list',
                               nll          = "numeric",
                               control      = 'list',
                               last_iter     = 'numeric',
-                              convergence  = 'logical',
+                              convergence  = 'numeric',
                               cppTime      = 'ANY'))
 
 

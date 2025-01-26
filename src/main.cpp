@@ -378,7 +378,7 @@ Rcpp::List cpp_plSA(
         Rcpp::Named("scale") = scale,
         Rcpp::Named("nll")   = nll,
         Rcpp::Named("path_theta") = path_theta,
-        Rcpp::Named("path_av_theta") = path_avtheta,
+        Rcpp::Named("path_avtheta") = path_avtheta,
         Rcpp::Named("path_iters") = path_iters,
         Rcpp::Named("path_nll") = path_nll,
         Rcpp::Named("post_index") = post_index,
