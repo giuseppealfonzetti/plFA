@@ -14,16 +14,12 @@ setClass('Dimensions', slots = c(n     = 'numeric',
                                  npar  = 'numeric'))
 
 #' Quantities specific for stochastic estimation
-setClass('StoFit', slots = c( trajSubset  = 'vector',
-                              projIters   = 'vector',
-                              pathTheta   = 'matrix',
-                              pathAvTheta = 'matrix',
-                              pathGrad    = 'matrix',
-                              pathValNll  = 'matrix',
-                              control     = 'list',
-                              lastIter    = 'numeric',
-                              convergence = 'numeric',
-                              cppTime     = 'ANY'))
+setClass('StoFit', slots = c( path         = 'list',
+                              nll          = "numeric",
+                              control      = 'list',
+                              last_iter     = 'numeric',
+                              convergence  = 'numeric',
+                              cppTime      = 'ANY'))
 
 
 # Object returned by fit_plFA

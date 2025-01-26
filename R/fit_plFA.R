@@ -1,3 +1,5 @@
+utils::globalVariables(c("clock"))
+
 #' Fit factor models for ordinal data with pairwise likelihood methods
 #'
 #' @description
@@ -59,11 +61,12 @@ fit_plFA <- function(
     DATA,
     CONSTR_LIST,
     VALDATA = NULL,
-    METHOD = c('ucminf'),
-    CONTROL = list(),
+    METHOD = c('ucminf', "SA"),
     INIT = NULL,
-    ITERATIONS_SUBSET = NULL,
-    VERBOSEFLAG = 0,
+    INIT_METHOD = NULL,
+    CONTROL = list(),
+    CPP_CONTROL_MAIN = NULL,
+    CPP_CONTROL_INIT = NULL,    VERBOSE = FALSE,
     NCORES = 1
 ){
 
@@ -96,25 +99,30 @@ fit_plFA <- function(
                         npar  = dims$d),
              method = METHOD)
 
-  # Check Initialisation
-  tmp@init <- check_init(INIT, dims, constr_list)
 
 
-  message('2. Computing frequencies...')
+  # Set up multi-threads computations
+  tmp@cores <- NCORES
+  RcppParallel::setThreadOptions(numThreads = NCORES)
+
+
+  if(VERBOSE) message('- Computing frequencies...')
   freq_start_time <- Sys.time()
   tmp@freq <- pairs_freq(DATA, dims$cat)
   freq_end_time <- Sys.time()
-
   tmp@freqTime <- as.numeric(difftime(freq_end_time, freq_start_time, units = 'secs')[1])
 
-  tmp@cores <- NCORES
-  RcppParallel::setThreadOptions(numThreads = NCORES)
+  # Check Initialisation
+  tmp@init <- check_init(INIT, tmp@freq, dims, constr_list, INIT_METHOD, VERBOSE, CPP_ARGS = CPP_CONTROL_INIT)
+
+
+
 
 
   # Numerical optimisation
   if(METHOD == 'ucminf'){
 
-    message('3. Optimising with ucminf...')
+    if(VERBOSE) message('- Optimising with ucminf...')
     tmp@method <- "ucminf"
 
     # Compute frequency table bivariate patterns
@@ -180,7 +188,107 @@ fit_plFA <- function(
     tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
 
 
-    message('4. Done! (', round(tmp@RTime,2),' secs)')
+    if(VERBOSE) message('Done! (', round(tmp@RTime,2),' secs)')
+    RcppParallel::setThreadOptions(numThreads = 1)
     return(tmp)
   }
+
+  if(METHOD=="SA"){
+    if(!is.null(VALDATA)){
+      if(VERBOSE) message('- Computing frequencies on validation data...')
+      tmp@valfreq <- pairs_freq(VALDATA, dims$cat)
+    }
+
+    if(VERBOSE) message('- Optimising via pairwise stochastic approximation...')
+    stoFit <- new('StoFit')
+    tmp@method <- "SA"
+
+
+    sa_args <- check_plSA_args(FREQ        = tmp@freq,
+                               VALFREQ     = if(is.null(VALDATA)) NULL else tmp@valfreq,
+                               DIMS        = dims,
+                               CONSTR_LIST = constr_list,
+                               LIST        = CPP_CONTROL_MAIN,
+                               SETTING     = "main")
+
+    stoFit@control <- sa_args
+
+    sa_args <-  c(list(N           = dims$n,
+                       C_VEC       = dims$cat,
+                       CONSTRMAT   = constr_list$CONSTRMAT,
+                       CONSTRLOGSD = constr_list$CONSTRLOGSD,
+                       THETA_INIT  = tmp@init,
+                       NTHR        = dims$nthr,
+                       NLOAD       = dims$nload,
+                       NCORR       = dims$ncorr,
+                       NVAR        = dims$nvar
+    ), sa_args)
+
+    opt <- do.call(cpp_plSA, sa_args)
+    end_time <- Sys.time()
+    tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+
+    if(!opt$convergence_burn) warning(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_NLL*10, ". Stopped at ", sa_args$BURN, " iterations. Try increasing BURN or STEP0."))
+    if(opt$proj_after_burn)   warning("Projections performed after the burn-in. Trajectories might be unstable.")
+    if(opt$convergence==0)    warning(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_NLL, ". Stopped at ", sa_args$MAXT, " iterations. Try increasing MAXT or STEP0.."))
+    if(opt$convergence==-1)   warning(paste0("Divergent trajectories. Decrease STEP0."))
+    if(opt$neg_pdiff)         warning("Possible divergent trajectories detected. Try decreasing STEP0.")
+
+
+    stoFit@path$iters   <- opt$path_iters
+    stoFit@path$theta   <- opt$path_theta
+    stoFit@path$avtheta <- opt$path_avtheta
+    stoFit@path$nll     <- opt$path_nll
+    stoFit@nll          <- opt$nll
+    stoFit@last_iter    <- opt$last_iter
+    stoFit@convergence  <- opt$convergence
+    stoFit@cppTime      <- summary(clock, units = 's')
+    tmp@stoFit          <- stoFit
+    tmp@theta           <- opt$avtheta
+
+
+    if(VERBOSE) message('Done! (', round(tmp@RTime,2),' secs)')
+    RcppParallel::setThreadOptions(numThreads = 1)
+    return(tmp)
+
+
+
+
+
+
+
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

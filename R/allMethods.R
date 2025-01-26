@@ -3,15 +3,15 @@
 setMethod('show', 'PlFaFit', function(object){
 
   cat( "- Dimensions:\n",
-       "  - Sample size: ", object@dims@n, "\n",
-       "  - Items: ", object@dims@p,  " (", object@dims@pairs, " pairs)\n",
-       "  - Latent traits: ", object@dims@q,"\n\n",
+       "  - Sample size:", object@dims@n, "\n",
+       "  - Items:", object@dims@p,  "(", object@dims@pairs, " pairs)\n",
+       "  - Latent traits:", object@dims@q,"\n\n",
        "- Free parameters:\n",
-       "  - Thresholds: ", object@dims@nthr, "\n",
-       "  - Loadings: ", object@dims@nload, "\n",
-       "  - Latent correlations: ", object@dims@ncorr, "\n",
-       "  - Latent variances: ", object@dims@nvar, "\n",
-       "  - Total: ", object@dims@npar, "\n\n")
+       "  - Thresholds:", object@dims@nthr, "\n",
+       "  - Loadings:", object@dims@nload, "\n",
+       "  - Latent correlations:", object@dims@ncorr, "\n",
+       "  - Latent variances:", object@dims@nvar, "\n",
+       "  - Total:", object@dims@npar, "\n\n")
 
   if(object@method == 'ucminf'){
 
@@ -202,20 +202,23 @@ setMethod('computeVar', 'PlFaFit',
                        NUMDERIV    = NUMDERIV,
                        INVHAPPRX   = OBJ@numFit$invhessian)
           }else{
-            compute_var(THETA    = OBJ@theta,
-                       C_VEC     = OBJ@dims@cat,
-                       N         = OBJ@dims@n,
-                       IT        = OBJ@stoFit@lastIter - OBJ@stoFit@control$BURN,
-                       PAIRS     = OBJ@dims@pairs,
-                       PPI       = OBJ@stoFit@control$PAIRS_PER_ITERATION,
-                       CONSTRMAT = OBJ@cnstr@loadings,
-                       CORRFLAG  = OBJ@cnstr@corrflag,
-                       FREQ      = OBJ@freq,
-                       DATA      = DATA,
-                       METHOD    = OBJ@method,
-                       NUMDERIV  = NUMDERIV,
-                       OPTION    = OPTION,
-                       INVHAPPRX = OBJ@numFit$invhessian)
+            compute_var(THETA      = OBJ@theta,
+                       C_VEC       = OBJ@dims@cat,
+                       N           = OBJ@dims@n,
+                       IT          = OBJ@stoFit@last_iter - OBJ@stoFit@control$BURN,
+                       PAIRS       = OBJ@dims@pairs,
+                       PPI         = OBJ@stoFit@control$PAIRS_PER_ITERATION,
+                       CONSTRMAT   = OBJ@cnstr@loadings,
+                       CONSTRLOGSD = OBJ@cnstr@loglatsd,
+                       NTHR        = OBJ@dims@nthr,
+                       NLOAD       = OBJ@dims@nload,
+                       NCORR       = OBJ@dims@ncorr,
+                       NVAR        = OBJ@dims@nvar,
+                       FREQ        = OBJ@freq,
+                       DATA        = DATA,
+                       METHOD      = OBJ@method,
+                       NUMDERIV    = NUMDERIV,
+                       INVHAPPRX   = NULL)
           }}
 )
 
@@ -235,6 +238,8 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
            NVAR        = NVAR)
   }
   trJacob <- numDeriv::jacobian(Rwr_getPar, x=THETA)
+
+  cat("dim trJacob: ", dim(trJacob))
 
   opt_noise <- NA
   Hhat <- NA
@@ -262,14 +267,19 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
   }else{
     if(is.null(INVHAPPRX)){
       message('- Estimating H...')
-      # Hhat <- estimate_H(
-      #   C_VEC = C_VEC,
-      #   A = CONSTRMAT,
-      #   THETA = THETA,
-      #   FREQ = FREQ,
-      #   N = N,
-      #   CORRFLAG = CORRFLAG
-      # )$est_H
+      Hhat <- estimate_H(
+        C_VEC = C_VEC,
+        A = CONSTRMAT,
+        CONSTRLOGSD = CONSTRLOGSD,
+        THETA = THETA,
+        FREQ = FREQ,
+        N = N,
+        CORRFLAG = (NCORR>0),
+        NTHR        = NTHR,
+        NLOAD       = NLOAD,
+        NCORR       = NCORR,
+        NVAR        = NVAR
+      )$est_H
     }
 
   }
@@ -288,14 +298,18 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     NVAR        = NVAR
   )$est_J
 
+  cat("dim J: ", dim(Jhat))
+
   invH <- INVHAPPRX
   if(is.null(INVHAPPRX)){
-    message('3. Inverting H...')
+    message('- Inverting H...')
     if(!(det(Hhat)>0)) stop('H not invertible.')
     invH <- solve(Hhat)
   }
 
-  sandwich <- invH %*% Jhat %*% invH
+  cat("dim invH: ", dim(invH))
+
+  vcov <- invH %*% Jhat %*% invH
 
   message('- Computing the variances...')
   if(METHOD =='ucminf'){

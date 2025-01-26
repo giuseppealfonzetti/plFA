@@ -69,6 +69,11 @@ cpp_latvar_mat2cmat <- function(S) {
     .Call(`_plFA_cpp_latvar_mat2cmat`, S)
 }
 
+#' @export
+cpp_sa_proj <- function(THETA, CONSTRMAT, CONSTRLOGSD, C_VEC, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_plFA_cpp_sa_proj`, THETA, CONSTRMAT, CONSTRLOGSD, C_VEC, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+}
+
 #' Compute pairwise frequencies
 #'
 #' It returns a 5-rows matrix with each combination of items and categories as columns.
@@ -105,8 +110,8 @@ cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, T
     .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }
 
-sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER) {
-    .Call(`_plFA_sampling_step`, FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_ITEMS, SEED, SILENTFLAG, ITER)
+cpp_plSA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA_INIT, NTHR, NLOAD, NCORR, NVAR, SAMPLER, PAIRS_PER_ITERATION, SCHEDULE, STEP0, STEP1, STEP2, STEP3, BURN, MAXT, TOL_WINDOW, TOL_NLL, CHECK_TOL, CHECK_WINDOW, PATH_WINDOW, CLOCK_WINDOW, SEED, VERBOSE) {
+    .Call(`_plFA_cpp_plSA`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA_INIT, NTHR, NLOAD, NCORR, NVAR, SAMPLER, PAIRS_PER_ITERATION, SCHEDULE, STEP0, STEP1, STEP2, STEP3, BURN, MAXT, TOL_WINDOW, TOL_NLL, CHECK_TOL, CHECK_WINDOW, PATH_WINDOW, CLOCK_WINDOW, SEED, VERBOSE)
 }
 
 #' Estimate of H
@@ -121,8 +126,8 @@ sampling_step <- function(FULL_POOL, METHODFLAG, PROB, PAIRS_PER_ITERATION, N_IT
 #' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 #' @param FREQ output from [pairs_freq()]
 #' @param N sample size
-estimate_H <- function(C_VEC, A, THETA, FREQ, N, CORRFLAG) {
-    .Call(`_plFA_estimate_H`, C_VEC, A, THETA, FREQ, N, CORRFLAG)
+estimate_H <- function(C_VEC, A, CONSTRLOGSD, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_plFA_estimate_H`, C_VEC, A, CONSTRLOGSD, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
 #' Estimate of J

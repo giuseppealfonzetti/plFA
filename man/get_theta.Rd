@@ -29,6 +29,8 @@ that the corresponding element in the loading matrix is free to be estimated.
 A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 to \eqn{0}.}
 
+\item{CORRFLAG}{Logical flag indicating whether the latent covariance matrix}
+
 \item{TAU}{Numerical vector of thresholds parameters.
 If all the \eqn{p} items have \eqn{c} possible categories, it contains
 \eqn{p(c-1)} elements.}
