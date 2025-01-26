@@ -116,8 +116,8 @@ cfa <- function(
     METHOD = method,
     CONTROL = control,
     INIT = start,
-    ITERATIONS_SUBSET = iterations_subset,
-    VERBOSEFLAG = as.numeric(verbose),
+    # ITERATIONS_SUBSET = iterations_subset,
+    VERBOSE = verbose,
     NCORES = ncores
   )
   vars <- computeVar(

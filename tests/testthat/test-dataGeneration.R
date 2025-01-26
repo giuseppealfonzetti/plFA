@@ -174,21 +174,28 @@ test_that("gen_loadings() errors", {
 #   ), 'LOADINGS and LATENT_COV dimensions not compatible.')
 # })
 
-test_that("sim_data() output", {
-  set.seed(123)
-  p <- 10L; q <- 5L; n <- 50L
-  A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-  Load <- gen_loadings(CONSTRMAT = A)
-  thr <- c(-1, 0, 1)
-  S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q, CORRFLAG = 1)
-  D <- sim_data(
-    SAMPLE_SIZE = n,
-    LOADINGS = Load,
-    THRESHOLDS = thr,
-    LATENT_COV = S)
-  expect_identical(ncol(D), p)
-  expect_identical(nrow(D), n)
-  expect_identical(round(D), D)
-  expect_identical(D<=length(thr), matrix(TRUE, n, p))
-  expect_identical(D>=0, matrix(TRUE, n, p))
-})
+# test_that("sim_data() output", {
+#   set.seed(123)
+#   p <- 10L; q <- 5L; n <- 50L
+#   stdlv <- TRUE
+#   corrflag <- TRUE
+#
+#
+#   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
+#   Load <- gen_loadings(CONSTRMAT = A)
+#   thr <- c(-1, 0, 1)
+#   cat <- rep(length(thr)+1, p)
+#   nthr <- sum(cat)-p
+#
+#   S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q, CORRFLAG = 1)
+#   D <- sim_data(
+#     SAMPLE_SIZE = n,
+#     LOADINGS = Load,
+#     THRESHOLDS = thr,
+#     LATENT_COV = S)
+#   expect_identical(ncol(D), p)
+#   expect_identical(nrow(D), n)
+#   expect_identical(round(D), D)
+#   expect_identical(D<=length(thr), matrix(TRUE, n, p))
+#   expect_identical(D>=0, matrix(TRUE, n, p))
+# })

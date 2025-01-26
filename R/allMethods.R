@@ -239,8 +239,6 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
   }
   trJacob <- numDeriv::jacobian(Rwr_getPar, x=THETA)
 
-  cat("dim trJacob: ", dim(trJacob))
-
   opt_noise <- NA
   Hhat <- NA
   if(NUMDERIV){
@@ -298,7 +296,6 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     NVAR        = NVAR
   )$est_J
 
-  cat("dim J: ", dim(Jhat))
 
   invH <- INVHAPPRX
   if(is.null(INVHAPPRX)){
@@ -307,13 +304,12 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     invH <- solve(Hhat)
   }
 
-  cat("dim invH: ", dim(invH))
 
   vcov <- invH %*% Jhat %*% invH
 
   message('- Computing the variances...')
   if(METHOD =='ucminf'){
-    asy_var <- diag(sandwich)
+    asy_var <- diag(vcov)
   } else {
     asy_var <- diag(vcov)
     a1 <- PAIRS*(PAIRS - PPI)/(PPI*(PAIRS-1))

@@ -66,7 +66,8 @@ fit_plFA <- function(
     INIT_METHOD = NULL,
     CONTROL = list(),
     CPP_CONTROL_MAIN = NULL,
-    CPP_CONTROL_INIT = NULL,    VERBOSE = FALSE,
+    CPP_CONTROL_INIT = NULL,
+    VERBOSE = FALSE,
     NCORES = 1
 ){
 
