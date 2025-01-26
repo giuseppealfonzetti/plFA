@@ -9,9 +9,11 @@ fit_plFA(
   CONSTR_LIST,
   VALDATA = NULL,
   METHOD = c("ucminf", "SA"),
-  CONTROL = list(),
   INIT = NULL,
-  ITERATIONS_SUBSET = NULL,
+  INIT_METHOD = NULL,
+  CONTROL = list(),
+  CPP_CONTROL_MAIN = NULL,
+  CPP_CONTROL_INIT = NULL,
   VERBOSE = FALSE,
   NCORES = 1
 )
@@ -34,6 +36,8 @@ fit_plFA(
 \tab \cr
 \code{'hyper'} \tab for stochastic estimation with weights following a multivariate hypergeometric distribution. \cr
 }}
+
+\item{INIT}{Initialising vector. If not provided, optiisation starts at the zero vector.}
 
 \item{CONTROL}{List of control options to pass to the optimiser: \tabular{ll}{
 \code{control} \tab  See \code{ucminf} documentation \cr
@@ -68,11 +72,9 @@ fit_plFA(
 \tab \cr
 }}
 
-\item{INIT}{Initialising vector. If not provided, optiisation starts at the zero vector.}
+\item{NCORES}{Integer value setting the number of threads to carry out the estimation.}
 
 \item{ITERATIONS_SUBSET}{Vector with the indexes of iterations used to store trajectories.}
-
-\item{NCORES}{Integer value setting the number of threads to carry out the estimation.}
 
 \item{VERBOSEFLAG}{TRUE verbose output}
 }

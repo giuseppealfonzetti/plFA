@@ -320,7 +320,7 @@ Eigen::VectorXd cpp_sa_proj(
 ){
   bool flag = false;
   Eigen::VectorXd theta = THETA;
-  sa::proj(CONSTRMAT,
+  sa::proj2(CONSTRMAT,
            CONSTRLOGSD,
            C_VEC,
            CORRFLAG,

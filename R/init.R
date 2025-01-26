@@ -48,8 +48,8 @@ init_par_with_plSA <- function(DIMS, CONSTR_LIST, CPP_ARGS=NULL){
 
   cpp_args <- c(list(N           = DIMS$n,
                      C_VEC       = DIMS$cat,
-                     CONSTRMAT   = constr_list$CONSTRMAT,
-                     CONSTRLOGSD = constr_list$CONSTRLOGSD,
+                     CONSTRMAT   = CONSTR_LIST$CONSTRMAT,
+                     CONSTRLOGSD = CONSTR_LIST$CONSTRLOGSD,
                      THETA_INIT  = start_par,
                      NTHR        = DIMS$nthr,
                      NLOAD       = DIMS$nload,
@@ -59,14 +59,6 @@ init_par_with_plSA <- function(DIMS, CONSTR_LIST, CPP_ARGS=NULL){
 
   sto_init <- do.call(cpp_plSA, cpp_args)
 
-  init_par <- cpp_sa_proj( THETA=sto_init$avtheta,
-                           CONSTRMAT=CONSTR_LIST$CONSTRMAT,
-                           CONSTRLOGSD=CONSTR_LIST$CONSTRLOGSD,
-                           C_VEC=DIMS$cat,
-                           CORRFLAG=CONSTR_LIST$CORRFLAG,
-                           NTHR=DIMS$nthr,
-                           NLOAD=DIMS$nload,
-                           NCORR=DIMS$ncorr,
-                           NVAR=DIMS$nvar)
-  return(init_par)
+
+  return(sto_init$avtheta)
 }

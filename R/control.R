@@ -168,7 +168,18 @@ check_init_par <- function(PAR, DIMS, CONSTR_LIST){
   check_latcov(S)
   Sy <- L%*%S%*%t(L)
   # stopifnot(diag(Sy)<=1)
-  # if(!all(diag(Sy)<=1))warning("Negative error variances implied by init parameters")
+  if(!all(diag(Sy)<=1)) warning("Negative error variances implied by init parameters")
+  PAR <- cpp_sa_proj( THETA=PAR,
+                      CONSTRMAT=CONSTR_LIST$CONSTRMAT,
+                      CONSTRLOGSD=CONSTR_LIST$CONSTRLOGSD,
+                      C_VEC=DIMS$cat,
+                      CORRFLAG=CONSTR_LIST$CORRFLAG,
+                      NTHR=DIMS$nthr,
+                      NLOAD=DIMS$nload,
+                      NCORR=DIMS$ncorr,
+                      NVAR=DIMS$nvar)
+
+  return(PAR)
 }
 
 check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("plSA", "custom", "standard"), VERBOSE=FALSE, CPP_ARGS=NULL){
@@ -197,13 +208,13 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("plSA", "cus
     if(VERBOSE) cat('- Done.\n')
   }else if(INIT_METHOD=="plSA"){
     if(VERBOSE) cat('- Initialising with plSA ...')
-    CPP_ARGS <- check_plSA_args(FREQ=FREQ, DIMS=DIMS, CONSTR_LIST=CONSTR_LIST, LIST=CPP_ARGS)
+    CPP_ARGS <- check_plSA_args(FREQ=FREQ, DIMS=DIMS, CONSTR_LIST=CONSTR_LIST, LIST=CPP_ARGS, SETTING = "init")
     INIT <- init_par_with_plSA(DIMS, CONSTR_LIST, CPP_ARGS)
     if(VERBOSE) cat('- Done.\n')
 
   }
 
-  check_init_par(INIT, DIMS, CONSTR_LIST)
+  INIT <- check_init_par(INIT, DIMS, CONSTR_LIST)
   return(INIT)
 }
 
@@ -211,15 +222,20 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("plSA", "cus
 
 
 
-check_plSA_args <- function(FREQ, DIMS, CONSTR_LIST, LIST=NULL, SETTING=c("init", "main")){
+check_plSA_args <- function(FREQ, VALFREQ=NULL, DIMS, CONSTR_LIST, LIST=NULL, SETTING=c("init", "main")){
+  SETTING <- match.arg(SETTING)
   out <- list()
-  out$FREQ <- out$VALFREQ <- FREQ
+  out$FREQ <-  FREQ
+
+  if(is.null(VALFREQ)) {out$VALFREQ <- FREQ} else {out$VALFREQ <- VALFREQ}
 
   if(is.null(LIST$SAMPLER)) LIST$SAMPLER <- 0
   stopifnot(LIST$SAMPLER%in%c(0,1))
   out$SAMPLER <- LIST$SAMPLER
 
-  if(is.null(LIST$PAIRS_PER_ITERATION)) LIST$PAIRS_PER_ITERATION <- 16
+  if(is.null(LIST$PAIRS_PER_ITERATION) & SETTING=="init") LIST$PAIRS_PER_ITERATION <- 16
+  if(is.null(LIST$PAIRS_PER_ITERATION) & SETTING=="main") LIST$PAIRS_PER_ITERATION <- 16
+
   stopifnot(is.numeric(LIST$PAIRS_PER_ITERATION))
   stopifnot(LIST$PAIRS_PER_ITERATION>0)
   out$PAIRS_PER_ITERATION <- as.integer(LIST$PAIRS_PER_ITERATION)
@@ -228,7 +244,9 @@ check_plSA_args <- function(FREQ, DIMS, CONSTR_LIST, LIST=NULL, SETTING=c("init"
   stopifnot(LIST$SCHEDULE%in%c(0,1))
   out$SCHEDULE <- LIST$SCHEDULE
 
-  if(is.null(LIST$STEP0)) LIST$STEP0 <- sqrt(1/DIMS$d)
+  if(is.null(LIST$STEP0) & SETTING=="init") LIST$STEP0 <- sqrt(1/DIMS$d)
+  if(is.null(LIST$STEP0) & SETTING=="main") LIST$STEP0 <- 1
+
   stopifnot(is.numeric(LIST$STEP0))
   stopifnot(LIST$STEP0>0)
   out$STEP0 <- LIST$STEP0
@@ -238,7 +256,7 @@ check_plSA_args <- function(FREQ, DIMS, CONSTR_LIST, LIST=NULL, SETTING=c("init"
   stopifnot(LIST$STEP1>0)
   out$STEP1 <- LIST$STEP1
 
-  if(is.null(LIST$STEP2)) LIST$STEP2 <- 1e-5
+  if(is.null(LIST$STEP2)) LIST$STEP2 <- 1e-8
   stopifnot(is.numeric(LIST$STEP2))
   stopifnot(LIST$STEP2>0)
   out$STEP2 <- LIST$STEP2
@@ -248,12 +266,14 @@ check_plSA_args <- function(FREQ, DIMS, CONSTR_LIST, LIST=NULL, SETTING=c("init"
   stopifnot(LIST$STEP3>0)
   out$STEP3 <- LIST$STEP3
 
-  if(is.null(LIST$BURN)) LIST$BURN <- 150
+  if(is.null(LIST$BURN) & (SETTING=="init")) LIST$BURN <- 150
+  if(is.null(LIST$BURN) & (SETTING=="main")) LIST$BURN <- 9000#(DIMS$pairs/LIST$PAIRS_PER_ITERATION)*100
   stopifnot(is.numeric(LIST$BURN))
   stopifnot(LIST$BURN>0)
   out$BURN <- as.integer(LIST$BURN)
 
-  if(is.null(LIST$MAXT)) LIST$MAXT <- 200
+  if(is.null(LIST$MAXT) & SETTING=="init") LIST$MAXT <- 200
+  if(is.null(LIST$MAXT) & SETTING=="main") LIST$MAXT <- 10000#(DIMS$pairs/LIST$PAIRS_PER_ITERATION)*110
   stopifnot(is.numeric(LIST$MAXT))
   stopifnot(LIST$MAXT>0)
   out$MAXT <- as.integer(LIST$MAXT)
@@ -263,17 +283,19 @@ check_plSA_args <- function(FREQ, DIMS, CONSTR_LIST, LIST=NULL, SETTING=c("init"
   stopifnot(LIST$TOL_WINDOW>0)
   out$TOL_WINDOW <- as.integer(LIST$TOL_WINDOW)
 
-  if(is.null(LIST$TOL)) LIST$TOL <- 1e-8
-  stopifnot(is.numeric(LIST$TOL))
-  stopifnot(LIST$TOL>0)
-  out$TOL <- LIST$TOL
+  if(is.null(LIST$TOL_NLL)) LIST$TOL_NLL <- 1e-7
+  stopifnot(is.numeric(LIST$TOL_NLL))
+  stopifnot(LIST$TOL_NLL>0)
+  out$TOL_NLL <- LIST$TOL_NLL
 
-  if(is.null(LIST$CHECK_TOL)) LIST$CHECK_TOL <- FALSE
+  if(is.null(LIST$CHECK_TOL) & SETTING=="init") LIST$CHECK_TOL <- FALSE
+  if(is.null(LIST$CHECK_TOL) & SETTING=="main") LIST$CHECK_TOL <- TRUE
+
   stopifnot(is.logical(LIST$CHECK_TOL))
   out$CHECK_TOL <- LIST$CHECK_TOL
 
 
-  if(is.null(LIST$CHECK_WINDOW)) LIST$CHECK_WINDOW <- 250
+  if(is.null(LIST$CHECK_WINDOW)) LIST$CHECK_WINDOW <- 500
   stopifnot(is.numeric(LIST$CHECK_WINDOW))
   stopifnot(LIST$CHECK_WINDOW>0)
   out$CHECK_WINDOW <- as.integer(LIST$CHECK_WINDOW)
@@ -293,7 +315,8 @@ check_plSA_args <- function(FREQ, DIMS, CONSTR_LIST, LIST=NULL, SETTING=c("init"
   stopifnot(LIST$SEED>0)
   out$SEED <- as.integer(LIST$SEED)
 
-  if(is.null(LIST$VERBOSE)) LIST$VERBOSE <- FALSE
+  if(is.null(LIST$VERBOSE) & SETTING=="init") LIST$VERBOSE <- FALSE
+  if(is.null(LIST$VERBOSE) & SETTING=="main") LIST$VERBOSE <- TRUE
   stopifnot(is.logical(LIST$VERBOSE))
   out$VERBOSE <- LIST$VERBOSE
 

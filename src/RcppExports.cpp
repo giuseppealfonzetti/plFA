@@ -234,8 +234,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // cpp_plSA
-Rcpp::List cpp_plSA(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, Eigen::Map<Eigen::VectorXd> THETA_INIT, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int SAMPLER, const int PAIRS_PER_ITERATION, const int SCHEDULE, const double STEP0, const double STEP1, const double STEP2, const double STEP3, const int BURN, const int MAXT, const int TOL_WINDOW, const double TOL, const int CHECK_TOL, const int CHECK_WINDOW, const int PATH_WINDOW, const int CLOCK_WINDOW, const int SEED, const bool VERBOSE);
-RcppExport SEXP _plFA_cpp_plSA(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP THETA_INITSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP SAMPLERSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP SCHEDULESEXP, SEXP STEP0SEXP, SEXP STEP1SEXP, SEXP STEP2SEXP, SEXP STEP3SEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOL_WINDOWSEXP, SEXP TOLSEXP, SEXP CHECK_TOLSEXP, SEXP CHECK_WINDOWSEXP, SEXP PATH_WINDOWSEXP, SEXP CLOCK_WINDOWSEXP, SEXP SEEDSEXP, SEXP VERBOSESEXP) {
+Rcpp::List cpp_plSA(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, Eigen::Map<Eigen::VectorXd> THETA_INIT, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int SAMPLER, const int PAIRS_PER_ITERATION, const int SCHEDULE, const double STEP0, const double STEP1, const double STEP2, const double STEP3, const int BURN, const int MAXT, const int TOL_WINDOW, const double TOL_NLL, const int CHECK_TOL, const int CHECK_WINDOW, const int PATH_WINDOW, const int CLOCK_WINDOW, const int SEED, const bool VERBOSE);
+RcppExport SEXP _plFA_cpp_plSA(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP THETA_INITSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP SAMPLERSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP SCHEDULESEXP, SEXP STEP0SEXP, SEXP STEP1SEXP, SEXP STEP2SEXP, SEXP STEP3SEXP, SEXP BURNSEXP, SEXP MAXTSEXP, SEXP TOL_WINDOWSEXP, SEXP TOL_NLLSEXP, SEXP CHECK_TOLSEXP, SEXP CHECK_WINDOWSEXP, SEXP PATH_WINDOWSEXP, SEXP CLOCK_WINDOWSEXP, SEXP SEEDSEXP, SEXP VERBOSESEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -260,14 +260,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type BURN(BURNSEXP);
     Rcpp::traits::input_parameter< const int >::type MAXT(MAXTSEXP);
     Rcpp::traits::input_parameter< const int >::type TOL_WINDOW(TOL_WINDOWSEXP);
-    Rcpp::traits::input_parameter< const double >::type TOL(TOLSEXP);
+    Rcpp::traits::input_parameter< const double >::type TOL_NLL(TOL_NLLSEXP);
     Rcpp::traits::input_parameter< const int >::type CHECK_TOL(CHECK_TOLSEXP);
     Rcpp::traits::input_parameter< const int >::type CHECK_WINDOW(CHECK_WINDOWSEXP);
     Rcpp::traits::input_parameter< const int >::type PATH_WINDOW(PATH_WINDOWSEXP);
     Rcpp::traits::input_parameter< const int >::type CLOCK_WINDOW(CLOCK_WINDOWSEXP);
     Rcpp::traits::input_parameter< const int >::type SEED(SEEDSEXP);
     Rcpp::traits::input_parameter< const bool >::type VERBOSE(VERBOSESEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_plSA(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA_INIT, NTHR, NLOAD, NCORR, NVAR, SAMPLER, PAIRS_PER_ITERATION, SCHEDULE, STEP0, STEP1, STEP2, STEP3, BURN, MAXT, TOL_WINDOW, TOL, CHECK_TOL, CHECK_WINDOW, PATH_WINDOW, CLOCK_WINDOW, SEED, VERBOSE));
+    rcpp_result_gen = Rcpp::wrap(cpp_plSA(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, THETA_INIT, NTHR, NLOAD, NCORR, NVAR, SAMPLER, PAIRS_PER_ITERATION, SCHEDULE, STEP0, STEP1, STEP2, STEP3, BURN, MAXT, TOL_WINDOW, TOL_NLL, CHECK_TOL, CHECK_WINDOW, PATH_WINDOW, CLOCK_WINDOW, SEED, VERBOSE));
     return rcpp_result_gen;
 END_RCPP
 }
