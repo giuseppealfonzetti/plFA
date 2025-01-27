@@ -11,6 +11,7 @@ is_ordinal_df <- function(D) {
 #'   the [`lavaan::lavaanify()`] function) is also accepted.
 #' @param data A data frame containing the observed variables used in the model.
 #'   Variables must be declared as ordered factors.
+#' @param std.lv TBC
 #' @param start Starting values to use.
 #' @param estimator (For `lavaan` compatibility only). The estimator is `PML`.
 #' @param estimator.args A list of arguments for [fit_plFA()]. TBC.

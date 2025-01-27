@@ -29,7 +29,6 @@ Imports:
     RcppClock  (>= 1.1),
     mvtnorm,
     ucminf,
-    dplyr,
     numDeriv,
     methods
 URL: https://github.com/giuseppealfonzetti/plFA

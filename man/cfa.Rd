@@ -26,6 +26,8 @@ the \code{\link[lavaan:model.syntax]{lavaan::lavaanify()}} function) is also acc
 \item{data}{A data frame containing the observed variables used in the model.
 Variables must be declared as ordered factors.}
 
+\item{std.lv}{TBC}
+
 \item{start}{Starting values to use.}
 
 \item{estimator}{(For \code{lavaan} compatibility only). The estimator is \code{PML}.}
