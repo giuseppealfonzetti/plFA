@@ -30,11 +30,11 @@ Variables must be declared as ordered factors.}
 
 \item{estimator}{(For \code{lavaan} compatibility only). The estimator is \code{PML}.}
 
-\item{estimator.args}{A list of arguments for \code{\link[=plFA]{plFA()}}. TBC.}
+\item{estimator.args}{A list of arguments for \code{\link[=fit_plFA]{fit_plFA()}}. TBC.}
 
 \item{information}{(For \code{lavaan} compatibility only). The information matrix is...}
 
-\item{control}{A list of control parameters for the estimation algorithm. See \code{\link[=plFA]{plFA()}} for more information.}
+\item{control}{A list of control parameters for the estimation algorithm. See \code{\link[=fit_plFA]{fit_plFA()}} for more information.}
 
 \item{...}{Additional arguments to be passed to \code{\link[=lavaan]{lavaan()}}.}
 }

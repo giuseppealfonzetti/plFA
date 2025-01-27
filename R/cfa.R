@@ -13,9 +13,9 @@ is_ordinal_df <- function(D) {
 #'   Variables must be declared as ordered factors.
 #' @param start Starting values to use.
 #' @param estimator (For `lavaan` compatibility only). The estimator is `PML`.
-#' @param estimator.args A list of arguments for [`plFA()`]. TBC.
+#' @param estimator.args A list of arguments for [fit_plFA()]. TBC.
 #' @param information (For `lavaan` compatibility only). The information matrix is...
-#' @param control A list of control parameters for the estimation algorithm. See [`plFA()`] for more information.
+#' @param control A list of control parameters for the estimation algorithm. See [fit_plFA()] for more information.
 #' @param ... Additional arguments to be passed to [lavaan()].
 #'
 #' @returns A `plFAlavaan` object.

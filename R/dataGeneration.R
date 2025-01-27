@@ -78,9 +78,6 @@ build_constrMat <- function(P, Q, STRUCT = c('simple', 'triangular', 'crossed'),
 
 #' Construct loading matrix
 #'
-#' gen_loadings() construct a (possibly) random loading matrix following the
-#' constraints passed.
-#'
 #' @param FIXED Fixed value to assign to all free loadings. If 'NULL' it draws
 #' them randomly from Unif(0,1)
 #' @param CONSTRMAT Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
@@ -90,6 +87,7 @@ build_constrMat <- function(P, Q, STRUCT = c('simple', 'triangular', 'crossed'),
 #' @param SEED Random seed.
 #' @param LB Lower bound for uniform random generator. Default set to 0.
 #' @param UB Upper bound for uniform random generator. Default set to 1.
+#' @param STDLV  Logical indicator. Set it to `TRUE` to fix latent variables scale. Set it `FALSE` to fix loadings scale.
 #' @export
 gen_loadings <- function(CONSTRMAT, FIXED = NULL,  SEED = 123, LB = 0, UB = 1, STDLV=TRUE){
   CONSTRMAT <- check_cnstr_loadings(CONSTRMAT, STDLV = STDLV)

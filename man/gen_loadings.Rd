@@ -20,8 +20,9 @@ them randomly from Unif(0,1)}
 \item{LB}{Lower bound for uniform random generator. Default set to 0.}
 
 \item{UB}{Upper bound for uniform random generator. Default set to 1.}
+
+\item{STDLV}{Logical indicator. Set it to \code{TRUE} to fix latent variables scale. Set it \code{FALSE} to fix loadings scale.}
 }
 \description{
-gen_loadings() construct a (possibly) random loading matrix following the
-constraints passed.
+Construct loading matrix
 }
