@@ -16,7 +16,7 @@ extract_par(
 )
 }
 \arguments{
-\item{THETA}{Raw theta vector.}
+\item{THETA}{Unconstrained parameter vector.}
 
 \item{OPTION}{Can take values \tabular{ll}{
 \code{'raw'} \tab Returns \code{THETA}. \cr
@@ -26,13 +26,17 @@ extract_par(
 \code{'list'} \tab List containing the ordered thresholds vector, the loading matrix and the latent correlation matrix. \cr
 }}
 
-\item{CONSTRMAT}{Matrix of dimension \eqn{p * q} with binary loading constraints. 1 for free loadings, 0 otherwise.}
+\item{CONSTRMAT}{\eqn{p*q}-dimensional matrix. Elements set to \code{NA} refers to free loading parameters. Elements set to numerical values denote fixed values constraints.}
 
-\item{C}{Sum of the number of categories for each item.}
+\item{CONSTRLOGSD}{\eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.}
 
-\item{P}{Number if items}
+\item{NTHR}{Number of thresholds parameters.}
 
-\item{Q}{Number of latent variables}
+\item{NLOAD}{Number of free loadings parameters}
+
+\item{NCORR}{Number of free latent correlations parameters.}
+
+\item{NVAR}{Number of free latent variance parameters.}
 }
 \description{
 Extract parameters

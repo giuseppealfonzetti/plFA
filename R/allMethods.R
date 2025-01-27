@@ -110,7 +110,7 @@ setMethod('getPar', 'vector', function(OBJ, ...) extract_par(THETA = OBJ, ...))
 
 #' Extract parameters
 #'
-#' @param THETA Raw theta vector.
+#' @param THETA Unconstrained parameter vector.
 #' @param OPTION Can take values \tabular{ll}{
 #'    \code{'raw'} \tab Returns \code{THETA}. \cr
 #'    \tab \cr
@@ -118,11 +118,14 @@ setMethod('getPar', 'vector', function(OBJ, ...) extract_par(THETA = OBJ, ...))
 #'     \tab \cr
 #'    \code{'list'} \tab List containing the ordered thresholds vector, the loading matrix and the latent correlation matrix. \cr
 #' }
-#' @param C Sum of the number of categories for each item.
-#' @param P Number if items
-#' @param Q Number of latent variables
-#' @param CONSTRMAT Matrix of dimension \eqn{p * q} with binary loading constraints. 1 for free loadings, 0 otherwise.
-extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'), CONSTRMAT, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR){
+#' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
+#' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param NTHR Number of thresholds parameters.
+#' @param NLOAD Number of free loadings parameters
+#' @param NCORR Number of free latent correlations parameters.
+#' @param NVAR Number of free latent variance parameters.
+extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'),
+                        CONSTRMAT, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR){
   OPTION <- match.arg(OPTION)
 
   q <- ncol(CONSTRMAT)
