@@ -10,7 +10,7 @@ utils::globalVariables(c("clock"))
 #' @param CONSTR_LIST List of constraints. It must contain \tabular{ll}{
 #'    \code{CONSTRMAT} \tab \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints. \cr
 #'    \tab \cr
-#'    \code{CONSTRVAR} \tab \eqn{q}-dimensional vector Elements set to `NA` refers to free latent variance parameters. Elements set to numerical values denote fixed values constraints. \cr
+#'    \code{CONSTRVAR} \tab \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent variance parameters. Elements set to numerical values denote fixed values constraints. \cr
 #'    \tab \cr
 #'    \code{CORRFLAG} \tab Logical indicator. Set it to `FALSE` if the latent variables are assumed to be independent. Set it `TRUE` otherwise. \cr
 #'    \tab \cr

@@ -28,8 +28,8 @@ setMethod('show', 'PlFaFit', function(object){
       "- Stochastic estimate\n\n",
       "    Sampling scheme:", object@method, "\n",
       "    Pairs per iteration:", object@stoFit@control$PAIRS_PER_ITERATION, " out of ", object@dims@pairs, "\n",
-      "    Iterations:", object@stoFit@lastIter, "\n",
-     # "    Convergence:", object@stoFit@convergence, "\n",
+      "    Iterations:", object@stoFit@last_iter, "\n",
+      "    Convergence:", object@stoFit@convergence, "\n",
       "    Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
       "    Cores used:", object@cores, "\n",
 
@@ -62,25 +62,25 @@ setMethod('getThetaPath', 'PlFaFit', function(OBJ, LAB, OPTION) extract_theta_pa
 #' @param LAB Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.
 #' @param OPTION Parameterisation option.
 extract_theta_path <- function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed'){
-  if(!(LAB%in%c('pathTheta', 'pathAvTheta'))) stop('The extraction of this path is not implemented.')
-  if(!(OPTION%in%c('raw', 'transformed'))) stop('OPTION choice not implemented.')
-
-  # out <- list()
-  iters <- OBJ@stoFit@trajSubset
-  path  <- slot(OBJ@stoFit, LAB)
-
-  out <- dplyr::tibble(iter = iters)
-  parList <- split(t(path), rep(1:nrow(path), each = ncol(path)))
-  newParList <- lapply(parList, function(x) extract_par(THETA= x,
-                                            OPTION = OPTION,
-                                            C = sum(OBJ@dims@cat),
-                                            P = OBJ@dims@p,
-                                            Q = OBJ@dims@q,
-                                            CONSTRMAT = OBJ@cnstr@loadings,
-                                            CORRFLAG = OBJ@cnstr@corrflag))
-
-  out$par <- newParList
-  return(out)
+  # if(!(LAB%in%c('pathTheta', 'pathAvTheta'))) stop('The extraction of this path is not implemented.')
+  # if(!(OPTION%in%c('raw', 'transformed'))) stop('OPTION choice not implemented.')
+  #
+  # # out <- list()
+  # iters <- OBJ@stoFit@trajSubset
+  # path  <- slot(OBJ@stoFit, LAB)
+  #
+  # out <- dplyr::tibble(iter = iters)
+  # parList <- split(t(path), rep(1:nrow(path), each = ncol(path)))
+  # newParList <- lapply(parList, function(x) extract_par(THETA= x,
+  #                                           OPTION = OPTION,
+  #                                           C = sum(OBJ@dims@cat),
+  #                                           P = OBJ@dims@p,
+  #                                           Q = OBJ@dims@q,
+  #                                           CONSTRMAT = OBJ@cnstr@loadings,
+  #                                           CORRFLAG = OBJ@cnstr@corrflag))
+  #
+  # out$par <- newParList
+  return(NULL)
 }
 
 

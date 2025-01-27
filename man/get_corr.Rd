@@ -2,17 +2,26 @@
 % Please edit documentation in R/utils.R
 \name{get_corr}
 \alias{get_corr}
-\title{Extract vector of correlations from parameter vector}
+\title{Extract vector of latent correlations from unconstrained parameter vector}
 \usage{
 get_corr(THETA, NTHR, NLOAD, NCORR, NVAR, Q)
 }
 \arguments{
-\item{THETA}{Parameter vector}
+\item{THETA}{Unconstrained parameter vector}
 
-\item{Q}{Number of latent variables.}
+\item{NTHR}{Number of thresholds parameters.}
+
+\item{NLOAD}{Number of free loadings parameters}
+
+\item{NCORR}{Number of free latent correlations parameters.}
+
+\item{NVAR}{Number of free latent variance parameters.}
+
+\item{Q}{Number of latent variables}
+}
+\value{
+Vector of latent correlations
 }
 \description{
-get_corr() extracts the latent correlations from the
-parameter vector. The vector has length \eqn{q*(q-1)/2},
-where \eqn{q} is the number of latent variables.
+Extract vector of latent correlations from unconstrained parameter vector
 }

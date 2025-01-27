@@ -1,37 +1,55 @@
+
+#' Extract latent covariance matrix from unconstrained parameter vector
+#'
+#' @param THETA Unconstrained parameter vector
+#' @param CONSTRLOGSD  \eqn{Q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param NTHR Number of thresholds parameters.
+#' @param NLOAD Number of free loadings parameters
+#' @param NCORR Number of free latent correlations parameters.
+#' @param NVAR Number of free latent variance parameters.
+#' @param Q Number of latent variables
+#'
+#' @return
+#' Latent covariance matrix of dimension  \eqn{Q*Q}.
+#'
 #' @export
 get_S <- function(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q){
   THETA <- check_theta(THETA)
-
   return(cpp_latvar_theta2mat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q))
 }
 
 
-#' Extract vector of correlations from parameter vector
+#' Extract latent correlation matrix from unconstrained parameter vector
 #'
-#' get_corr() extracts the latent correlations from the
-#' parameter vector. The vector has length \eqn{q*(q-1)/2},
-#' where \eqn{q} is the number of latent variables.
+#' @param THETA Unconstrained parameter vector
+#' @param NTHR Number of thresholds parameters.
+#' @param NLOAD Number of free loadings parameters
+#' @param NCORR Number of free latent correlations parameters.
+#' @param NVAR Number of free latent variance parameters.
+#' @param Q Number of latent variables
 #'
-#' @param Q Number of latent variables.
-#' @param THETA Parameter vector
+#' @return Latent correlation matrix
+#'
 #' @export
 get_R <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q){
   Q <- check_q(Q)
   THETA <- check_theta(THETA)
-
   R <- cpp_latvar_theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, Q)
-
   return(R)
 }
 
-#' Extract vector of correlations from parameter vector
+#' Extract vector of latent correlations from unconstrained parameter vector
 #'
-#' get_corr() extracts the latent correlations from the
-#' parameter vector. The vector has length \eqn{q*(q-1)/2},
-#' where \eqn{q} is the number of latent variables.
+#' @param THETA Unconstrained parameter vector
+#' @param NTHR Number of thresholds parameters.
+#' @param NLOAD Number of free loadings parameters
+#' @param NCORR Number of free latent correlations parameters.
+#' @param NVAR Number of free latent variance parameters.
+#' @param Q Number of latent variables
 #'
-#' @param Q Number of latent variables.
-#' @param THETA Parameter vector
+#' @return Vector of latent correlations
+#'
+#' @export
 #' @export
 get_corr <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q){
   Q <- check_q(Q)
@@ -45,13 +63,9 @@ get_corr <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q){
 
 #' Extract free loadings from parameter vector
 #'
-#' get_lambda() extracts the vector of free loadings
-#' from the parameter vector
-#'
-#' @param THETA Raw vector of parameters.
-#' @param C Sum of the number of categories for each item.
-#' @param P Number if items
-#' @param Q Number of latent variables
+#' @param THETA Unconstrained parameter vector
+#' @param NTHR Number of thresholds parameters.
+#' @param NLOAD Number of free loadings parameters
 #'
 #'@export
 get_lambda <- function(THETA, NTHR, NLOAD){
@@ -64,23 +78,23 @@ get_lambda <- function(THETA, NTHR, NLOAD){
 
 #' Get full parameter vector
 #'
+#' @description
 #' Assemble the parameter vector starting from the threshold vector,
 #' the latent covariance matrix and the loading matrix
 #'
-#' @param TAU Numerical vector of thresholds parameters.
+#' @param THRESHOLDS Numerical vector of thresholds parameters.
 #' If all the \eqn{p} items have \eqn{c} possible categories, it contains
 #' \eqn{p(c-1)} elements.
 #' @param LOADINGS Numerical matrix of dimension \eqn{p*q},
 #' where \eqn{q} is the number of latent variables.
-#' @param LATENT_COV Correlation matrix of dimension \eqn{q}.
+#' @param LATENT_COV Latent covariance matrix of dimension \eqn{q*q}.
 #' @param CAT Integer vector storing the possible number of categories
 #' for each item. Values must be ordered following items order in the dataset.
-#' @param CONSTRMAT Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
-#' that the corresponding element in the loading matrix is free to be estimated.
-#' A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
-#' to \eqn{0}.
-#' @param CORRFLAG Logical flag indicating whether the latent covariance matrix
-#'
+#' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
+#' @param CONSTRVAR \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent variance parameters. Elements set to numerical values denote fixed values constraints.
+#' @param CORRFLAG Logical indicator. Set it to `FALSE` if the latent variables are independent. Set it `TRUE` otherwise.
+#' @param STDLV Logical indicator. Set it to `TRUE` to fix latent variables scale. Set it `FALSE` to fix loadings scale.
+
 #' @export
 get_theta <- function(THRESHOLDS, LOADINGS, LATENT_COV, CAT, CONSTRMAT, CONSTRVAR, CORRFLAG, STDLV){
 
@@ -99,9 +113,6 @@ get_theta <- function(THRESHOLDS, LOADINGS, LATENT_COV, CAT, CONSTRMAT, CONSTRVA
 
   load_vec <- cpp_loadings_mat2vec(LOADINGS, CONSTRMAT, sum(is.na(CONSTRMAT)))
 
-  # corr_vec <- NULL
-  # if(CORRFLAG)  corr_vec <- cpp_get_latvar_mat2vec(LATENT_COV)
-
   q <- ncol(CONSTRMAT)
   ncorr <- if(CORRFLAG) q*(q-1)/2 else 0
 
@@ -115,26 +126,26 @@ get_theta <- function(THRESHOLDS, LOADINGS, LATENT_COV, CAT, CONSTRMAT, CONSTRVA
 }
 
 
-#' Extract estimation trajectories
+#' #' Extract estimation trajectories
+#' #'
+#' #' Extract trajectories of interest along the stochastic optimisation
+#' #' from a fitted object
+#' #'
+#' #' @param MOD_OBJ Output of [fit_plFA].
+#' #' @param PATH_LAB Label for the trajectory of interest. Use "path_av_theta"
+#' #' for the averaged parameters trajectories.
+#' #'
+#' #'@export
+#' get_tidy_path <- function(MOD_OBJ, PATH_LAB){
+#'   iters <- MOD_OBJ$iterations_subset
+#'   path  <- MOD_OBJ$fit[[PATH_LAB]]
 #'
-#' Extract trajectories of interest along the stochastic optimisation
-#' from a fitted object
+#'   out <- dplyr::mutate(dplyr::tibble(iter = iters),
+#'       path_chosen = split(t(path), rep(1:nrow(path), each = ncol(path)))
+#'     )
 #'
-#' @param MOD_OBJ Output of [fit_plFA].
-#' @param PATH_LAB Label for the trajectory of interest. Use "path_av_theta"
-#' for the averaged parameters trajectories.
+#'   colnames(out) <- c('iter', PATH_LAB)
 #'
-#'@export
-get_tidy_path <- function(MOD_OBJ, PATH_LAB){
-  iters <- MOD_OBJ$iterations_subset
-  path  <- MOD_OBJ$fit[[PATH_LAB]]
-
-  out <- dplyr::mutate(dplyr::tibble(iter = iters),
-      path_chosen = split(t(path), rep(1:nrow(path), each = ncol(path)))
-    )
-
-  colnames(out) <- c('iter', PATH_LAB)
-
-  return(out)
-}
+#'   return(out)
+#' }
 

@@ -25,7 +25,9 @@ cpp_multiThread_completePairwise(
 
 \item{C_VEC}{Vector containing the number of categories for each item}
 
-\item{CONSTRMAT}{Constraint matrix. Loadings free to be estimated are identified by a NA.}
+\item{CONSTRMAT}{\eqn{p*q}-dimensional matrix. Elements set to \code{NA} refers to free loading parameters. Elements set to numerical values denote fixed values constraints.}
+
+\item{CONSTRLOGSD}{\eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.}
 
 \item{THETA}{Parameter vector}
 
@@ -33,11 +35,19 @@ cpp_multiThread_completePairwise(
 
 \item{CORRFLAG}{1 to estimate latent correlations. 0 for orthogonal latent factors.}
 
+\item{NTHR}{Number of thresholds parameters.}
+
+\item{NLOAD}{Number of free loadings parameters}
+
+\item{NCORR}{Number of free latent correlations parameters.}
+
+\item{NVAR}{Number of free latent variance parameters.}
+
 \item{GRFLAG}{0 to only compute the likelihood. 1 to also compute the gradient.}
 
 \item{SILENTFLAG}{optional for verbose output}
 }
 \description{
-Evaluate negative loglikelihood or gradient of the complete pool of pairs.
+Evaluate negative log pairwise likelihood or gradient of the complete pool of pairs.
 Used by external optimisers. Multithreading options via \code{RcppParallel}.
 }

@@ -24,7 +24,7 @@ fit_plFA(
 \item{CONSTR_LIST}{List of constraints. It must contain \tabular{ll}{
 \code{CONSTRMAT} \tab \eqn{p*q}-dimensional matrix. Elements set to \code{NA} refers to free loading parameters. Elements set to numerical values denote fixed values constraints. \cr
 \tab \cr
-\code{CONSTRVAR} \tab \eqn{q}-dimensional vector Elements set to \code{NA} refers to free latent variance parameters. Elements set to numerical values denote fixed values constraints. \cr
+\code{CONSTRVAR} \tab \eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent variance parameters. Elements set to numerical values denote fixed values constraints. \cr
 \tab \cr
 \code{CORRFLAG} \tab Logical indicator. Set it to \code{FALSE} if the latent variables are assumed to be independent. Set it \code{TRUE} otherwise. \cr
 \tab \cr
@@ -71,5 +71,5 @@ fit_plFA(
 Object of class \code{plFaFit}.
 }
 \description{
-Fit latent variable models for ordinal variable using pairwise likelihood methods running via quasi-Newton BFGS or stochastic approximations
+Fit latent variable models for ordinal variable using pairwise likelihood methods running via quasi-Newton BFGS or stochastic approximations.
 }

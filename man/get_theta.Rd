@@ -16,24 +16,25 @@ get_theta(
 )
 }
 \arguments{
+\item{THRESHOLDS}{Numerical vector of thresholds parameters.
+If all the \eqn{p} items have \eqn{c} possible categories, it contains
+\eqn{p(c-1)} elements.}
+
 \item{LOADINGS}{Numerical matrix of dimension \eqn{p*q},
 where \eqn{q} is the number of latent variables.}
 
-\item{LATENT_COV}{Correlation matrix of dimension \eqn{q}.}
+\item{LATENT_COV}{Latent covariance matrix of dimension \eqn{q*q}.}
 
 \item{CAT}{Integer vector storing the possible number of categories
 for each item. Values must be ordered following items order in the dataset.}
 
-\item{CONSTRMAT}{Binary matrix of dimension \eqn{p*q}. A cell equal to \eqn{1} indicates
-that the corresponding element in the loading matrix is free to be estimated.
-A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
-to \eqn{0}.}
+\item{CONSTRMAT}{\eqn{p*q}-dimensional matrix. Elements set to \code{NA} refers to free loading parameters. Elements set to numerical values denote fixed values constraints.}
 
-\item{CORRFLAG}{Logical flag indicating whether the latent covariance matrix}
+\item{CONSTRVAR}{\eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent variance parameters. Elements set to numerical values denote fixed values constraints.}
 
-\item{TAU}{Numerical vector of thresholds parameters.
-If all the \eqn{p} items have \eqn{c} possible categories, it contains
-\eqn{p(c-1)} elements.}
+\item{CORRFLAG}{Logical indicator. Set it to \code{FALSE} if the latent variables are independent. Set it \code{TRUE} otherwise.}
+
+\item{STDLV}{Logical indicator. Set it to \code{TRUE} to fix latent variables scale. Set it \code{FALSE} to fix loadings scale.}
 }
 \description{
 Assemble the parameter vector starting from the threshold vector,

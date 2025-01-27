@@ -18,15 +18,20 @@
 //' Full pairwise iteration
 //'
 //' @description
-//' Evaluate negative loglikelihood or gradient of the complete pool of pairs.
+//' Evaluate negative log pairwise likelihood or gradient of the complete pool of pairs.
 //' Used by external optimisers. Multithreading options via `RcppParallel`.
 //'
 //' @param N Number of observations
 //' @param C_VEC Vector containing the number of categories for each item
-//' @param CONSTRMAT Constraint matrix. Loadings free to be estimated are identified by a NA.
+//' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
+//' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
 //' @param THETA Parameter vector
 //' @param FREQ Frequency table
 //' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param NTHR Number of thresholds parameters.
+//' @param NLOAD Number of free loadings parameters
+//' @param NCORR Number of free latent correlations parameters.
+//' @param NVAR Number of free latent variance parameters.
 //' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
 //' @param SILENTFLAG optional for verbose output
 //'
@@ -49,14 +54,8 @@ Rcpp::List cpp_multiThread_completePairwise(
 
   Rcpp::checkUserInterrupt();
   const unsigned int d = THETA.size();
-  const unsigned int n = N;                                             // number of units
   const unsigned int p = CONSTRMAT.rows();                                             // number of items
   const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
-  const unsigned int c = C_VEC.sum();                                          // total number of categories
-  const unsigned int nthr = c-p;                                        // number of thresholds
-  unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;                  // number of correlations
-  const unsigned int nload = d - nthr - ncorr;                                    // number of loadings
-
   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
 
   // Copy frequencies, and build pair dictionary
@@ -96,6 +95,11 @@ Rcpp::List cpp_multiThread_completePairwise(
     );
   return(output);
 }
+
+
+
+
+
 
 // [[Rcpp::export]]
 Rcpp::List cpp_plSA(

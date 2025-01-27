@@ -7,15 +7,12 @@
 get_lambda(THETA, NTHR, NLOAD)
 }
 \arguments{
-\item{THETA}{Raw vector of parameters.}
+\item{THETA}{Unconstrained parameter vector}
 
-\item{C}{Sum of the number of categories for each item.}
+\item{NTHR}{Number of thresholds parameters.}
 
-\item{P}{Number if items}
-
-\item{Q}{Number of latent variables}
+\item{NLOAD}{Number of free loadings parameters}
 }
 \description{
-get_lambda() extracts the vector of free loadings
-from the parameter vector
+Extract free loadings from parameter vector
 }

@@ -12,11 +12,17 @@
 //' advantage of the second Bartlett's identity at the single pair level
 //'
 //' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+//' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
 //' @param C_VEC Vector containing the number of categories for each item
 //' @param THETA Parameter vector
-//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 //' @param FREQ output from [pairs_freq()]
 //' @param N sample size
+//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param NTHR Number of thresholds parameters.
+//' @param NLOAD Number of free loadings parameters
+//' @param NCORR Number of free latent correlations parameters.
+//' @param NVAR Number of free latent variance parameters.
+//'
 // [[Rcpp::export]]
 Rcpp::List estimate_H(
     Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
@@ -174,8 +180,14 @@ Rcpp::List estimate_H(
 //' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
 //' @param C_VEC Vector containing the number of categories for each item
 //' @param THETA Parameter vector
+//' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
 //' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 //' @param Y data matrix
+//' @param NTHR Number of thresholds parameters.
+//' @param NLOAD Number of free loadings parameters
+//' @param NCORR Number of free latent correlations parameters.
+//' @param NVAR Number of free latent variance parameters.
+//'
 // [[Rcpp::export]]
 Rcpp::List estimate_J(
     Eigen::Map<Eigen::MatrixXd> Y,                    // Manifest data

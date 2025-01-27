@@ -13,9 +13,19 @@ estimate_J(Y, C_VEC, A, CONSTRLOGSD, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 
 \item{A}{Constraint matrix. Loadings free to be estimated are identified by a 1.}
 
+\item{CONSTRLOGSD}{\eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.}
+
 \item{THETA}{Parameter vector}
 
 \item{CORRFLAG}{1 to estimate latent correlations. 0 for orthogonal latent factors.}
+
+\item{NTHR}{Number of thresholds parameters.}
+
+\item{NLOAD}{Number of free loadings parameters}
+
+\item{NCORR}{Number of free latent correlations parameters.}
+
+\item{NVAR}{Number of free latent variance parameters.}
 }
 \description{
 Compute a sample estimate of the variability matrix via the sample average outer product
