@@ -56,7 +56,7 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
 
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
-if(0){
+if(1){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- TRUE
@@ -130,7 +130,7 @@ if(0){
 
 #### (STDLV=TRUE, CORRFLAG=TRUE) ####
 #### free correlation matrix but all latent variances fixed ######
-if(0){
+if(1){
   set.seed(123)
   stdlv <- TRUE
   corrflag <- TRUE
@@ -212,7 +212,7 @@ if(0){
 #### (STDLV=TRUE, CORRFLAG=TRUE) ####
 #### free correlation matrix but all latent variances fixed ######
 #### some variances specified by the user ####
-if(0){
+if(1){
   set.seed(123)
   stdlv <- TRUE
   corrflag <- TRUE
@@ -285,7 +285,7 @@ if(0){
 
 #### (STDLV=FALSE, CORRFLAG=FALSE) ####
 #### no correlation matrix but some free latent variances ######
-if(0){
+if(1){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- FALSE
@@ -358,7 +358,7 @@ if(0){
 
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### no correlation matrix but all free latent variances ######
-if(0){
+if(1){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- FALSE
