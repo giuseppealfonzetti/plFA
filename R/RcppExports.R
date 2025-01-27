@@ -51,16 +51,18 @@ cpp_sa_proj <- function(THETA, CONSTRMAT, CONSTRLOGSD, C_VEC, CORRFLAG, NTHR, NL
 
 #' Compute pairwise frequencies
 #'
-#' It returns a 5-rows matrix with each combination of items and categories as columns.
-#' Row0: item k, Row1: item l, Row2; category item k, Row3: category item l, Row4: freq
-#' It is computed just once, before the optimization of the complete pairwise
-#'
 #' @param Y Integer matrix of dimension \eqn{n*p}, where \eqn{n} is the sample size
 #' and \eqn{p} is the number of items considered. Categories must be coded starting from zero.
 #' For example, an item with three categories can only accept values contained in
 #' \eqn{\{0, 1, 2\}}.
 #' @param C_VEC Integer vector indicating how many possible categories are associated to
 #' each item in 'Y'.
+#'
+#' @return
+#' It returns a 5-rows matrix with each combination of items and categories as columns.
+#' Row0: item k, Row1: item l, Row2; category item k, Row3: category item l, Row4: freq
+#' It is computed just once, before the optimization of the complete pairwise
+#'
 #' @export
 pairs_freq <- function(Y, C_VEC) {
     .Call(`_plFA_pairs_freq`, Y, C_VEC)
@@ -78,7 +80,7 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
 #' @param THETA Parameter vector
 #' @param FREQ Frequency table
-#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param CORRFLAG TRUE to estimate latent correlations. 0 for orthogonal latent factors.
 #' @param NTHR Number of thresholds parameters.
 #' @param NLOAD Number of free loadings parameters
 #' @param NCORR Number of free latent correlations parameters.

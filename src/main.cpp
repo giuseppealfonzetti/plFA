@@ -27,7 +27,7 @@
 //' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
 //' @param THETA Parameter vector
 //' @param FREQ Frequency table
-//' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param CORRFLAG TRUE to estimate latent correlations. 0 for orthogonal latent factors.
 //' @param NTHR Number of thresholds parameters.
 //' @param NLOAD Number of free loadings parameters
 //' @param NCORR Number of free latent correlations parameters.
@@ -55,7 +55,6 @@ Rcpp::List cpp_multiThread_completePairwise(
   Rcpp::checkUserInterrupt();
   const unsigned int d = THETA.size();
   const unsigned int p = CONSTRMAT.rows();                                             // number of items
-  const unsigned int q = CONSTRMAT.cols();                                             // number of latent variables
   unsigned int R = p*(p-1)/2;                                            // number of pairs of items
 
   // Copy frequencies, and build pair dictionary
@@ -143,8 +142,8 @@ Rcpp::List cpp_plSA(
     const int d = THETA_INIT.size();
     const int n = N;
     const int p = CONSTRMAT.rows();
-    const int q = CONSTRMAT.cols();
-    const int c = C_VEC.sum();
+    // const int q = CONSTRMAT.cols();
+    // const int c = C_VEC.sum();
     const int pairs = p*(p-1)/2;
     const int corrflag = NCORR>0;
     if(d!=NTHR+NLOAD+NCORR+NVAR) Rcpp::stop("check theta dimensions");
@@ -163,7 +162,6 @@ Rcpp::List cpp_plSA(
     Eigen::MatrixXd items_pairs(2,pairs);
     unsigned int idx = 0;
     for(unsigned int k = 1; k < p; k++){
-      const unsigned int ck = C_VEC(k);
       for(unsigned int l = 0; l < k; l ++){
         items_pairs(0, idx) = k;
         items_pairs(1, idx) = l;
@@ -343,7 +341,6 @@ Rcpp::List cpp_plSA(
       bool checkevent;
       sa::proj2(CONSTRMAT, CONSTRLOGSD, C_VEC, corrflag, NTHR, NLOAD, NCORR, NVAR, theta, checkevent);
       if(checkevent) post_index.push_back(t);
-      // if(VERBOSE && checkevent && t>burn) Rcpp::warning("Projection performed after the burn-in. Try increasing burn-in period.");
       if(VERBOSE && checkevent && t>burn) proj_after_burn=true;
 
 

@@ -62,113 +62,6 @@ namespace sa{
     return(pool);
   }
 
-  void proj(
-      Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
-      Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
-      Eigen::Map<Eigen::VectorXd> C_VEC,
-      const int CORRFLAG,
-      const int NTHR,
-      const int NLOAD,
-      const int NCORR,
-      const int NVAR,
-      Eigen::VectorXd &THETA,          // Address used to update projected theta
-      bool &CHECKEVENT                 // Turn on the indicator whether there was a projection or not
-  ){
-    //dimensions
-    const int p = CONSTRMAT.rows(); // number of items
-    const int q = CONSTRMAT.cols(); // number of latents
-    const int d = THETA.size(); // number of parameters
-    const int c = C_VEC.sum();
-
-    // rearrange parameters
-    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, CONSTRMAT, NTHR, NLOAD);
-    Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
-    Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
-    Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-    Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
-    const double eps = 1e-8;
-
-
-    // Normalisation if needed
-    for(unsigned int k = 0; k < p; k++){
-      const Eigen::VectorXd lambdak = Lam.row(k);
-      const double vk = lambdak.transpose()*Sigma_u*lambdak;
-      if(vk>1){
-        CHECKEVENT = true;
-
-        if(NVAR>0){
-          for(int h=0; h<q; h++){
-            if(Lam(k,h)!=0.0){
-              Du(h,h)/=sqrt(vk);
-            }
-          }
-        }else{
-          Lam.row(k) = lambdak/sqrt(vk);
-        }
-      }
-    }
-
-
-
-    if(CHECKEVENT){
-
-      int idx = 0;
-      if(NVAR>0){
-        Eigen::VectorXd norm_logsd(NVAR);
-        for(unsigned int h = 0; h < q; h++){
-          if(!std::isfinite(CONSTRLOGSD(h))){
-            norm_logsd(idx) = log(Du(h,h));
-            idx++;
-          }
-        }
-        THETA.segment(NTHR+NLOAD+NCORR, NVAR) = norm_logsd;
-
-      }else{
-        Eigen::VectorXd norm_lambda(NLOAD);
-        for(unsigned int h = 0; h < q; h++){
-          for(unsigned int j = 0; j < p; j++){
-            if(!std::isfinite(CONSTRMAT(j,h)))
-            {
-              norm_lambda(idx) = Lam(j, h);
-              idx ++;
-            };
-          };
-        }
-        THETA.segment(NTHR, NLOAD) = norm_lambda;
-      }
-
-    }
-
-
-    // for(unsigned int k = 0; k < p; k++){
-    //   const Eigen::VectorXd lambdak = Lam.row(k);
-    //   const double vk = lambdak.transpose()*Sigma_u*lambdak;
-    //   if(vk>=1){
-    //     Lam.row(k) = lambdak/(vk+eps);
-    //     CHECKEVENT = true;
-    //   }
-    // }
-
-
-
-
-    // if(CHECKEVENT){
-    //   Eigen::VectorXd norm_lambda(NLOAD);
-    //   int idx = 0;
-    //   for(unsigned int h = 0; h < q; h++){
-    //     for(unsigned int j = 0; j < p; j++){
-    //       if(!std::isfinite(CONSTRMAT(j,h)))
-    //       {
-    //         norm_lambda(idx) = Lam(j, h);
-    //         idx ++;
-    //       };
-    //     };
-    //   }
-    //
-    //   THETA.segment(NTHR, NLOAD) = norm_lambda;
-    // }
-  }
-
 void proj2(
       Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
       Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
@@ -178,14 +71,12 @@ void proj2(
       const int NLOAD,
       const int NCORR,
       const int NVAR,
-      Eigen::VectorXd &THETA,          // Address used to update projected theta
-      bool &CHECKEVENT                 // Turn on the indicator whether there was a projection or not
+      Eigen::VectorXd &THETA,
+      bool &CHECKEVENT
   ){
     //dimensions
     const int p = CONSTRMAT.rows(); // number of items
     const int q = CONSTRMAT.cols(); // number of latents
-    const int d = THETA.size(); // number of parameters
-    const int c = C_VEC.sum();
 
     // rearrange parameters
     Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, CONSTRMAT, NTHR, NLOAD);
@@ -193,7 +84,6 @@ void proj2(
     Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
     Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
     Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
-    const double eps = 1e-8;
 
 
     // Normalisation if needed

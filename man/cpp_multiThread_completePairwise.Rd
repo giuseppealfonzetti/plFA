@@ -33,7 +33,7 @@ cpp_multiThread_completePairwise(
 
 \item{FREQ}{Frequency table}
 
-\item{CORRFLAG}{1 to estimate latent correlations. 0 for orthogonal latent factors.}
+\item{CORRFLAG}{TRUE to estimate latent correlations. 0 for orthogonal latent factors.}
 
 \item{NTHR}{Number of thresholds parameters.}
 

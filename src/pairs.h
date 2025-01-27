@@ -32,8 +32,6 @@ namespace pairs{
   ){
     const unsigned int p = A.rows();
     const unsigned int q = A.cols();
-    const unsigned int d = NTHR+NLOAD+NCORR+NVAR;
-    const unsigned int c = C_VEC.sum();
 
     // rearrange parameters
     Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
@@ -175,7 +173,6 @@ namespace pairs{
     const unsigned int p = A.rows();
     const unsigned int q = A.cols();
     const unsigned int d = NTHR+NLOAD+NCORR+NVAR;
-    const unsigned int c = C_VEC.sum();
 
     // rearrange parameters
     Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);

@@ -24,7 +24,7 @@ namespace grads{
       if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ gradient("<< s<< ")\n";
 
       // List three cases: 1. threshold related to item k, 2. threshold related to item l, 3. threshold non relevant to items couple (k,l)
-      if(s >= (C_VEC.segment(0, K).sum()) - (K) & s < C_VEC.segment(0, K + 1).sum() - (K + 1)){
+      if(s >= (C_VEC.segment(0, K).sum()) - (K) && s < C_VEC.segment(0, K + 1).sum() - (K + 1)){
         // [CASE 1]: threshold related to item k
 
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item k:\n";
@@ -53,7 +53,7 @@ namespace grads{
 
           // identify tau_sk, tau_sl, tau_sl-1
           const Eigen::VectorXd pi_thresholds = params::extract_thresholds(TAU, C_VEC, K, L, sk, sl);
-          const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2); const double t_sl_prev = pi_thresholds(3);
+          const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1);  const double t_sl_prev = pi_thresholds(3);
 
           // compute gradient
           const double tmp1 = ((n_sksl/(pi_sksl+1e-8))-(n_sksucsl/(pi_sksucsl+1e-8)));
@@ -64,7 +64,7 @@ namespace grads{
         }
         if(SILENTFLAG == 0)Rcpp::Rcout << "\n";
 
-      }else if(s >= (C_VEC.segment(0, L).sum())-(L) & s<C_VEC.segment(0, L + 1).sum()-(L + 1)){
+      }else if(s >= (C_VEC.segment(0, L).sum())-(L) && s<C_VEC.segment(0, L + 1).sum()-(L + 1)){
         // [CASE 2]: threshold related to item l
 
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item l\n";
@@ -92,7 +92,7 @@ namespace grads{
 
           // identify tau_sk, tau_sl, tau_sl-1
           const Eigen::VectorXd pi_thresholds = params::extract_thresholds(TAU, C_VEC, K, L, sk, sl);
-          const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2); const double t_sl_prev = pi_thresholds(3);
+          const double t_sk = pi_thresholds(0); const double t_sl = pi_thresholds(1); const double t_sk_prev = pi_thresholds(2);
 
 
           if(SILENTFLAG == 0)Rcpp::Rcout<<"\n  |    |   |_ sk:"<< sk << ", r: "<< r<<", n_sksl:"
@@ -337,54 +337,6 @@ namespace grads{
     }
   }
 
-  // void samplepi(Eigen::VectorXd &GRADIENT,
-  //         const Eigen::Ref<const Eigen::MatrixXd> PAIRS_TAB,
-  //         const Eigen::Ref<const Eigen::MatrixXd> A,
-  //         const Eigen::Ref<const Eigen::VectorXd> C_VEC,
-  //         const Eigen::Ref<const Eigen::VectorXd> TAU,
-  //         const Eigen::Ref<const Eigen::MatrixXd> SIGMA_U,
-  //         const Eigen::Ref<const Eigen::VectorXd> LAMBDAK,
-  //         const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
-  //         const Eigen::Ref<const Eigen::VectorXd> TRANSFORMED_RHOS,
-  //         const double RHO_KL,
-  //         const unsigned int P,
-  //         const unsigned int Q,
-  //         const unsigned int K,
-  //         const unsigned int L,
-  //         const unsigned int CK,
-  //         const unsigned int CL,
-  //         const unsigned int I1,
-  //         const unsigned int I2,
-  //         const unsigned int NCORR,
-  //         const unsigned int CORRFLAG){
-  //
-  //   unsigned int iter = 0;
-  //
-  //   /////////////////////////////////////////////////////
-  //   // (k,l)-pair likelihood derivative wrt thresholds //
-  //   /////////////////////////////////////////////////////
-  //   grads::thresholds(GRADIENT, PAIRS_TAB, C_VEC, TAU, RHO_KL, K, L, CK, CL, I1, I2, iter);
-  //
-  //   ///////////////////////////////////////////////////////////
-  //   // (k,l)-pair likelihood derivative wrt URV correlation: //
-  //   // intermediate step for derivatives wrt                 //
-  //   // loadings and factor correlations                      //
-  //   ///////////////////////////////////////////////////////////
-  //   double tmp_kl = grads::rho_urv(PAIRS_TAB, C_VEC, TAU, RHO_KL, K, L, CK, CL, I1, I2);
-  //
-  //   ///////////////////////////////////////////////////
-  //   // (k,l)-pair likelihood derivative wrt loadings //
-  //   ///////////////////////////////////////////////////
-  //   grads::loadings(GRADIENT, A, SIGMA_U, LAMBDAK, LAMBDAL, tmp_kl, P, Q, K, L, iter);
-  //
-  //   //////////////////////////////////////////////////////////////
-  //   // (k,l)-pair likelihood derivative wrt latent correlations //
-  //   //////////////////////////////////////////////////////////////
-  //   if(CORRFLAG == 1){
-  //     grads::lat_corr(GRADIENT, A, LAMBDAK, LAMBDAL, TRANSFORMED_RHOS, tmp_kl, Q, NCORR, iter);
-  //   }
-  // }
-
   Eigen::VectorXd pi(
       const Eigen::Ref<const Eigen::VectorXd> THETA,
       const Eigen::Ref<const Eigen::MatrixXd> A,
@@ -449,7 +401,7 @@ namespace grads{
     for(unsigned int s = 0; s < C_VEC.sum()-P; s++){
 
       // Elicit three cases: 1. threshold related to item k, 2. threshold related to item l, 3. threshold non relevant to items couple (k,l)
-      if(s >= (C_VEC.segment(0, K).sum()) - (K) & s < C_VEC.segment(0, K + 1).sum() - (K + 1)){
+      if(s >= (C_VEC.segment(0, K).sum()) - (K) && s < C_VEC.segment(0, K + 1).sum() - (K + 1)){
         // [CASE 1]: threshold related to item k
         unsigned int sk_a = s - (C_VEC.segment(0, K).sum()) + (K);
         //Rcpp::Rcout << "  |    |_ tau item k. sk_a:"<< sk_a <<"\n";
@@ -467,7 +419,7 @@ namespace grads{
           grad(idx) = 0;
         }
 
-      }else if(s >= (C_VEC.segment(0, L).sum())-(L) & s<C_VEC.segment(0, L + 1).sum()-(L + 1)){
+      }else if(s >= (C_VEC.segment(0, L).sum())-(L) && s<C_VEC.segment(0, L + 1).sum()-(L + 1)){
         // [CASE 2]: threshold related to item l
         unsigned int sl_a = s - (C_VEC.segment(0, L).sum()) + (L);
         //Rcpp::Rcout << "  |    |_ tau item l. sl_a:"<< sl_a<<"\n";

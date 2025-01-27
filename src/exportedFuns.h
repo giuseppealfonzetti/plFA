@@ -23,9 +23,6 @@ Rcpp::List cpp_compute_pair_ext(
      const unsigned int GRADFLAG,
      const int OPTION = 0
  ){
-   const int p = CONSTRMAT.rows();
-   const int q = CONSTRMAT.cols();
-   const int c = C_VEC.sum();
    const int d = NTHR+NLOAD+NCORR+NVAR;
 
    if(THETA.size()!=(NTHR+NLOAD+NCORR+NVAR))Rcpp::stop("Check theta size");
@@ -43,11 +40,6 @@ Rcpp::List cpp_compute_pair_ext(
                                          NTHR, NLOAD, NCORR, NVAR, K, L,
                                          PAIRS_TABLE, SILENTFLAG, GRADFLAG,
                                          ll, gradient);
-       }else if(OPTION==2){
-         // pairs::pair_contribution( CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
-         //                           NTHR, NLOAD, NCORR, NVAR, K, L,
-         //                           PAIRS_TABLE, SILENTFLAG, GRADFLAG,
-         //                           ll, gradient);
        }
 
 

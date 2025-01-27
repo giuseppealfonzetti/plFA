@@ -15,8 +15,11 @@ For example, an item with three categories can only accept values contained in
 \item{C_VEC}{Integer vector indicating how many possible categories are associated to
 each item in 'Y'.}
 }
-\description{
+\value{
 It returns a 5-rows matrix with each combination of items and categories as columns.
 Row0: item k, Row1: item l, Row2; category item k, Row3: category item l, Row4: freq
 It is computed just once, before the optimization of the complete pairwise
+}
+\description{
+Compute pairwise frequencies
 }

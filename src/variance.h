@@ -25,8 +25,8 @@
 //'
 // [[Rcpp::export]]
 Rcpp::List estimate_H(
-    Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
-    Eigen::Map<Eigen::MatrixXd> A,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
+    Eigen::Map<Eigen::VectorXd> C_VEC,
+    Eigen::Map<Eigen::MatrixXd> A,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
@@ -37,22 +37,7 @@ Rcpp::List estimate_H(
     const int NCORR,
     const int NVAR
 ){
-  // const unsigned int p = A.rows();
-  // const unsigned int q = A.cols();
-  // const unsigned int d = THETA.size();
-  // const unsigned int c = C_VEC.sum();
-  // const unsigned int nthr = c-p;
-  // unsigned int ncorr = 0; if(CORRFLAG==1) ncorr = q*(q-1)/2;
-  // const unsigned int nload = d-nthr-ncorr;
-  // unsigned int R = p*(p-1)/2;                                            // number of pairs of items
 
-  // // rearrange parameters
-  // Eigen::MatrixXd Lam             = params::get_loadings_theta2mat(THETA, A, p, c, nload);
-  // Eigen::MatrixXd Sigma_u         = params::get_latvar_theta2mat(THETA, q, d, CORRFLAG);
-  // Eigen::VectorXd tau             = params::get_thresholds_theta2vec(THETA, p, c);
-  // Eigen::VectorXd transformed_rhos= params::get_latvar_theta2vec(THETA, nthr, nload, ncorr, CORRFLAG);
-  //
-  //
   // Copy frequencies, and build pair dictionary
   Eigen::MatrixXd pairs_table = FREQ;
   pairs_table.conservativeResize(pairs_table.rows() + 1, Eigen::NoChange_t() );
@@ -61,7 +46,6 @@ Rcpp::List estimate_H(
   const int p = A.rows();
   const int q = A.cols();
   const int d = NTHR+NLOAD+NCORR+NVAR;
-  const int c = C_VEC.sum();
 
   // rearrange parameters
   Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
@@ -84,7 +68,6 @@ Rcpp::List estimate_H(
     if(k > 1){
       for(int u = 1; u < k; u++){
         int cu = C_VEC(u);
-        //if(silentFLAG == 0)Rcpp::Rcout << "u: " << u << ", cu: "<< cu << "\n";
         i1 += cu * C_VEC.segment(0,u).sum();
       }
     }
@@ -119,7 +102,6 @@ Rcpp::List estimate_H(
 
           // compute pi
           double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
-          //if(SILENTFLAG == 0)Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", t_sk:"<< pi_thresholds(0)<<", t_sl:"<< pi_thresholds(1)<<", t_sk-1:"<< pi_thresholds(2)<<", t_sl-1:"<< pi_thresholds(3)<<", pi: "<< pi_sksl<< "\n";
           pairs_table(5,r) = pi_sksl;
           Eigen::VectorXd pi_grad = grads::pi(THETA,
                                               A,
@@ -149,7 +131,6 @@ Rcpp::List estimate_H(
                                               NCORR,
                                               NVAR);
           gradient += (n_sksl/(pi_sksl+1e-8))*pi_grad;
-          // Eigen::MatrixXd tempH = pi_grad*pi_grad.transpose();
           est_H +=  (n_sksl/(pow(pi_sksl,2)+1e-8))*pi_grad*pi_grad.transpose();
 
           // update ll
@@ -190,9 +171,9 @@ Rcpp::List estimate_H(
 //'
 // [[Rcpp::export]]
 Rcpp::List estimate_J(
-    Eigen::Map<Eigen::MatrixXd> Y,                    // Manifest data
-    Eigen::Map<Eigen::VectorXd> C_VEC,                // Vector containing the number of categories for each item
-    Eigen::Map<Eigen::MatrixXd> A,                    // Constraint matrix. Loadings free to be estimated are identified by a 1
+    Eigen::Map<Eigen::MatrixXd> Y,
+    Eigen::Map<Eigen::VectorXd> C_VEC,
+    Eigen::Map<Eigen::MatrixXd> A,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
     Eigen::VectorXd &THETA,
     int CORRFLAG,
@@ -206,7 +187,6 @@ Rcpp::List estimate_J(
   const int p = A.rows();
   const int q = A.cols();
   const int d = NTHR+NLOAD+NCORR+NVAR;
-  const int c = C_VEC.sum();
   const int n = Y.rows();
 
   // rearrange parameters
@@ -216,7 +196,6 @@ Rcpp::List estimate_J(
   Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
   Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
 
-  double ll = 0;
   Eigen::MatrixXd est_J = Eigen::MatrixXd::Zero(d,d);
   Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
 
@@ -234,7 +213,6 @@ Rcpp::List estimate_J(
       if(k > 1){
         for(unsigned int u = 1; u < k; u++){
           const unsigned int cu = C_VEC(u);
-          //if(silentFLAG == 0)Rcpp::Rcout << "u: " << u << ", cu: "<< cu << "\n";
           i1 += cu * C_VEC.segment(0,u).sum();
         }
       }
@@ -248,7 +226,6 @@ Rcpp::List estimate_J(
         const Eigen::VectorXd lambdal = Lam.row(l);
         const double rho_kl = lambdak.transpose() * Sigma_u * lambdal;
 
-        // if(i==0) Rcpp::Rcout << "("<<k<<","<<l<<"), rho_kl:"<<rho_kl<<"\n";
 
 
         // i2 starting index from i1 dor item l
@@ -259,13 +236,6 @@ Rcpp::List estimate_J(
 
         unsigned int sl = Y(i, l);
 
-
-        // i3: starting index from i2 for cat sk
-        const unsigned int i3 = sk * cl;
-
-        // final column index for pairs_tab. Print to check
-        const unsigned int r = i1 + i2 + i3 + sl;
-
         // read frequency
         // const unsigned int n_sksl = pairs_table(4, r);
 
@@ -275,11 +245,8 @@ Rcpp::List estimate_J(
         // compute pi
         const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, k, l, sk, sl);
 
-        // Rcpp::Rcout << "("<<k<<","<<l<<","<<sk<<","<<sl<<"), rho_kl:"<<rho_kl<<", pi: "<< pi_sksl<< "\n";
 
         // compute pi gradient contribution
-        // Eigen::VectorXd pi_grad = biprobs::compute_pi_grad(A, C_VEC, pi_thresholds, Sigma_u, Lam, THETA, rho_kl, k, l, sk, sl, CORRFLAG);
-        // Eigen::VectorXd pi_grad = Eigen::VectorXd::Zero(d);
         Eigen::VectorXd pi_grad = grads::pi(THETA,
                                             A,
                                             CONSTRLOGSD,
