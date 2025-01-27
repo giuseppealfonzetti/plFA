@@ -4,7 +4,19 @@
 \alias{estimate_H}
 \title{Estimate of H}
 \usage{
-estimate_H(C_VEC, A, THETA, FREQ, N, CORRFLAG)
+estimate_H(
+  C_VEC,
+  A,
+  CONSTRLOGSD,
+  THETA,
+  FREQ,
+  N,
+  CORRFLAG,
+  NTHR,
+  NLOAD,
+  NCORR,
+  NVAR
+)
 }
 \arguments{
 \item{C_VEC}{Vector containing the number of categories for each item}

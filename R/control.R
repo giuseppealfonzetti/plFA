@@ -182,7 +182,7 @@ check_init_par <- function(PAR, DIMS, CONSTR_LIST){
   return(PAR)
 }
 
-check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("plSA", "custom", "standard"), VERBOSE=FALSE, CPP_ARGS=NULL){
+check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("SA", "custom", "standard"), VERBOSE=FALSE, CPP_ARGS=NULL){
 
   if(!is.null(INIT)) INIT_METHOD <- "custom"
   INIT_METHOD <- match.arg(INIT_METHOD)
@@ -206,8 +206,8 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("plSA", "cus
                         NCORR=DIMS$ncorr,
                         NVAR=DIMS$nvar)
     if(VERBOSE) cat('- Done.\n')
-  }else if(INIT_METHOD=="plSA"){
-    if(VERBOSE) cat('- Initialising with plSA ...')
+  }else if(INIT_METHOD=="SA"){
+    if(VERBOSE) cat('- Initialising with SA ...')
     CPP_ARGS <- check_plSA_args(FREQ=FREQ, DIMS=DIMS, CONSTR_LIST=CONSTR_LIST, LIST=CPP_ARGS, SETTING = "init")
     INIT <- init_par_with_plSA(DIMS, CONSTR_LIST, CPP_ARGS)
     if(VERBOSE) cat('- Done.\n')

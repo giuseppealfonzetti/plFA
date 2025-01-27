@@ -7,77 +7,69 @@
 fit_plFA(
   DATA,
   CONSTR_LIST,
-  VALDATA = NULL,
   METHOD = c("ucminf", "SA"),
-  INIT = NULL,
-  INIT_METHOD = NULL,
+  INIT_METHOD = c("SA", "custom", "standard"),
+  NCORES = 1,
+  VALDATA = NULL,
   CONTROL = list(),
   CPP_CONTROL_MAIN = NULL,
   CPP_CONTROL_INIT = NULL,
-  VERBOSE = FALSE,
-  NCORES = 1
+  INIT = NULL,
+  VERBOSE = FALSE
 )
 }
 \arguments{
 \item{DATA}{Integer data matrix of dimension \eqn{n*p}. Categories must be coded starting from zero.}
 
 \item{CONSTR_LIST}{List of constraints. It must contain \tabular{ll}{
-\code{CONSTRMAT} \tab \eqn{p*q} binary matrix. Elements set to 1 refers to free loding paameters. Elements set to 0 refer to null loadings. \cr
+\code{CONSTRMAT} \tab \eqn{p*q}-dimensional matrix. Elements set to \code{NA} refers to free loading parameters. Elements set to numerical values denote fixed values constraints. \cr
 \tab \cr
-\code{CORRFLAG} \tab Binary indicator. Set it to 0 if the latent variables are assumed to be independent. Set it 1 otherwise. \cr
+\code{CONSTRVAR} \tab \eqn{q}-dimensional vector Elements set to \code{NA} refers to free latent variance parameters. Elements set to numerical values denote fixed values constraints. \cr
+\tab \cr
+\code{CORRFLAG} \tab Logical indicator. Set it to \code{FALSE} if the latent variables are assumed to be independent. Set it \code{TRUE} otherwise. \cr
+\tab \cr
+\code{STDLV} \tab Logical indicator. Set it to \code{TRUE} to fix latent variables scale. Set it \code{FALSE} to fix loadings scale. \cr
 }}
-
-\item{VALDATA}{Data matrix used as validation set to check for convergence.}
 
 \item{METHOD}{Label for the method chosen. Possible values are: \tabular{ll}{
-\code{'ucminf'} \tab for estimation via the numerical optimiser from the \code{ucminf} package. \cr
+\code{'ucminf'} \tab for estimation via the quasi-Newton BFGS optimiser from the \code{ucminf} package. Used as default method. \cr
 \tab \cr
-\code{'bernoulli'} \tab for stochastic estimation with weights following a Bernoulli distribution. \cr
-\tab \cr
-\code{'hyper'} \tab for stochastic estimation with weights following a multivariate hypergeometric distribution. \cr
+\code{'SA'} \tab for estimation via Stochastic Approximations. \cr
 }}
 
-\item{INIT}{Initialising vector. If not provided, optiisation starts at the zero vector.}
-
-\item{CONTROL}{List of control options to pass to the optimiser: \tabular{ll}{
-\code{control} \tab  See \code{ucminf} documentation \cr
+\item{INIT_METHOD}{\tabular{ll}{
+\code{'custom'} \tab Uses the vector provided via \code{INIT} as starting point. \cr
 \tab \cr
-\code{hessian} \tab  See \code{ucminf} documentation \cr
+\code{'standard'} \tab Uses cold initialisation where loadings are initialised at \code{0.5} and the latent covariance matrix as an Identity matrix. \cr
 \tab \cr
-\code{PAIRS_PER_ITERATION} \tab  (Average) number of pairs to draw stochastically at each iteration with method (\code{'bernoulli'}) \code{'hyper'}.   \cr
-\tab \cr
-\code{MAXT} \tab  Maximum number of iterations.\cr
-\tab \cr
-\code{BURN} \tab  Length of the burning period.\cr
-\tab \cr
-\code{ETA} \tab  Initial stepsize.\cr
-\tab \cr
-\code{PAR1} \tab Hyperparameter for stepsize scheduling by Xu (2011): Scaling. \cr
-\tab \cr
-\code{PAR2} \tab Hyperparameter for stepsize scheduling by Xu (2011): Smallest Hessian eigenvalue. \cr
-\tab \cr
-\code{PAR1} \tab Hyperparameter for stepsize scheduling by Xu (2011): Decay rate. \cr
-\tab \cr
-\code{STEPSIZEFLAG} \tab Choose stepsize scheduling: Set 0 for Polyak and Juditsky (1992), 1 for Xu (2011). \cr
-\tab \cr
-\code{EACHCLOCK} \tab How often (in terms of iterations) to measure single iteration computational times (using \code{RcppClock}. \cr
-\tab \cr
-\code{CHECKCONV} \tab Flag to check for convergence using complete pairwise likelihood on the validation set. \cr
-\tab \cr
-\code{EACHCHECK} \tab How often (in terms of iterations) to check for convergence. \cr
-\tab \cr
-\code{TOL} \tab Tolerance between consecutive evaluations of the validation composite likelihood. \cr
-\tab \cr
-\code{TOLCOUNT} \tab How many checks the algorithm is allowed to accept if the validation negative composite likelihood starts increasing. \cr
-\tab \cr
+\code{'SA'} \tab Computes the starting point using a short chain of stochastic updates. Updates start from the \code{standard} initialisation point. Set as default method. \cr
 }}
 
 \item{NCORES}{Integer value setting the number of threads to carry out the estimation.}
 
-\item{ITERATIONS_SUBSET}{Vector with the indexes of iterations used to store trajectories.}
+\item{VALDATA}{Validation data used to monitor convergence of stochastic approximations. If \code{NULL}, data passed via \code{DATA} is used for monitoring purposes.}
 
-\item{VERBOSEFLAG}{TRUE verbose output}
+\item{CONTROL}{List of control options to pass to \code{ucminf}. See \link[ucminf:ucminf]{ucminf::ucminf} documentation.}
+
+\item{CPP_CONTROL_MAIN}{List of control options to pass to the \code{SA} optimiser when \code{METHOD="SA"}: \tabular{ll}{
+\code{PAIRS_PER_ITERATION} \tab  Number of pairs to draw at each iteration.   \cr
+\tab \cr
+\code{MAXT} \tab  Maximum number of iterations.\cr
+\tab \cr
+\code{BURN} \tab  Maximum number of iterations to burn before trajectory averaging.\cr
+\tab \cr
+\code{STEP0} \tab  Initial step length.\cr
+}}
+
+\item{CPP_CONTROL_INIT}{List of control options to pass to the \code{SA} optimiser when \code{INIT_METHOD="SA"}. See \code{CPP_CONTROL_MAIN} for details.}
+
+\item{INIT}{Initialising vector. If not provided, the starting point is computed according to \code{INIT_METHOD}.}
+
+\item{VERBOSE}{\code{TRUE} for verbose output}
+}
+\value{
+Object of class \code{plFaFit}.
 }
 \description{
-fit_plFA() allows to fit models both numerically and stochastically
+Fit latent variable models for ordinal variable using pairwise likelihood methods running via quasi-Newton BFGS or stochastic approximations
 }
