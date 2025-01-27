@@ -118,10 +118,12 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
   for (l in 2:p) {
     for (k in 1:(l-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
     }
@@ -191,13 +193,12 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
   for (l in 2:p) {
     for (k in 1:(l-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
-      # test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
-      #   expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=2), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
-      # })
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
     }
@@ -273,10 +274,12 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
   for (l in 2:p) {
     for (k in 1:(l-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
     }
@@ -346,10 +349,12 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
   for (l in 2:p) {
     for (k in 1:(l-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
     }
@@ -419,10 +424,12 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
   for (l in 2:p) {
     for (k in 1:(l-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
+        skip_if_not_installed("numDeriv")
         expect_equal(pair_ngr(PAR=theta, K=k, L=l, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k,L=l), tolerance = 1e-4)
       })
     }
