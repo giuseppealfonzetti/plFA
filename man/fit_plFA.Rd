@@ -77,7 +77,7 @@ Fit latent variable models for ordinal variable using pairwise likelihood method
 }
 \details{
 The argument CONSTR_LIST$LLC is expected to be a list of constraints, e.g. \code{CONSTR_LIST$LLC <- list(constraint_1, constraint2, ...)},
-where each constraint is defined by a list itself. For example, to impose the constraint "L\link{2,1}=0.5L\link{5,2}+0.25L\link{9,3}" you have to write
+where each constraint is defined by a list itself. For example, to impose the constraint "L_(2,1)=0.5L_(5,2)+0.25L_(9,3)" you have to write
 \code{constraint_1 <- list(c(2,1), c(0.5,5,2), c(0.25, 9,3))}.
 That is: the first vector of the list is 2-dimensional and stores the coordinates of the constrained loading.
 Each of the successive triplets represent a linear coefficient followed by the coordinates of the loading of reference.
