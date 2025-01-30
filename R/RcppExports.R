@@ -78,6 +78,7 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param C_VEC Vector containing the number of categories for each item
 #' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
 #' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 #' @param THETA Parameter vector
 #' @param FREQ Frequency table
 #' @param CORRFLAG TRUE to estimate latent correlations. 0 for orthogonal latent factors.
@@ -104,6 +105,7 @@ cpp_plSA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA
 #'
 #' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
 #' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 #' @param C_VEC Vector containing the number of categories for each item
 #' @param THETA Parameter vector
 #' @param FREQ output from [pairs_freq()]
@@ -128,6 +130,7 @@ estimate_H <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTH
 #' @param C_VEC Vector containing the number of categories for each item
 #' @param THETA Parameter vector
 #' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 #' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 #' @param Y data matrix
 #' @param NTHR Number of thresholds parameters.

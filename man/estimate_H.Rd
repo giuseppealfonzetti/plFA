@@ -8,6 +8,7 @@ estimate_H(
   C_VEC,
   A,
   CONSTRLOGSD,
+  LLC,
   THETA,
   FREQ,
   N,
@@ -24,6 +25,8 @@ estimate_H(
 \item{A}{Constraint matrix. Loadings free to be estimated are identified by a 1.}
 
 \item{CONSTRLOGSD}{\eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.}
+
+\item{LLC}{Linear loadings constraints. Expects a list of constraints. See \link{fit_plFA} documentation.}
 
 \item{THETA}{Parameter vector}
 

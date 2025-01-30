@@ -87,6 +87,7 @@ build_constrMat <- function(P, Q, STRUCT = c('simple', 'triangular', 'crossed'),
 #' that the corresponding element in the loading matrix is free to be estimated.
 #' A cell equal to \eqn{0} fixes the corresponding element in the loading matrix
 #' to \eqn{0}.
+#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 #' @param SEED Random seed.
 #' @param LB Lower bound for uniform random generator. Default set to 0.
 #' @param UB Upper bound for uniform random generator. Default set to 1.

@@ -15,6 +15,8 @@ utils::globalVariables(c("clock"))
 #'    \code{CORRFLAG} \tab Logical indicator. Set it to `FALSE` if the latent variables are assumed to be independent. Set it `TRUE` otherwise. \cr
 #'    \tab \cr
 #'    \code{STDLV} \tab Logical indicator. Set it to `TRUE` to fix latent variables scale. Set it `FALSE` to fix loadings scale. \cr
+#'.   \tab \cr
+#'    \code{LLC} \tab Linear loadings constraints. Expects a list of constraints. See DETAILS. \cr
 #' }
 #' @param METHOD Label for the method chosen. Possible values are: \tabular{ll}{
 #'    \code{'ucminf'} \tab for estimation via the quasi-Newton BFGS optimiser from the \code{ucminf} package. Used as default method. \cr
@@ -43,6 +45,14 @@ utils::globalVariables(c("clock"))
 #' @param VALDATA Validation data used to monitor convergence of stochastic approximations. If `NULL`, data passed via `DATA` is used for monitoring purposes.
 #' @param INIT Initialising vector. If not provided, the starting point is computed according to `INIT_METHOD`.
 #' @param VERBOSE `TRUE` for verbose output
+#'
+#' @details
+#' The argument CONSTR_LIST$LLC is expected to be a list of constraints, e.g. `CONSTR_LIST$LLC <- list(constraint_1, constraint2, ...)`,
+#' where each constraint is defined by a list itself. For example, to impose the constraint "L_(2,1)=0.5L_(5,2)+0.25L_(9,3)" you have to write
+#' `constraint_1 <- list(c(2,1), c(0.5,5,2), c(0.25, 9,3))`.
+#' That is: the first vector of the list is 2-dimensional and stores the coordinates of the constrained loading.
+#' Each of the successive triplets represent a linear coefficient followed by the coordinates of the loading of reference.
+#' You can set up an arbitrary number of triplets in each constraint.
 #'
 #' @return Object of class `plFaFit`.
 #' @export

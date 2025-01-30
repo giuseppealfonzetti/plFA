@@ -29,6 +29,8 @@ fit_plFA(
 \code{CORRFLAG} \tab Logical indicator. Set it to \code{FALSE} if the latent variables are assumed to be independent. Set it \code{TRUE} otherwise. \cr
 \tab \cr
 \code{STDLV} \tab Logical indicator. Set it to \code{TRUE} to fix latent variables scale. Set it \code{FALSE} to fix loadings scale. \cr
+.   \tab \cr
+\code{LLC} \tab Linear loadings constraints. Expects a list of constraints. See DETAILS. \cr
 }}
 
 \item{METHOD}{Label for the method chosen. Possible values are: \tabular{ll}{
@@ -72,4 +74,12 @@ Object of class \code{plFaFit}.
 }
 \description{
 Fit latent variable models for ordinal variable using pairwise likelihood methods running via quasi-Newton BFGS or stochastic approximations.
+}
+\details{
+The argument CONSTR_LIST$LLC is expected to be a list of constraints, e.g. \code{CONSTR_LIST$LLC <- list(constraint_1, constraint2, ...)},
+where each constraint is defined by a list itself. For example, to impose the constraint "L\link{2,1}=0.5L\link{5,2}+0.25L\link{9,3}" you have to write
+\code{constraint_1 <- list(c(2,1), c(0.5,5,2), c(0.25, 9,3))}.
+That is: the first vector of the list is 2-dimensional and stores the coordinates of the constrained loading.
+Each of the successive triplets represent a linear coefficient followed by the coordinates of the loading of reference.
+You can set up an arbitrary number of triplets in each constraint.
 }

@@ -9,6 +9,7 @@ extract_par(
   OPTION = c("list", "raw", "transformed"),
   CONSTRMAT,
   CONSTRLOGSD,
+  LLC,
   NTHR,
   NLOAD,
   NCORR,
@@ -29,6 +30,8 @@ extract_par(
 \item{CONSTRMAT}{\eqn{p*q}-dimensional matrix. Elements set to \code{NA} refers to free loading parameters. Elements set to numerical values denote fixed values constraints.}
 
 \item{CONSTRLOGSD}{\eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.}
+
+\item{LLC}{Linear loadings constraints. Expects a list of constraints. See \link{fit_plFA} documentation.}
 
 \item{NTHR}{Number of thresholds parameters.}
 

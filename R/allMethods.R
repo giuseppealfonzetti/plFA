@@ -121,6 +121,7 @@ setMethod('getPar', 'vector', function(OBJ, ...) extract_par(THETA = OBJ, ...))
 #' }
 #' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
 #' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 #' @param NTHR Number of thresholds parameters.
 #' @param NLOAD Number of free loadings parameters
 #' @param NCORR Number of free latent correlations parameters.

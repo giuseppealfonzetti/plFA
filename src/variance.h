@@ -13,6 +13,7 @@
 //'
 //' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
 //' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+//' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 //' @param C_VEC Vector containing the number of categories for each item
 //' @param THETA Parameter vector
 //' @param FREQ output from [pairs_freq()]
@@ -164,6 +165,7 @@ Rcpp::List estimate_H(
 //' @param C_VEC Vector containing the number of categories for each item
 //' @param THETA Parameter vector
 //' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+//' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 //' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
 //' @param Y data matrix
 //' @param NTHR Number of thresholds parameters.
