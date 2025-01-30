@@ -22,10 +22,13 @@ nthr <- sum(cat)-p
 
   # Simple loading matrix constraints
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-  A <- check_cnstr_loadings(A, stdlv)
+  llc <- list(list(c(2,1), c(1.5,6,2), c(2,10, 3)),
+              list(c(3,1), c(3,7,2))
+              )
+  A <- check_cnstr_loadings(A, STDLV=stdlv, LLC = llc)
 
   # Draw some random loadings according to constraints
-  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv, LLC=llc)
   nload <- sum(is.na(A))
 
   # Generate random latent correlation matrix
@@ -86,6 +89,7 @@ nthr <- sum(cat)-p
       cpp_loadings_theta2mat(
         THETA = theta,
         CONSTRMAT = A,
+        LLC = llc,
         NTHR = nthr,
         NLOAD = nload
       ),
@@ -166,10 +170,13 @@ nthr <- sum(cat)-p
 
   # Simple loading matrix constraints
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-  A <- check_cnstr_loadings(A, stdlv)
+  llc <- list(list(c(2,1), c(1,6,2), c(2,10, 3)),
+              list(c(3,1), c(3,7,2))
+  )
+  A <- check_cnstr_loadings(A, stdlv, llc)
 
   # Draw some random loadings according to constraints
-  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv, LLC=llc)
   nload <- sum(is.na(A))
 
   # Generate random latent correlation matrix
@@ -230,6 +237,7 @@ nthr <- sum(cat)-p
                        cpp_loadings_theta2mat(
                          THETA = theta,
                          CONSTRMAT = A,
+                         LLC = llc,
                          NTHR = nthr,
                          NLOAD = nload
                        ),
@@ -327,10 +335,13 @@ nthr <- sum(cat)-p
 
   # Simple loading matrix constraints
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-  A <- check_cnstr_loadings(A, stdlv)
+  llc <- list(list(c(2,1), c(1,6,2), c(2,10, 3)),
+              list(c(3,1), c(3,7,2))
+  )
+  A <- check_cnstr_loadings(A, stdlv, llc)
 
   # Draw some random loadings according to constraints
-  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv, LLC=llc)
   nload <- sum(is.na(A))
 
   # Generate random latent correlation matrix
@@ -391,6 +402,7 @@ nthr <- sum(cat)-p
                        cpp_loadings_theta2mat(
                          THETA = theta,
                          CONSTRMAT = A,
+                         LLC = llc,
                          NTHR = nthr,
                          NLOAD = nload
                        ),
@@ -487,10 +499,13 @@ nthr <- sum(cat)-p
 
   # Simple loading matrix constraints
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-  A <- check_cnstr_loadings(A, stdlv)
+  llc <- list(list(c(2,1), c(1,6,2), c(2,10, 3)),
+              list(c(3,1), c(3,7,2))
+  )
+  A <- check_cnstr_loadings(A, stdlv, llc)
 
   # Draw some random loadings according to constraints
-  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv, LLC=llc)
   nload <- sum(is.na(A))
 
   # Generate random latent correlation matrix
@@ -551,6 +566,7 @@ nthr <- sum(cat)-p
                        cpp_loadings_theta2mat(
                          THETA = theta,
                          CONSTRMAT = A,
+                         LLC = llc,
                          NTHR = nthr,
                          NLOAD = nload
                        ),
@@ -631,10 +647,13 @@ nthr <- sum(cat)-p
 
   # Simple loading matrix constraints
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-  A <- check_cnstr_loadings(A, stdlv)
+  llc <- list(list(c(2,1), c(1,6,2), c(2,10, 3)),
+              list(c(3,1), c(3,7,2))
+  )
+  A <- check_cnstr_loadings(A, stdlv, llc)
 
   # Draw some random loadings according to constraints
-  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv)
+  Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv, LLC=llc)
   nload <- sum(is.na(A))
 
   # Generate random latent correlation matrix
@@ -695,6 +714,7 @@ nthr <- sum(cat)-p
                        cpp_loadings_theta2mat(
                          THETA = theta,
                          CONSTRMAT = A,
+                         LLC = llc,
                          NTHR = nthr,
                          NLOAD = nload
                        ),

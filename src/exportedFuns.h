@@ -9,6 +9,7 @@
 Rcpp::List cpp_compute_pair_ext(
      Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
      Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+     const std::vector<std::vector<std::vector<double>>> LLC,
      Eigen::Map<Eigen::VectorXd> C_VEC,
      Eigen::VectorXd THETA,
      const int CORRFLAG,
@@ -31,12 +32,12 @@ Rcpp::List cpp_compute_pair_ext(
    double ll = 0;
    Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
    if(OPTION==0){
-     pairs::pair_contribution_extended(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
+     pairs::pair_contribution_extended(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA, CORRFLAG,
                                        NTHR, NLOAD, NCORR, NVAR, K, L,
                                        PAIRS_TABLE, SILENTFLAG, GRADFLAG,
                                        ll, gradient);
      }else if(OPTION==1){
-       pairs::pair_contribution2(CONSTRMAT, CONSTRLOGSD, C_VEC, THETA, CORRFLAG,
+       pairs::pair_contribution2(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA, CORRFLAG,
                                          NTHR, NLOAD, NCORR, NVAR, K, L,
                                          PAIRS_TABLE, SILENTFLAG, GRADFLAG,
                                          ll, gradient);
@@ -65,11 +66,23 @@ Eigen::VectorXd cpp_loadings_theta2vec(
 Eigen::MatrixXd cpp_loadings_theta2mat(
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+    const std::vector<std::vector<std::vector<double>>> LLC,
     const int NTHR,
     const int NLOAD
 ){
-  return params::loadings::theta2mat(THETA, CONSTRMAT, NTHR, NLOAD);
+  return params::loadings::theta2mat(THETA, CONSTRMAT, LLC, NTHR, NLOAD);
 }
+
+// // [[Rcpp::export]]
+// Eigen::MatrixXd cpp_loadings_theta2mat_lc(
+//     Eigen::Map<Eigen::VectorXd> THETA,
+//     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+//     const std::vector<std::vector<std::vector<int>>> LLC,
+//     const int NTHR,
+//     const int NLOAD
+// ){
+//   return params::loadings::theta2matlc(THETA, CONSTRMAT, LLC, NTHR, NLOAD);
+// }
 
 // [[Rcpp::export]]
 Eigen::MatrixXd cpp_loadings_mat2vec(
@@ -153,6 +166,7 @@ Eigen::VectorXd cpp_sa_proj(
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const std::vector<std::vector<std::vector<double>>> LLC,
     Eigen::Map<Eigen::VectorXd> C_VEC,
     const int CORRFLAG,
     const int NTHR,
@@ -164,6 +178,7 @@ Eigen::VectorXd cpp_sa_proj(
   Eigen::VectorXd theta = THETA;
   sa::proj2(CONSTRMAT,
            CONSTRLOGSD,
+           LLC,
            C_VEC,
            CORRFLAG,
            NTHR,

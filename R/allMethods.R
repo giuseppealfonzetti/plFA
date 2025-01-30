@@ -97,6 +97,7 @@ setGeneric('getPar', function(OBJ, ...) standardGeneric('getPar'))
 setMethod('getPar', 'PlFaFit', function(OBJ, ...) extract_par(THETA       = OBJ@theta,
                                                               CONSTRMAT   = OBJ@cnstr@loadings,
                                                               CONSTRLOGSD = OBJ@cnstr@loglatsd,
+                                                              LLC         = OBJ@cnstr@llc,
                                                               NTHR        = OBJ@dims@nthr,
                                                               NLOAD       = OBJ@dims@nload,
                                                               NCORR       = OBJ@dims@ncorr,
@@ -125,7 +126,7 @@ setMethod('getPar', 'vector', function(OBJ, ...) extract_par(THETA = OBJ, ...))
 #' @param NCORR Number of free latent correlations parameters.
 #' @param NVAR Number of free latent variance parameters.
 extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'),
-                        CONSTRMAT, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR){
+                        CONSTRMAT, CONSTRLOGSD, LLC, NTHR, NLOAD, NCORR, NVAR){
   OPTION <- match.arg(OPTION)
 
   q <- ncol(CONSTRMAT)
@@ -155,6 +156,7 @@ extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'),
     ld <- cpp_loadings_theta2mat(
       THETA     = THETA,
       CONSTRMAT = CONSTRMAT,
+      LLC       = LLC,
       NTHR      = NTHR,
       NLOAD     = NLOAD)
 
@@ -195,6 +197,7 @@ setMethod('computeVar', 'PlFaFit',
                        PPI         = NULL,
                        CONSTRMAT   = OBJ@cnstr@loadings,
                        CONSTRLOGSD = OBJ@cnstr@loglatsd,
+                       LLC         = OBJ@cnstr@llc,
                        NTHR        = OBJ@dims@nthr,
                        NLOAD       = OBJ@dims@nload,
                        NCORR       = OBJ@dims@ncorr,
@@ -213,6 +216,7 @@ setMethod('computeVar', 'PlFaFit',
                        PPI         = OBJ@stoFit@control$PAIRS_PER_ITERATION,
                        CONSTRMAT   = OBJ@cnstr@loadings,
                        CONSTRLOGSD = OBJ@cnstr@loglatsd,
+                       LLC         = OBJ@cnstr@llc,
                        NTHR        = OBJ@dims@nthr,
                        NLOAD       = OBJ@dims@nload,
                        NCORR       = OBJ@dims@ncorr,
@@ -227,7 +231,7 @@ setMethod('computeVar', 'PlFaFit',
 
 #setMethod('computeVar', 'vector', function(OBJ, DATA, ...) compute_var(OBJ, DATA, ...))
 compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
-                        CONSTRMAT, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR,
+                        CONSTRMAT, CONSTRLOGSD, LLC, NTHR, NLOAD, NCORR, NVAR,
                         FREQ, DATA, METHOD, NUMDERIV = F, INVHAPPRX=NULL){
 
   Rwr_getPar <- function(x){
@@ -235,6 +239,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
            OPTION      = "transformed",
            CONSTRMAT   = CONSTRMAT,
            CONSTRLOGSD = CONSTRLOGSD,
+           LLC         = LLC,
            NTHR        = NTHR,
            NLOAD       = NLOAD,
            NCORR       = NCORR,
@@ -253,6 +258,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
         C_VEC      = C_VEC,
         CONSTRMAT  = CONSTRMAT,
         CONSTRLOGSD= CONSTRLOGSD,
+        LLC        = LLC,
         FREQ       = FREQ,
         THETA      = par_vec,
         CORRFLAG   = (NCORR>0),
@@ -269,13 +275,14 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     if(is.null(INVHAPPRX)){
       message('- Estimating H...')
       Hhat <- estimate_H(
-        C_VEC = C_VEC,
-        A = CONSTRMAT,
+        C_VEC       = C_VEC,
+        A           = CONSTRMAT,
         CONSTRLOGSD = CONSTRLOGSD,
-        THETA = THETA,
-        FREQ = FREQ,
-        N = N,
-        CORRFLAG = (NCORR>0),
+        LLC         = LLC,
+        THETA       = THETA,
+        FREQ        = FREQ,
+        N           = N,
+        CORRFLAG    = (NCORR>0),
         NTHR        = NTHR,
         NLOAD       = NLOAD,
         NCORR       = NCORR,
@@ -291,6 +298,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     C_VEC       = C_VEC,
     A           = CONSTRMAT,
     CONSTRLOGSD = CONSTRLOGSD,
+    LLC         = LLC,
     THETA       = THETA,
     CORRFLAG    = as.numeric((NCORR>0)),
     NTHR        = NTHR,

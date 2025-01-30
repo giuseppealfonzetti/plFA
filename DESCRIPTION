@@ -7,7 +7,7 @@ Authors@R:  c(
     person("Haziq", "Jamil", , "haziq.jamil@gmail.com", role = c("aut"),
            comment = c(ORCID = "0000-0003-3298-1010"))
   )
-Description: The plFA package provides a fast implementation of numerical and stochastic pairiwse likelihood estimation for factor models with ordinal data. 
+Description: The plFA package provides a fast implementation of numerical and stochastic pairiwse likelihood estimation for latent variable models with ordinal data. 
 License: MIT + file LICENSE
 Suggests: 
     testthat (>= 3.0.0)

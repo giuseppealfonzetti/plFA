@@ -174,6 +174,7 @@ namespace grads{
   void loadings(
       Eigen::VectorXd &GRADIENT,
       const Eigen::Ref<const Eigen::MatrixXd> A,
+      const std::vector<std::vector<std::vector<double>>> LLC,
       const Eigen::Ref<const Eigen::MatrixXd> SIGMA_U,
       const Eigen::Ref<const Eigen::VectorXd> LAMBDAK,
       const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
@@ -185,6 +186,8 @@ namespace grads{
       unsigned int &IDX
   ){
     int SILENTFLAG=1;
+
+    Eigen::MatrixXd dict=Eigen::MatrixXd::Zero(P, Q);
     for(unsigned int j = 0; j < P; j++){
       for(unsigned int v = 0; v < Q; v++){
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ visiting lambda_"<< j << v <<":\n";
@@ -197,6 +200,7 @@ namespace grads{
             const double d_rho_kl = ev.transpose() * SIGMA_U * LAMBDAL;
             if(SILENTFLAG == 0)Rcpp::Rcout << "  |   |_ d_rho_kl:" << d_rho_kl << "\n";
             GRADIENT(IDX) += PRHO_URV * d_rho_kl;
+            dict(j,v) = IDX;
 
             IDX ++;
           }
@@ -207,15 +211,61 @@ namespace grads{
             const double d_rho_kl = LAMBDAK.transpose() * SIGMA_U * ev;
             if(SILENTFLAG == 0)Rcpp::Rcout << "  |   |_ d_rho_kl:" << d_rho_kl << "\n";
             GRADIENT(IDX) += PRHO_URV * d_rho_kl;
+            dict(j,v) = IDX;
 
             IDX ++;
           }
         }else if(!std::isfinite(A(j,v))){
+          dict(j,v) = IDX;
           IDX ++;
         }
       }
     }
 
+    for(int idx_lc = 0; idx_lc < LLC.size(); idx_lc++){
+      const int target_row = LLC.at(idx_lc).at(0).at(0)-1;
+      const int target_col = LLC.at(idx_lc).at(0).at(1)-1;
+      const int n_loads_involved = LLC.at(idx_lc).size();
+      // Rcpp::Rcout << "Constrain number " << idx_lc+1 << ", L("<<target_row+1<<","<<target_col+1
+      //             <<"), Number of params involved: "<< n_loads_involved-1<<"\n";
+
+      if(target_row==K){
+
+        // Rcpp::Rcout<< "Target row == K \n";
+        for(int idx_var = 1; idx_var<n_loads_involved; idx_var++){
+          Eigen::VectorXd ev=Eigen::VectorXd::Zero(Q);
+          const double coeff = LLC.at(idx_lc).at(idx_var).at(0);
+          const int target_row_var = LLC.at(idx_lc).at(idx_var).at(1)-1;
+          const int target_col_var = LLC.at(idx_lc).at(idx_var).at(2)-1;
+          const int target_idx_var = dict(target_row_var, target_col_var);
+
+          // Rcpp::Rcout << " + " << coeff << "*" "L("<<target_row_var+1<<","<<target_col_var+1<<"), idx:" << target_idx_var<< "\n";
+
+          ev(target_col) = coeff;
+          const double d_rho_kl = ev.transpose() * SIGMA_U * LAMBDAL;
+
+          GRADIENT(target_idx_var) +=  PRHO_URV * d_rho_kl;
+          }
+      } else if(target_row==L){
+
+        // Rcpp::Rcout<< "Target row ==L \n";
+
+        for(int idx_var = 1; idx_var<n_loads_involved; idx_var++){
+          Eigen::VectorXd ev=Eigen::VectorXd::Zero(Q);
+          const double coeff = LLC.at(idx_lc).at(idx_var).at(0);
+          const int target_row_var = LLC.at(idx_lc).at(idx_var).at(1)-1;
+          const int target_col_var = LLC.at(idx_lc).at(idx_var).at(2)-1;
+          const int target_idx_var = dict(target_row_var, target_col_var);
+          ev(target_col) = coeff;
+          const double d_rho_kl = LAMBDAK.transpose() * SIGMA_U * ev;
+
+          GRADIENT(target_idx_var) +=  PRHO_URV * d_rho_kl;
+        }
+      }
+
+
+
+    }
   }
 
   Eigen::MatrixXd S(const Eigen::Ref<const Eigen::MatrixXd> A,
@@ -341,6 +391,7 @@ namespace grads{
       const Eigen::Ref<const Eigen::VectorXd> THETA,
       const Eigen::Ref<const Eigen::MatrixXd> A,
       const Eigen::Ref<const Eigen::VectorXd> CONSTRLOGSD,
+      const std::vector<std::vector<std::vector<double>>> LLC,
       const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> PI_THRESHOLDS,
       const Eigen::Ref<const Eigen::MatrixXd> SIGMA_U,
@@ -449,29 +500,32 @@ namespace grads{
     //////////////////////////////////////
 
     // double loop: iterate over elements of loadings matrix
-    for(unsigned int j = 0; j < P; j++){
-      for(unsigned int v = 0; v < Q; v++){
+    // for(unsigned int j = 0; j < P; j++){
+    //   for(unsigned int v = 0; v < Q; v++){
+    //
+    //     // elicit three cases: 1. free loading item k, 2. free loading l, 3. other
+    //     if(j == K){
+    //       if(!std::isfinite(A(j,v))){
+    //         Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
+    //         double d_rho_kl = ev.transpose() * SIGMA_U * LAMBDAL;
+    //         grad(idx) = tmp_sksl * d_rho_kl;
+    //         idx ++;
+    //       }
+    //     }else if (j == L){
+    //       if(!std::isfinite(A(j,v))){
+    //         Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
+    //         double d_rho_kl = LAMBDAK.transpose() * SIGMA_U * ev;
+    //         grad(idx) = tmp_sksl * d_rho_kl;
+    //         idx ++;
+    //       }
+    //     }else if(!std::isfinite(A(j,v))){
+    //       idx ++;
+    //     }
+    //   }
+    // }
 
-        // elicit three cases: 1. free loading item k, 2. free loading l, 3. other
-        if(j == K){
-          if(!std::isfinite(A(j,v))){
-            Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
-            double d_rho_kl = ev.transpose() * SIGMA_U * LAMBDAL;
-            grad(idx) = tmp_sksl * d_rho_kl;
-            idx ++;
-          }
-        }else if (j == L){
-          if(!std::isfinite(A(j,v))){
-            Eigen::VectorXd ev(Q); ev.fill(0.0); ev(v) = 1;
-            double d_rho_kl = LAMBDAK.transpose() * SIGMA_U * ev;
-            grad(idx) = tmp_sksl * d_rho_kl;
-            idx ++;
-          }
-        }else if(!std::isfinite(A(j,v))){
-          idx ++;
-        }
-      }
-    }
+    grads::loadings(grad, A, LLC, SIGMA_U, LAMBDAK, LAMBDAL, tmp_sksl, P, Q, K, L, idx);
+
 
     /////////////////////////////////////////
     // gradient pi_sksl wrt correlations

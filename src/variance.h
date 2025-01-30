@@ -28,6 +28,7 @@ Rcpp::List estimate_H(
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> A,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const std::vector<std::vector<std::vector<double>>> LLC,
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
     int N,
@@ -48,7 +49,7 @@ Rcpp::List estimate_H(
   const int d = NTHR+NLOAD+NCORR+NVAR;
 
   // rearrange parameters
-  Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
+  Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
   Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
   Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
   Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
@@ -106,6 +107,7 @@ Rcpp::List estimate_H(
           Eigen::VectorXd pi_grad = grads::pi(THETA,
                                               A,
                                               CONSTRLOGSD,
+                                              LLC,
                                               C_VEC,
                                               pi_thresholds,
                                               Sigma_u,
@@ -175,6 +177,7 @@ Rcpp::List estimate_J(
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> A,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const std::vector<std::vector<std::vector<double>>> LLC,
     Eigen::VectorXd &THETA,
     int CORRFLAG,
     const int NTHR,
@@ -190,7 +193,7 @@ Rcpp::List estimate_J(
   const int n = Y.rows();
 
   // rearrange parameters
-  Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
+  Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
   Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
   Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
   Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
@@ -250,6 +253,7 @@ Rcpp::List estimate_J(
         Eigen::VectorXd pi_grad = grads::pi(THETA,
                                             A,
                                             CONSTRLOGSD,
+                                            LLC,
                                             C_VEC,
                                             pi_thresholds,
                                             Sigma_u,

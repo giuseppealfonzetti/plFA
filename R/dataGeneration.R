@@ -72,6 +72,9 @@ build_constrMat <- function(P, Q, STRUCT = c('simple', 'triangular', 'crossed'),
     constrMat[ max(1, (loadings_per_factor*(h-1) + 1 - CROSS)) : (loadings_per_factor*(h-1) + loadings_per_factor + remaining_loadings), h] <- NA
 
   }
+
+
+
   return(constrMat)
 }
 
@@ -89,11 +92,11 @@ build_constrMat <- function(P, Q, STRUCT = c('simple', 'triangular', 'crossed'),
 #' @param UB Upper bound for uniform random generator. Default set to 1.
 #' @param STDLV  Logical indicator. Set it to `TRUE` to fix latent variables scale. Set it `FALSE` to fix loadings scale.
 #' @export
-gen_loadings <- function(CONSTRMAT, FIXED = NULL,  SEED = 123, LB = 0, UB = 1, STDLV=TRUE){
-  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT, STDLV = STDLV)
+gen_loadings <- function(CONSTRMAT, FIXED = NULL,  SEED = 123, LB = 0, UB = 1, STDLV=TRUE, LLC=NULL){
+  CONSTRMAT <- check_cnstr_loadings(CONSTRMAT, STDLV = STDLV, LLC=LLC)
 
   set.seed(SEED)
-  p <- check_p(nrow(CONSTRMAT));
+  p <- check_p(nrow(CONSTRMAT))
   q <- check_q(ncol(CONSTRMAT))
 
   out <-  CONSTRMAT
@@ -110,6 +113,17 @@ gen_loadings <- function(CONSTRMAT, FIXED = NULL,  SEED = 123, LB = 0, UB = 1, S
       }
     }
   }
+
+  if(!is.null(LLC)){
+    for (idx_lc in 1:length(LLC)) {
+      val <- 0
+      for (idx_var in 2:length(LLC[[idx_lc]])) {
+        val <- val + LLC[[idx_lc]][[idx_var]][1]*out[LLC[[idx_lc]][[idx_var]][2], LLC[[idx_lc]][[idx_var]][3]]
+      }
+      out[LLC[[idx_lc]][[1]][1], LLC[[idx_lc]][[1]][2]] <- val
+    }
+  }
+
 
   return(out)
 }
