@@ -234,6 +234,7 @@ fit_plFA <- function(
                        NCORR       = dims$ncorr,
                        NVAR        = dims$nvar
     ), sa_args)
+    sa_args$VERBOSE <- VERBOSE
 
     opt <- do.call(cpp_plSA, sa_args)
     end_time <- Sys.time()
