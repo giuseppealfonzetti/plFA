@@ -1,3 +1,7 @@
+if (.Platform$OS.type == "windows") {
+  testthat::skip("Skipping this file on Windows because of time constraints")
+}
+
 #### test compute_frequencies() ####
 test_that("compute_frequencies() output", {
   set.seed(123)

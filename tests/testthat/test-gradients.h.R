@@ -1,3 +1,7 @@
+if (.Platform$OS.type == "windows") {
+  testthat::skip("Skipping this file on Windows because of time constraints")
+}
+
 ###################################################
 # Test file for gradients.h based on wrappers for #
 # pair contributions in pairs.h as exported by    #
