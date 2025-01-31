@@ -83,12 +83,9 @@ fit_plFA <- function(
   constr_list <- check_cnstr(CONSTR_LIST)
   method <- match.arg(METHOD)
 
-
-  if(!is.null(INIT)) INIT_METHOD <- "custom"
-  INIT_METHOD <- match.arg(INIT_METHOD)
-
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
+  INIT_METHOD <- check_init_method(dims, INIT_METHOD, INIT)
 
   tmp <- new('PlFaFit',
              cnstr = new('Constraints',
