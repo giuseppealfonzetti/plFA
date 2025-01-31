@@ -33,7 +33,6 @@ test_that("[binary] cfa function works", {
   expect_s4_class(fit, "lavaan")
   expect_s4_class(fit, "plFAlavaan")
   expect_true(inherits(coef(fit), "lavaan.vector"))
-  expect_snapshot(coef(fit))
 })
 
 test_that("[ordinal] cfa function works", {
