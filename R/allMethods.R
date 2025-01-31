@@ -181,15 +181,16 @@ extract_par <- function(THETA, OPTION = c('list', 'raw', 'transformed'),
 #' @param DATA Original data
 #' @param NUMDERIV TRUE if the hessian must be computed using \link[numDeriv]{jacobian}
 #' @param OPTION `transformed` if correlations are of interest. `raw` for inference on the reparametrised level.
+#' @param VERBOSE TRUE if the function must print messages
 #' @export
-setGeneric('computeVar', function(OBJ, DATA, NUMDERIV = F, OPTION = 'transformed') standardGeneric('computeVar'), signature = 'OBJ')
+setGeneric('computeVar', function(OBJ, DATA, NUMDERIV = F, OPTION = 'transformed', VERBOSE = FALSE) standardGeneric('computeVar'), signature = 'OBJ')
 #' Compute variance of the estimates
 #' @param OBJ Object of class plFaFit
 #' @param DATA Original data
 #' @param NUMDERIV TRUE if the hessian must be computed using \link[numDeriv]{jacobian}
 #' @param OPTION `transformed` if correlations are of interest. `raw` for inference on the reparametrised level.
 setMethod('computeVar', 'PlFaFit',
-          function(OBJ, DATA, NUMDERIV, OPTION){ if(OBJ@method == 'ucminf'){
+          function(OBJ, DATA, NUMDERIV, OPTION, VERBOSE){ if(OBJ@method == 'ucminf'){
             compute_var(THETA      = OBJ@theta,
                        C_VEC       = OBJ@dims@cat,
                        N           = OBJ@dims@n,
@@ -207,7 +208,8 @@ setMethod('computeVar', 'PlFaFit',
                        DATA        = DATA,
                        METHOD      = OBJ@method,
                        NUMDERIV    = NUMDERIV,
-                       INVHAPPRX   = OBJ@numFit$invhessian)
+                       INVHAPPRX   = OBJ@numFit$invhessian,
+                       VERBOSE     = VERBOSE)
           }else{
             compute_var(THETA      = OBJ@theta,
                        C_VEC       = OBJ@dims@cat,
@@ -226,14 +228,16 @@ setMethod('computeVar', 'PlFaFit',
                        DATA        = DATA,
                        METHOD      = OBJ@method,
                        NUMDERIV    = NUMDERIV,
-                       INVHAPPRX   = NULL)
+                       INVHAPPRX   = NULL,
+                       VERBOSE     = VERBOSE)
           }}
 )
 
 #setMethod('computeVar', 'vector', function(OBJ, DATA, ...) compute_var(OBJ, DATA, ...))
 compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
                         CONSTRMAT, CONSTRLOGSD, LLC, NTHR, NLOAD, NCORR, NVAR,
-                        FREQ, DATA, METHOD, NUMDERIV = F, INVHAPPRX=NULL){
+                        FREQ, DATA, METHOD, NUMDERIV = F, INVHAPPRX=NULL,
+                        VERBOSE = FALSE){
 
   Rwr_getPar <- function(x){
     getPar(OBJ         = x,
@@ -251,7 +255,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
   opt_noise <- NA
   Hhat <- NA
   if(NUMDERIV){
-    message('- Computing H numerically...')
+    if (isTRUE(VERBOSE)) message('- Computing H numerically...')
     # function for gradient
     Rwr_ngr <- function(par_vec){
       mod <- cpp_multiThread_completePairwise(
@@ -274,7 +278,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
   }else{
     if(is.null(INVHAPPRX)){
-      message('- Estimating H...')
+      if (isTRUE(VERBOSE)) message('- Estimating H...')
       Hhat <- estimate_H(
         C_VEC       = C_VEC,
         A           = CONSTRMAT,
@@ -293,7 +297,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   }
 
-  message('- Estimating J...')
+  if (isTRUE(VERBOSE)) message('- Estimating J...')
   Jhat <- estimate_J(
     Y           = DATA,
     C_VEC       = C_VEC,
@@ -311,7 +315,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   invH <- INVHAPPRX
   if(is.null(INVHAPPRX)){
-    message('- Inverting H...')
+    if (isTRUE(VERBOSE)) message('- Inverting H...')
     if(!(det(Hhat)>0)) stop('H not invertible.')
     invH <- solve(Hhat)
   }
@@ -319,7 +323,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   vcov <- invH %*% Jhat %*% invH
 
-  message('- Computing the variances...')
+  if (isTRUE(VERBOSE)) message('- Computing the variances...')
   if(METHOD =='ucminf'){
     asy_var <- diag(vcov)
   } else {
@@ -328,7 +332,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     a2 <- (PAIRS-PPI)/(PPI*(PAIRS-1))
     opt_noise <- diag( trJacob %*% (invH%*%(a1*Hhat - a2*Jhat)%*%invH/(N*IT) ) %*% t(trJacob) )
   }
-  message('Done!')
+  if (isTRUE(VERBOSE)) message('Done!')
 
   return(
     list(

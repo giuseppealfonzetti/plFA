@@ -202,9 +202,9 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("SA", "custo
   INIT_METHOD <- match.arg(INIT_METHOD)
 
   if(INIT_METHOD=="custom"){
-    if(VERBOSE) cat('- Initialised at INIT vector.\n')
+    if(VERBOSE) message('- Initialised at INIT vector.\n')
   }else if(INIT_METHOD=="standard"){
-    if(VERBOSE) cat('- Initialising at default values ...')
+    if(VERBOSE) message('- Initialising at default values ...', appendLF = FALSE)
     lambda0_init <- init_thresholds(DIMS, CONSTR_LIST)
     lambda_init  <- init_loadings(DIMS, CONSTR_LIST)
     transformed_rhos_init  <- init_transformed_latcorr(DIMS, CONSTR_LIST)
@@ -220,12 +220,12 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("SA", "custo
                         NLOAD=DIMS$nload,
                         NCORR=DIMS$ncorr,
                         NVAR=DIMS$nvar)
-    if(VERBOSE) cat('- Done.\n')
+    if(VERBOSE) message(' Done.')
   }else if(INIT_METHOD=="SA"){
-    if(VERBOSE) cat('- Initialising with SA ...')
+    if(VERBOSE) message('- Initialising with SA ...', appendLF = FALSE)
     CPP_ARGS <- check_plSA_args(FREQ=FREQ, DIMS=DIMS, CONSTR_LIST=CONSTR_LIST, LIST=CPP_ARGS, SETTING = "init")
     INIT <- init_par_with_plSA(DIMS, CONSTR_LIST, CPP_ARGS)
-    if(VERBOSE) cat('- Done.\n')
+    if(VERBOSE) message(' Done.')
 
   }
 

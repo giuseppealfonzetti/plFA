@@ -4,7 +4,7 @@
 \alias{computeVar,PlFaFit-method}
 \title{Compute variance of the estimates}
 \usage{
-\S4method{computeVar}{PlFaFit}(OBJ, DATA, NUMDERIV = F, OPTION = "transformed")
+\S4method{computeVar}{PlFaFit}(OBJ, DATA, NUMDERIV = F, OPTION = "transformed", VERBOSE = FALSE)
 }
 \arguments{
 \item{OBJ}{Object of class plFaFit}
