@@ -28,11 +28,12 @@ test_that("[binary] cfa function works", {
     eta1 =~ y1 + y2 + y3 + y4 + y5
     eta2 =~ y6 + y7 + y8 + y9 + y10
   "
-  fit <- cfa(mod, dat, std.lv = TRUE)
+  fit <- cfa(mod, dat)
 
   expect_s4_class(fit, "lavaan")
   expect_s4_class(fit, "plFAlavaan")
   expect_true(inherits(coef(fit), "lavaan.vector"))
+  expect_snapshot(coef(fit))
 })
 
 test_that("[ordinal] cfa function works", {
@@ -76,7 +77,56 @@ test_that("[ordinal] cfa function works", {
   expect_true(inherits(coef(fit), "lavaan.vector"))
 })
 
+test_that("`std.lv` argument works", {
+  mod <- "
+    A =~ A1 + A2 + A3
+    C =~ C1 + C2 + C3
+    E =~ E1 + E2 + E3
+  "
+  fit1 <- cfa(mod, bfi)
+  fit2 <- cfa(mod, bfi, std.lv = TRUE)
+  expect_equal(
+    fit1@external$plFA@numFit$value,
+    fit2@external$plFA@numFit$value
+  )
+})
 
+test_that("Method = 'SA' works", {
+  mod <- "
+    A =~ A1 + A2 + A3 + A4 + A5
+    C =~ C1 + C2 + C3 + C4 + C5
+    E =~ E1 + E2 + E3 + E4 + E5
+    N =~ N1 + N2 + N3 + N4 + N5
+    O =~ O1 + O2 + O3 + O4 + O5
+  "
 
+  expect_warning({
+    fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA",
+                                                              ncores = 4))
+  })
 
+  expect_s4_class(fit, "lavaan")
+  expect_s4_class(fit, "plFAlavaan")
+  expect_true(inherits(coef(fit), "lavaan.vector"))
+})
 
+test_that("Constraints work", {
+  mod <- "
+    A =~ -0.4*A1 + A2 + a*A3 + b*A4 + c*A5
+    C =~ 0.6*C1 + C2 + C3 + C4 + C5
+    A ~~ -0.4*C
+    a == 0.5*b + 0.25*c
+  "
+  fit <- cfa(mod, bfi, std.lv = TRUE)
+  Lambda <- lavaan::inspect(fit, "est")$lambda
+  Psi <- lavaan::inspect(fit, "est")$psi
+  expect_equal(Lambda[1, 1], -0.4)
+  expect_equal(Lambda[6, 2], 0.6)
+  expect_equal(Psi[1, 2], -0.4)
+
+})
+
+# Test for starting values
+#
+fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT)
+# fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT, start = coef(fit))

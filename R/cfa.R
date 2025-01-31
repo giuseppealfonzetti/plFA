@@ -42,9 +42,6 @@ cfa <- function(
 ) {
 
   # Validate arguments ---------------------------------------------------------
-  if (!is_ordinal_df(data)) {
-    cli::cli_abort("Ordinal data required")
-  }
   method <- estimator.args$method
   if (is.null(method)) method <- "ucminf"
   method <- rlang::arg_match(method, c("ucminf", "SA"))
@@ -60,6 +57,7 @@ cfa <- function(
   cpp_control_init <- estimator.args$cpp_control_init
   computevar_numderiv <- estimator.args$computevar_numderiv
   if (is.null(computevar_numderiv)) computevar_numderiv <- FALSE
+  if (!is.null(start)) start <- as.numeric(start)
 
   # Initialise {lavaan} model object -------------------------------------------
   lavargs <- list(...)
@@ -69,6 +67,10 @@ cfa <- function(
   lavargs$do.fit <- FALSE
   fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
 
+  # Check any ordinal data or not?
+  if (!all(fit0@Data@ov$type == "ordered")) {
+    cli::cli_abort("All measurement items must be declared as ordered factors.")
+  }
   if (fit0@Data@ngroups > 1L) {
     cli::cli_abort("Multigroup analysis is not currently supported.")
   }
@@ -89,9 +91,12 @@ cfa <- function(
 
   # CORRFLAG
   psi <- lavaan::inspect(fit0, "est")$psi
-  LTpsi <- FREE$psi[lower.tri(psi)]
-  if (length(LTpsi) > 0 & any(LTpsi > 0)) {
-    corrflag <- TRUE
+  LTpsi <- psi[lower.tri(psi)]
+  if (length(LTpsi) > 0) {
+    if (any(LTpsi == 0 & FREE$psi[lower.tri(psi)] == 0))
+      corrflag <- FALSE
+    else
+      corrflag <- TRUE
   } else {
     corrflag <- FALSE
   }
@@ -114,6 +119,9 @@ cfa <- function(
 
       for (j in seq_along(coord2)) {
         cz <- strsplit(coord2[j], "\\*")[[1]]
+        if (length(cz) == 1L) {
+          cz <- c("1", cz)
+        }
         idx <- pt$id[pt$label == cz[2]]
         tmp <- which(Lambdaid == idx, arr.ind = TRUE)
         llc[[i]] <- c(llc[[i]], list(as.numeric(c(cz[1], tmp))))
@@ -147,7 +155,8 @@ cfa <- function(
     OBJ = fit1,
     DATA = D,
     NUMDERIV = computevar_numderiv,
-    OPTION = "transformed"
+    OPTION = "transformed",
+    VERBOSE = verbose
   )
 
   # list(fit0 = fit0, fit1 = fit1, vars = vars)
@@ -181,11 +190,12 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   vcov <- vars$vcov
 
   # Change version slot
-  fit0@version <- as.character(packageVersion("plFA"))
+  # fit0@version <- as.character(packageVersion("plFA"))
 
   # Change timing slot
   fit0@timing$optim <- fit0@timing$optim + fit1@RTime
-  fit0@timing$total <- fit0@timing$total + fit1@RTime
+  fit0@timing$vcov <- vars$RTime
+  fit0@timing$total <- sum(unlist(fit0@timing))
 
   # Change Model and implied slots
   fit0@Model <- lavaan::lav_model_set_parameters(fit0@Model, x)
@@ -196,6 +206,9 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   pt$est[pt$free > 0] <- x
   pt$se <- 0
   pt$se[pt$free > 0] <- SE
+  # Manually change the slack column
+  slack_values <- as.vector(fit0@Model@con.jac %*% x - fit0@Model@ceq.rhs)
+  pt$est[pt$op == "=="] <- slack_values
   fit0@ParTable <- as.list(pt)
   fit0@pta$names <- names(pt)
 
@@ -207,11 +220,17 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   fit0@Options$se <- "robust.huber.white"  # this is the sandwich
   fit0@Options$do.fit <- TRUE
 
-  # Change Fit slot
+  # Change Fit slot (depends whether it is numFit or stoFit)
   fit0@Fit@x <- x
   fit0@Fit@se <- SE
-  fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
-  fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
+  fit0@Fit@start <- fit1@init  # FIXME: Need to fix how start values are handled
+  if (fit1@method == "ucminf") {
+    fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
+    fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
+  } else if (fit1@method == "SA") {
+    fit0@Fit@iterations <- as.integer(fit1@stoFit@last_iter)
+    fit0@Fit@converged <- fit1@stoFit@convergence == 1L  # FIXME: Check!!
+  }
 
   # Change optim slot
   fit0@optim$x <- x
@@ -219,15 +238,17 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   fit0@optim$npar <- length(x)
   fit0@optim$fx <- fit0@Fit@fx
   fit0@optim$fx.group <- fit0@Fit@fx.group
-  fit0@optim$iterations <- fit1@numFit$info["neval"]
-  fit0@optim$converged <- fit1@numFit$convergence == 1L
+  fit0@optim$iterations <- fit0@Fit@iterations
+  fit0@optim$converged <- fit0@Fit@converged
 
   # Change loglik slot
-  # fit0@loglik$estimator <-
-  #   if (fit$estimator == "ML") "ML"
-  #   else if (fit$estimator == "IBRM") "IMP-BR ML"
-  #   else if (fit$estimator == "IBRMP") "IMP-BR ML"
-  #   else if (fit$estimator == "EBRM") "EXP-BR ML"
+  if (fit1@method == "ucminf") {
+    fit0@loglik$loglik <- fit1@numFit$value
+  } else if (fit1@method == "SA") {
+    fit0@loglik$loglik <- fit1@stoFit@nll
+  }
+  fit0@loglik$estimator <- "PML"
+
   # Change vcov slot
   fit0@vcov$se <- "robust.sem"
   fit0@vcov$information <- "expected"
