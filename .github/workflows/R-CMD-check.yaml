@@ -51,3 +51,9 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
+          - uses: r-lib/actions/check-r-package@v2
+
+      - name: Print test results
+        if: failure()
+        run: cat $(find . -name 'testthat-results.xml')
+
