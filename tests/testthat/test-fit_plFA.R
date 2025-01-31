@@ -1,3 +1,7 @@
+if (.Platform$OS.type == "windows") {
+  testthat::skip("Skipping this file on Windows because of time constraints")
+}
+
 # p = number of items, q = number of latent variables, n = number of observations
 p <- 30; q <- 8; n <- 1000
 
