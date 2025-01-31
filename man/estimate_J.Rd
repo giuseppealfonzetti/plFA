@@ -4,7 +4,19 @@
 \alias{estimate_J}
 \title{Estimate of J}
 \usage{
-estimate_J(Y, C_VEC, A, CONSTRLOGSD, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+estimate_J(
+  Y,
+  C_VEC,
+  A,
+  CONSTRLOGSD,
+  LLC,
+  THETA,
+  CORRFLAG,
+  NTHR,
+  NLOAD,
+  NCORR,
+  NVAR
+)
 }
 \arguments{
 \item{Y}{data matrix}
@@ -14,6 +26,8 @@ estimate_J(Y, C_VEC, A, CONSTRLOGSD, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 \item{A}{Constraint matrix. Loadings free to be estimated are identified by a 1.}
 
 \item{CONSTRLOGSD}{\eqn{q}-dimensional vector. Elements set to \code{NA} refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.}
+
+\item{LLC}{Linear loadings constraints. Expects a list of constraints. See \link{fit_plFA} documentation.}
 
 \item{THETA}{Parameter vector}
 

@@ -15,6 +15,7 @@ namespace pairs{
       // Parameters
       const Eigen::Ref<const Eigen::MatrixXd> A,
       const Eigen::Ref<const Eigen::VectorXd> CONSTRLOGSD,
+      const std::vector<std::vector<std::vector<double>>> LLC,
       const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> THETA,
       const int CORRFLAG,
@@ -34,7 +35,7 @@ namespace pairs{
     const unsigned int q = A.cols();
 
     // rearrange parameters
-    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
+    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
     Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
     Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
     Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
@@ -47,7 +48,12 @@ namespace pairs{
     const Eigen::VectorXd lambdal  = Lam.row(L);
     const double rho_kl            = lambdak.transpose() * Sigma_u * lambdal;
 
-    // Rcpp::Rcout<<"rho_kl:"<<Ru<<"\n";
+    // Rcpp::Rcout<<"LAM:\n"<<Lam<<"\n";
+    //
+    // Rcpp::Rcout<<"lambdak:"<<lambdak.transpose()<<"\n";
+    // Rcpp::Rcout<<"lambdal:"<<lambdal.transpose()<<"\n";
+    //
+    // Rcpp::Rcout<<"rho_kl:"<<rho_kl<<"\n";
     // Initialize pairs table
     Eigen::MatrixXd pairs_tab     = PAIRS_TABLE;
     pairs_tab.conservativeResize(PAIRS_TABLE.rows() + 1, Eigen::NoChange_t() );
@@ -120,7 +126,7 @@ namespace pairs{
       ///////////////////////////////////////////////////
       // (k,l)-pair likelihood derivative wrt loadings //
       ///////////////////////////////////////////////////
-      grads::loadings(GRADIENT, A, Sigma_u, lambdak, lambdal, tmp_kl, p, q, K, L, iter);
+      grads::loadings(GRADIENT, A, LLC, Sigma_u, lambdak, lambdal, tmp_kl, p, q, K, L, iter);
 
       /////////////////////////////////////////////////////////////////////////////
       // (k,l)-pair likelihood derivative wrt reparametrised latent correlations //
@@ -155,6 +161,7 @@ namespace pairs{
   void pair_contribution2(
       const Eigen::Ref<const Eigen::MatrixXd> A,
       const Eigen::Ref<const Eigen::VectorXd> CONSTRLOGSD,
+      const std::vector<std::vector<std::vector<double>>> LLC,
       const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> THETA,
       const int CORRFLAG,
@@ -175,7 +182,7 @@ namespace pairs{
     const unsigned int d = NTHR+NLOAD+NCORR+NVAR;
 
     // rearrange parameters
-    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, NTHR, NLOAD);
+    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
     Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
     Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
     Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
@@ -242,6 +249,7 @@ namespace pairs{
           GRADIENT += (n_sksl/(pi_sksl+1e-8))* grads::pi(THETA,
                        A,
                        CONSTRLOGSD,
+                       LLC,
                        C_VEC,
                        pi_thresholds,
                        Sigma_u,
@@ -280,6 +288,7 @@ namespace pairs{
     //// Global:
     const Eigen::Map<Eigen::MatrixXd> constrmat;
     const Eigen::Map<Eigen::VectorXd> constrsd;
+    const std::vector<std::vector<std::vector<double>>> llc;
     const Eigen::Map<Eigen::VectorXd> c_vec;
     const Eigen::MatrixXd &pairs_table;
     const Eigen::MatrixXd &items_pairs;
@@ -303,6 +312,7 @@ namespace pairs{
     SubsetWorker(
       const Eigen::Map<Eigen::MatrixXd> CONSTRMAT_,
       const Eigen::Map<Eigen::VectorXd> CONSTRSD_,
+      const std::vector<std::vector<std::vector<double>>> LLC_,
       const Eigen::Map<Eigen::VectorXd> C_VEC_,
       const Eigen::MatrixXd &PAIRS_TABLE_,
       const Eigen::MatrixXd &ITEMS_PAIRS_,
@@ -316,14 +326,14 @@ namespace pairs{
       const Eigen::VectorXd &THETA_,
       const std::vector<int> &INDEX_VECTOR_
     ):
-      constrmat(CONSTRMAT_), constrsd(CONSTRSD_), c_vec(C_VEC_), pairs_table(PAIRS_TABLE_), items_pairs(ITEMS_PAIRS_),
+      constrmat(CONSTRMAT_), constrsd(CONSTRSD_), llc(LLC_), c_vec(C_VEC_), pairs_table(PAIRS_TABLE_), items_pairs(ITEMS_PAIRS_),
       corrFLAG(CORRFLAG_), nthr(NTHR_), nload(NLOAD_), ncorr(NCORR_), nvar(NVAR_), silentFLAG(SILENTFLAG_), gradFLAG(GRADFLAG_),
       theta(THETA_), index_vector(INDEX_VECTOR_), subset_ll(0.0),
       subset_gradient(Eigen::VectorXd::Zero(THETA_.size())){}
 
     // Constructor 2:
     SubsetWorker(const SubsetWorker &OBJ_, RcppParallel::Split):
-      constrmat(OBJ_.constrmat), constrsd(OBJ_.constrsd), c_vec(OBJ_.c_vec), pairs_table(OBJ_.pairs_table), items_pairs(OBJ_.items_pairs),
+      constrmat(OBJ_.constrmat), constrsd(OBJ_.constrsd), llc(OBJ_.llc), c_vec(OBJ_.c_vec), pairs_table(OBJ_.pairs_table), items_pairs(OBJ_.items_pairs),
       corrFLAG(OBJ_.corrFLAG), nthr(OBJ_.nthr), nload(OBJ_.nload), ncorr(OBJ_.ncorr), nvar(OBJ_.nvar),
       silentFLAG(OBJ_.silentFLAG), gradFLAG(OBJ_.gradFLAG),
       theta(OBJ_.theta), index_vector(OBJ_.index_vector), subset_ll(0.0),
@@ -355,7 +365,7 @@ namespace pairs{
       Eigen::VectorXd pair_gradient = Eigen::VectorXd::Zero(d);
 
       // computation of log-likelihood, gradient
-      pair_contribution_extended(constrmat, constrsd, c_vec, theta, corrFLAG, nthr, nload, ncorr, nvar, k, l, pairs_table, silentFLAG, gradFLAG, pair_ll, pair_gradient);
+      pair_contribution_extended(constrmat, constrsd, llc, c_vec, theta, corrFLAG, nthr, nload, ncorr, nvar, k, l, pairs_table, silentFLAG, gradFLAG, pair_ll, pair_gradient);
 
       // update
       {

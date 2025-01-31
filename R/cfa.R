@@ -102,12 +102,16 @@ cfa <- function(
   constrvar <- diag(psi)
   constrvar[constrvar > 0] <- NA
 
+  # Linear loadings constraints
+  llc <- NULL
+
   # Build constraint list
   constr_list <- list(
     CONSTRMAT = A,
-    CORRFLAG = corrflag,
     CONSTRVAR = exp(sqrt(constrvar)) ^ 2,
-    STDLV = std.lv
+    CORRFLAG = corrflag,
+    STDLV = std.lv,
+    LLC = llc
   )
 
   fit1 <- fit_plFA(
@@ -143,10 +147,11 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
     OPTION = "list",
     CONSTRMAT = fit1@cnstr@loadings,
     CONSTRLOGSD = fit1@cnstr@loglatsd,
-    NTHR = length(FREE$tau),
-    NLOAD = sum(FREE$lambda > 0),
-    NCORR = sum(FREE$psi > 0 & lower.tri(FREE$psi)),
-    NVAR = sum(diag(FREE$psi) > 0)
+    LLC = fit1@cnstr@llc,
+    NTHR = fit1@dims@nthr,
+    NLOAD = fit1@dims@nload,
+    NCORR = fit1@dims@ncorr,
+    NVAR = fit1@dims@nvar
   )
   lambda <- parlist$loadings[FREE$lambda > 0]
   tau <- parlist$thresholds[FREE$tau > 0]

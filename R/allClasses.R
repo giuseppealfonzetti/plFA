@@ -1,5 +1,5 @@
 #' list with constraints
-setClass('Constraints', slots = c(loadings = 'matrix', corrflag = 'logical', stdlv="logical", loglatsd="vector"))
+setClass('Constraints', slots = c(loadings = 'matrix', corrflag = 'logical', stdlv="logical", loglatsd="vector", llc="ANY"))
 
 #' List collecting problem dimensions
 setClass('Dimensions', slots = c(n     = 'numeric',

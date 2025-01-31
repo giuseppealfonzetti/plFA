@@ -15,23 +15,34 @@ check_cnstr_stdlv <- function(STDLV){
   stopifnot(is.logical(STDLV))
   return(STDLV)
 }
-check_cnstr_loadings <- function(MAT, STDLV){
+check_cnstr_loadings <- function(MAT, STDLV, LLC=NULL){
   stopifnot(is.matrix(MAT))
   stopifnot(is.numeric(MAT))
   stopifnot(!is.infinite(sum(MAT, na.rm = TRUE)))
 
   if(!STDLV){
     for(j in 1:ncol(MAT)){
-      wna <- which(is.na(MAT[,j]))
-      fna <- wna[1]
-      if(is.null(fna)) break
-      if(fna==1){MAT[fna,j] <- 1}else{
-        if(all(MAT[1:(fna-1),j]==0))MAT[fna,j] <- 1
+      if(sum(is.na(MAT[,j]))>0){
+        wna <- which(is.na(MAT[,j]))
+        fna <- wna[1]
+        if(is.null(fna)) break
+        if(fna==1){MAT[fna,j] <- 1}else{
+          if(all(MAT[1:(fna-1),j]==0))MAT[fna,j] <- 1
+        }
       }
     }
   }
 
+  if(!is.null(LLC)){
+    for (idx_lc in 1:length(LLC)) {
+      MAT[LLC[[idx_lc]][[1]][1], LLC[[idx_lc]][[1]][2]] <- 1
+    }
+  }
+
   return(MAT)
+}
+check_cnstr_loadings_llc <- function(LIST){
+  return(LIST)
 }
 check_cnstr_latvar <- function(VEC, Q, STDLV){
   if(is.null(VEC) & STDLV) VEC <- rep(1, Q)
@@ -51,7 +62,8 @@ check_cnstr <- function(LIST){
   ls <- list()
   ls$CORRFLAG <- check_cnstr_corrflag(LIST$CORRFLAG)
   ls$STDLV    <- check_cnstr_stdlv(LIST$STDLV)
-  ls$CONSTRMAT <- check_cnstr_loadings(LIST$CONSTRMAT, STDLV = ls$STDLV)
+  ls$LLC <- check_cnstr_loadings_llc(LIST$LLC)
+  ls$CONSTRMAT <- check_cnstr_loadings(LIST$CONSTRMAT, STDLV = ls$STDLV, LLC = ls$LLC)
   q <- ncol(ls$CONSTRMAT)
   ls$CONSTRLOGSD <- check_cnstr_latvar(LIST$CONSTRVAR, Q=q, STDLV = ls$STDLV)
 
@@ -155,6 +167,7 @@ check_init_par <- function(PAR, DIMS, CONSTR_LIST){
 
   L <- cpp_loadings_theta2mat(THETA     = PAR,
                               CONSTRMAT = CONSTR_LIST$CONSTRMAT,
+                              LLC       = CONSTR_LIST$LLC,
                               NTHR      = DIMS$nthr,
                               NLOAD     = DIMS$nload)
   check_loadings(L)
@@ -172,6 +185,7 @@ check_init_par <- function(PAR, DIMS, CONSTR_LIST){
   PAR <- cpp_sa_proj( THETA=PAR,
                       CONSTRMAT=CONSTR_LIST$CONSTRMAT,
                       CONSTRLOGSD=CONSTR_LIST$CONSTRLOGSD,
+                      LLC=CONSTR_LIST$LLC,
                       C_VEC=DIMS$cat,
                       CORRFLAG=CONSTR_LIST$CORRFLAG,
                       NTHR=DIMS$nthr,
@@ -199,6 +213,7 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("SA", "custo
     INIT <- cpp_sa_proj(THETA=INIT,
                         CONSTRMAT=CONSTR_LIST$CONSTRMAT,
                         CONSTRLOGSD=CONSTR_LIST$CONSTRLOGSD,
+                        LLC=CONSTR_LIST$LLC,
                         C_VEC=DIMS$cat,
                         CORRFLAG=CONSTR_LIST$CORRFLAG,
                         NTHR=DIMS$nthr,

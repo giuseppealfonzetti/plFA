@@ -25,6 +25,7 @@
 //' @param C_VEC Vector containing the number of categories for each item
 //' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
 //' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+//' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
 //' @param THETA Parameter vector
 //' @param FREQ Frequency table
 //' @param CORRFLAG TRUE to estimate latent correlations. 0 for orthogonal latent factors.
@@ -41,6 +42,7 @@ Rcpp::List cpp_multiThread_completePairwise(
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const std::vector<std::vector<std::vector<double>>> LLC,
     Eigen::Map<Eigen::VectorXd> THETA,
     Eigen::Map<Eigen::MatrixXd> FREQ,
     const int CORRFLAG,
@@ -80,7 +82,7 @@ Rcpp::List cpp_multiThread_completePairwise(
   double iter_ll = 0;
   Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
-  pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, C_VEC, pairs_table, items_pairs, CORRFLAG, NTHR, NLOAD, NCORR, NVAR,
+  pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, pairs_table, items_pairs, CORRFLAG, NTHR, NLOAD, NCORR, NVAR,
                                        SILENTFLAG, GRFLAG, theta, vector_pairs);
   RcppParallel::parallelReduce(0, R, iteration_subset);
   iter_ll = iteration_subset.subset_ll;
@@ -108,6 +110,7 @@ Rcpp::List cpp_plSA(
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const std::vector<std::vector<std::vector<double>>> LLC,
     Eigen::Map<Eigen::VectorXd> THETA_INIT,
     const int NTHR,
     const int NLOAD,
@@ -231,7 +234,7 @@ Rcpp::List cpp_plSA(
         if(t % CLOCK_WINDOW == 0) clock.tick("Obj eval");
 
         double prev_nll = nll;
-        pairs::SubsetWorker fullpool_worker(CONSTRMAT, CONSTRLOGSD, C_VEC, VALFREQ, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
+        pairs::SubsetWorker fullpool_worker(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, VALFREQ, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
                                              1, 0, theta, full_pool);
         RcppParallel::parallelReduce(0, pairs, fullpool_worker);
         nll = -fullpool_worker.subset_ll/n;
@@ -301,7 +304,7 @@ Rcpp::List cpp_plSA(
       // GRADIENT COMPUTATION  //
       ///////////////////////////
       if(t % CLOCK_WINDOW == 0) clock.tick("Stochastic_gradient");
-      pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, C_VEC, FREQ, items_pairs, corrflag,
+      pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, FREQ, items_pairs, corrflag,
                                            NTHR, NLOAD, NCORR, NVAR,
                                            1, 1, theta, iter_chosen_pairs);
       RcppParallel::parallelReduce(0, iter_chosen_pairs.size(), iteration_subset);
@@ -339,7 +342,7 @@ Rcpp::List cpp_plSA(
       ///////////////////////////////////////////////
 
       bool checkevent;
-      sa::proj2(CONSTRMAT, CONSTRLOGSD, C_VEC, corrflag, NTHR, NLOAD, NCORR, NVAR, theta, checkevent);
+      sa::proj2(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, corrflag, NTHR, NLOAD, NCORR, NVAR, theta, checkevent);
       if(checkevent) post_index.push_back(t);
       if(VERBOSE && checkevent && t>burn) proj_after_burn=true;
 
