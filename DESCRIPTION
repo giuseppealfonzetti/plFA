@@ -1,6 +1,6 @@
 Package: plFA
 Title: Fast pairiwse likelihood estimation of factor models for ordinal data
-Version: 0.0.0.9001
+Version: 0.1.0
 Authors@R: c(
     person("Giuseppe", "Alfonzetti", email = "giuseppe.alfonzetti@uniud.it", 
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6118-6553")),
