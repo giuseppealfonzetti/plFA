@@ -24,63 +24,59 @@ is_ordinal_df <- function(D) {
 cfa <- function(
     model,
     data,
-    std.lv = TRUE,
-    start = NULL,
+    std.lv = FALSE,
     estimator = "PML",
     estimator.args = list(
-      method = "ucminf",
+      method = c("ucminf", "SA"),
+      init_method = c("SA", "custom", "standard"),
+      cpp_control_init = NULL,
+      ncores = 1,
       valdata = NULL,
-      iterations_subset = NULL,
-      ncores = 1
+      computevar_numderiv = FALSE
     ),
+    start = NULL,
     information = "observed",
     control = list(),
+    verbose = FALSE,
     ...
 ) {
 
-  lavargs <- list(...)
-
-  # Validate arguments
+  # Validate arguments ---------------------------------------------------------
   if (!is_ordinal_df(data)) {
     cli::cli_abort("Ordinal data required")
   }
-  if (isFALSE(std.lv)) {
-    cli::cli_alert_warning("Non-standardised latent variable estimation not implemented yet. Setting `std.lv = TRUE`.")
-    std.lv <- TRUE
-  }
-  lavargs$std.lv <- std.lv
-  lavargs$control <- control
   method <- estimator.args$method
-  if (is.null(method)) {
-    cli::cli_alert_warning("No estimation method specified. Setting `method = 'ucminf'`.")
-    method <- "ucminf"
-  }
-  if (method != "ucminf") {
-    cli::cli_alert_warning("Only 'ucminf' method implemented for now.")
-    method <- "ucminf"
-  }
-  valdata <- estimator.args$valdata
-  iterations_subset <- estimator.args$iterations_subset
+  if (is.null(method)) method <- "ucminf"
+  method <- rlang::arg_match(method, c("ucminf", "SA"))
+  init_method <- estimator.args$init_method
+  if (is.null(init_method)) init_method <- "SA"
   ncores <- estimator.args$ncores
-  if ("verbose" %in% names(lavargs)) verbose <- lavargs$verbose
-  else verbose <- FALSE
-
-  # Options for computeVar()
-  computevar_numderiv <- estimator.args$numderiv
+  if (is.null(ncores)) ncores <- 1
+  valdata <- estimator.args$valdata
+  if (method == "SA") {
+    cpp_control_main <- control
+    control <- list()
+  }
+  cpp_control_init <- estimator.args$cpp_control_init
+  computevar_numderiv <- estimator.args$computevar_numderiv
   if (is.null(computevar_numderiv)) computevar_numderiv <- FALSE
-  computevar_option <- estimator.args$numderiv
-  if (is.null(computevar_option)) computevar_option <- "transformed"
 
   # Initialise {lavaan} model object -------------------------------------------
+  lavargs <- list(...)
   lavargs$model <- model
   lavargs$data <- data
+  lavargs$std.lv <- std.lv
   lavargs$do.fit <- FALSE
   fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
 
-  # Fit plFA -------------------------------------------------------------------
-  D <- fit0@Data@X[[1]] - 1  # FIXME: First group only!!
+  if (fit0@Data@ngroups > 1L) {
+    cli::cli_abort("Multigroup analysis is not currently supported.")
+  }
 
-  # Build A matrix
+  # Fit plFA -------------------------------------------------------------------
+  D <- fit0@Data@X[[1]] - 1
+
+  # Build the p x q loading constraints matrix
   FREE <- lavaan::inspect(fit0, what = "free")
   lambda <- lavaan::inspect(fit0, what = "est")$lambda
   p <- nrow(lambda)
@@ -92,23 +88,43 @@ cfa <- function(
   A[FREE$lambda == 0] <- lambda[FREE$lambda == 0]
 
   # CORRFLAG
-  psi <- FREE$psi
-  LTpsi <- psi[lower.tri(psi)]
+  psi <- lavaan::inspect(fit0, "est")$psi
+  LTpsi <- FREE$psi[lower.tri(psi)]
   if (length(LTpsi) > 0 & any(LTpsi > 0)) {
     corrflag <- TRUE
   } else {
     corrflag <- FALSE
   }
   constrvar <- diag(psi)
-  constrvar[constrvar > 0] <- NA
+  constrvar[diag(FREE$psi) > 0] <- NA
 
   # Linear loadings constraints
   llc <- NULL
+  pt <- partable(fit0)
+  ptlc <- pt[pt$op == "==", ]
+  Lambdaid <- lavaan::inspect(fit0, "free")$lambda
+
+  if (nrow(ptlc) > 0L) {
+    llc <- list()
+    coord1 <- ptlc$lhs
+    coord2 <- strsplit(ptlc$rhs, "\\+")[[1]]
+    for (i in seq_along(coord1)) {
+      idx <- pt$id[pt$label == coord1[i]]
+      llc[[i]] <- list(which(Lambdaid == idx, arr.ind = TRUE))
+
+      for (j in seq_along(coord2)) {
+        cz <- strsplit(coord2[j], "\\*")[[1]]
+        idx <- pt$id[pt$label == cz[2]]
+        tmp <- which(Lambdaid == idx, arr.ind = TRUE)
+        llc[[i]] <- c(llc[[i]], list(as.numeric(c(cz[1], tmp))))
+      }
+    }
+  }
 
   # Build constraint list
   constr_list <- list(
     CONSTRMAT = A,
-    CONSTRVAR = exp(sqrt(constrvar)) ^ 2,
+    CONSTRVAR = constrvar,  # FIXME: Correct way to specify variance constraints?
     CORRFLAG = corrflag,
     STDLV = std.lv,
     LLC = llc
@@ -117,19 +133,21 @@ cfa <- function(
   fit1 <- fit_plFA(
     DATA = D,
     CONSTR_LIST = constr_list,
-    VALDATA = valdata,
     METHOD = method,
+    INIT_METHOD = init_method,
+    NCORES = ncores,
+    VALDATA = valdata,
     CONTROL = control,
+    CPP_CONTROL_MAIN = cpp_control_main,
+    CPP_CONTROL_INIT = cpp_control_init,
     INIT = start,
-    # ITERATIONS_SUBSET = iterations_subset,
-    VERBOSE = verbose,
-    NCORES = ncores
+    VERBOSE = verbose
   )
   vars <- computeVar(
     OBJ = fit1,
     DATA = D,
     NUMDERIV = computevar_numderiv,
-    OPTION = computevar_option
+    OPTION = "transformed"
   )
 
   # list(fit0 = fit0, fit1 = fit1, vars = vars)
@@ -155,7 +173,8 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   )
   lambda <- parlist$loadings[FREE$lambda > 0]
   tau <- parlist$thresholds[FREE$tau > 0]
-  psi <- parlist$latent_correlations[FREE$psi > 0 & lower.tri(FREE$psi)]
+  psi <- parlist$latent_correlations[FREE$psi > 0 & lower.tri(FREE$psi, diag = TRUE)]
+
   x <- c(lambda, tau, psi)
 
   SE <- sqrt(vars$asymptotic_variance)
@@ -222,3 +241,4 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   fit0
 }
+
