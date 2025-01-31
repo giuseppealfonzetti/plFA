@@ -1,8 +1,3 @@
-is_ordinal_df <- function(D) {
-  if (!is.data.frame(D)) return(FALSE)
-  else all(sapply(D, is.ordered))
-}
-
 #' Fit Confirmatory Factor Analysis Models using plFA
 #'
 #' @param model A description of the user-specified model. Typically, the model
