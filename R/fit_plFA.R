@@ -107,7 +107,8 @@ fit_plFA <- function(
                         npar  = dims$d),
              method = METHOD)
 
-
+  # Version
+  tmp@version <- as.character(packageVersion("plFA"))
 
   # Set up multi-threads computations
   tmp@cores <- NCORES
