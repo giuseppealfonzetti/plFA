@@ -1,7 +1,7 @@
 Package: plFA
 Title: Fast pairiwse likelihood estimation of factor models for ordinal data
 Version: 0.0.0.9001
-Authors@R:  c(
+Authors@R: c(
     person("Giuseppe", "Alfonzetti", email = "giuseppe.alfonzetti@uniud.it", 
            role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6118-6553")),
     person("Haziq", "Jamil", , "haziq.jamil@gmail.com", role = c("aut"),
@@ -21,7 +21,8 @@ LinkingTo:
     RcppParallel,
     RcppClock
 Depends:
-    lavaan
+    lavaan,
+    R (>= 3.5)
 Imports: 
     Rcpp (>= 1.0.11),
     RcppEigen  (>= 0.3.3.9.3),
@@ -33,3 +34,4 @@ Imports:
     methods
 URL: https://github.com/giuseppealfonzetti/plFA
 BugReports: https://github.com/giuseppealfonzetti/plFA/issues
+LazyData: true
