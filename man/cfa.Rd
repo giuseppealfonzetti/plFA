@@ -7,13 +7,15 @@
 cfa(
   model,
   data,
-  std.lv = TRUE,
-  start = NULL,
+  std.lv = FALSE,
   estimator = "PML",
-  estimator.args = list(method = "ucminf", valdata = NULL, iterations_subset = NULL,
-    ncores = 1),
+  estimator.args = list(method = c("ucminf", "SA"), init_method = c("SA", "custom",
+    "standard"), cpp_control_init = NULL, ncores = 1, valdata = NULL, computevar_numderiv
+    = FALSE),
+  start = NULL,
   information = "observed",
   control = list(),
+  verbose = FALSE,
   ...
 )
 }
@@ -28,11 +30,11 @@ Variables must be declared as ordered factors.}
 
 \item{std.lv}{TBC}
 
-\item{start}{Starting values to use.}
-
 \item{estimator}{(For \code{lavaan} compatibility only). The estimator is \code{PML}.}
 
 \item{estimator.args}{A list of arguments for \code{\link[=fit_plFA]{fit_plFA()}}. TBC.}
+
+\item{start}{Starting values to use.}
 
 \item{information}{(For \code{lavaan} compatibility only). The information matrix is...}
 
