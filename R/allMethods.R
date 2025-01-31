@@ -239,6 +239,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
                         FREQ, DATA, METHOD, NUMDERIV = F, INVHAPPRX=NULL,
                         VERBOSE = FALSE){
 
+  start_time <- Sys.time()
   Rwr_getPar <- function(x){
     getPar(OBJ         = x,
            OPTION      = "transformed",
@@ -332,7 +333,10 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     a2 <- (PAIRS-PPI)/(PPI*(PAIRS-1))
     opt_noise <- diag( trJacob %*% (invH%*%(a1*Hhat - a2*Jhat)%*%invH/(N*IT) ) %*% t(trJacob) )
   }
-  if (isTRUE(VERBOSE)) message('Done!')
+
+  end_time <- Sys.time()
+  totaltime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+  if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
 
   return(
     list(
@@ -341,7 +345,8 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
       J = Jhat,
       vcov = vcov,
       asymptotic_variance = asy_var,
-      optimisation_noise = opt_noise
+      optimisation_noise = opt_noise,
+      RTime = totaltime
     )
   )
 
