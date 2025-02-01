@@ -18,6 +18,11 @@ The LSAT is a classical example in educational testing for measuring
   ability traits. This test was designed to measure a \emph{single}
   latent ability scale.
 }
+\examples{
+library(tidyverse)
+glimpse(LSAT)
+
+}
 \references{
 Bartholomew, D., Steel, F., Moustaki, I. and Galbraith, J. (2002)
 \emph{The Analysis and Interpretation of Multivariate Data for

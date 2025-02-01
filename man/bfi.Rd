@@ -20,11 +20,22 @@ bfi
 Unlike the \code{psych::bfi} data sets, the \code{bfi} data set in this
 package retains only complete cases of all variables.
 }
+\note{
+The bfi data set and items should not be confused with the BFI (Big Five Inventory) of Oliver John and colleagues (John, O. P., Donahue, E. M., & Kentle, R. L. (1991). The Big Five Inventory--Versions 4a and 54. Berkeley, CA: University of California,Berkeley, Institute of Personality and Social Research.)
+}
+\examples{
+library(tidyverse)
+glimpse(bfi)
+
+}
 \references{
 Goldberg, L.R. (1999) A broad-bandwidth, public domain, personality inventory measuring the lower-level facets of several five-factor models. In Mervielde, I. and Deary, I. and De Fruyt, F. and Ostendorf, F. (eds) Personality psychology in Europe. 7. Tilburg University Press. Tilburg, The Netherlands.
 
 Revelle, W., Wilt, J.,  and Rosenthal, A. (2010)  Individual Differences in Cognition: New Methods for examining the Personality-Cognition Link In Gruszka, A.  and Matthews, G. and Szymura, B. (Eds.) Handbook of Individual Differences in Cognition: Attention, Memory and Executive Control, Springer.
 
 Revelle, W,  Condon, D.M.,  Wilt, J.,  French, J.A., Brown, A.,  and  Elleman, L.G. (2016) Web and phone based data collection using planned missing designs. In  Fielding, N.G.,  Lee, R.M. and  Blank, G. (Eds). SAGE Handbook of Online Research Methods (2nd Ed), Sage Publcations.
+}
+\seealso{
+The \code{\link[psych:bfi]{psych::bfi}} data set from the \code{{psych}} package.
 }
 \keyword{datasets}

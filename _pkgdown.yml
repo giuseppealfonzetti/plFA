@@ -1,4 +1,4 @@
-url: ~
+url: https://giuseppealfonzetti.github.io/plFA
 template:
   bootstrap: 5
 
@@ -20,3 +20,42 @@ navbar:
   #   manuscript:
   #     text: Manuscript
   #     href: manuscript/index.html    
+
+reference:
+  - title: lavaan wrapper
+    contents:
+      - cfa
+
+  - title: Original functions
+    contents:
+      - fit_plFA
+      - getPar
+      - contains("compute")
+      - contains("show")
+
+  - title: Generating data
+    contents:
+      - sim_data
+      -  contains("gen")
+
+  - title: Utilities
+    contents:
+      - build_constrMat
+      - contains("get")
+      - contains("estimate")
+      - extract_par
+      - pairs_freq
+      - contains("extract")
+
+  - title: C++ exports
+    contents:
+      - contains("cpp")
+
+  - title: Data sets
+    contents:
+      - LSAT
+      - bfi
+
+  - title: S4 classes
+    contents:
+      - contains("class")
