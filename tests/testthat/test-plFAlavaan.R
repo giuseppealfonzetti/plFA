@@ -28,7 +28,7 @@ test_that("[binary] cfa function works", {
     eta1 =~ y1 + y2 + y3 + y4 + y5
     eta2 =~ y6 + y7 + y8 + y9 + y10
   "
-  fit <- cfa(mod, dat)
+  fit <- cfa(mod, dat, std.lv = TRUE)
 
   expect_s4_class(fit, "lavaan")
   expect_s4_class(fit, "plFAlavaan")

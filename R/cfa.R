@@ -266,13 +266,9 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   fit0@Model <- lavaan::lav_model_set_parameters(fit0@Model, x)
   fit0@implied <- lavaan::lav_model_implied(fit0@Model)
 
-  # Find Theta matrix (residuals)
-  tmp <- inspect(fit0, "est")
-  Lambda <- tmp$lambda
-  Psi <- tmp$psi
-  LPLT <- Lambda %*% Psi %*% t(Lambda)
-  thetadiag <- as.numeric(1 - diag(LPLT))
-  Sigmay <- LPLT + diag(thetadiag)
+  # Find Theta matrix (residuals) and Sigmay (implied covariance matrix)
+  thetadiag <- diag(fit0@Model@GLIST$theta)
+  Sigmay <- fit0@implied$cov[[1]]  # FIXME: Group 1 only
 
   # Change ParTable and pta slots
   pt <- lavaan::partable(fit0)
