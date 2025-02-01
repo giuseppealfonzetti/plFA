@@ -14,7 +14,7 @@ Description: The plFA package provides a fast implementation of numerical
     and stochastic pairiwse likelihood estimation for latent variable
     models with ordinal data.
 License: MIT + file LICENSE
-URL: https://github.com/giuseppealfonzetti/plFA
+URL: https://giuseppealfonzetti.github.io/plFA/
 BugReports: https://github.com/giuseppealfonzetti/plFA/issues
 Depends:
     R (>= 3.5)
