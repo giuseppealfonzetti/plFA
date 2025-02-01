@@ -1,5 +1,7 @@
 ---
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -19,146 +21,139 @@ knitr::opts_chunk$set(
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
 [![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/giuseppealfonzetti/plFA/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/plFA)
 <!-- badges: end -->
 
-The plFA package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
+The `{plFA}` package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
 
 ## Installation
 
-You can install the development version of plFAfrom [GitHub](https://github.com/) with:
+You can install the development version of plFA from [GitHub](https://github.com/) with:
 
-``` r
+```r
 # install.packages("devtools")
 devtools::install_github("giuseppealfonzetti/plFA")
 ```
 
+When the package is installed, you can load it with:
+
+```{r}
+library(plFA)
+```
+
+The startup message indicates that the `{plFA}` package provides its own version of the `cfa()` function, which can be used to estimate plFA models using the `lavaan` syntax.
+See below for an example.
+
 ## Example
 
-First, generate a synthetic dataset
+Consider the data containing 25 personality items measured on 6-point scale from the International Personality Item Pool (IPIP) dataset. 
+The data set is available in the `{plFA}` package and can be loaded with the following code:
 
-```{r example}
-library(plFA)
-set.seed(123)
-
-# p = number of items, q = number of latent variables, n = number of observations
-p <- 30; q <- 8; n <- 1000L
-
-# Simple loading matrix constraints
-A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
-
-# Draw some random loadings according to constraints
-Load <- gen_loadings(CONSTRMAT = A)
-
-# Thresholds vector for each item
-thr <- c(-1.5, 0, 1.5)
-
-# Generate random latent correlation matrix
-S <- get_S(THETA = rnorm(q*(q-1)/2), Q = q, CORRFLAG = 1)
-
-# simulate the data
-D <- sim_data(
-  SAMPLE_SIZE = n,
-  LOADINGS = Load,
-  THRESHOLDS = thr,
-  LATENT_COV = S)
-
-# categories per item
-cat <- apply(D, 2, max) + 1
-
-# store true parameter vector (interpretable parameterisation)
-theta <- get_theta(rep(thr, p), Load, S, cat, A, CORRFLAG = 1)
+```{r}
+data("bfi")
+head(bfi)
 ```
 
-<!-- Estimate the model with the stochastic optimiser -->
+To fit a latent factor analysis model with 5 factors, where the first 5 items load on the first factor and so on, we can use the `fit_plFA()` function.
+In preparation, we must build the following objects to be supplied as a list to the `CONSTR_LIST` argument:
 
-<!-- ```{r sto} -->
+- `CONSTRMAT`: A matrix of constraints on the factor loadings.
+- `CORRFLAG`: A flag indicating whether the factor correlations are estimated.
+- `CONSTRVAR`: A vector of constraints on the factor variances, if any.
+- `STDLV`: A flag indicating whether the factor loadings are standardised.
+- `LLC`: A list indicating linear constraints on factor loading estimations, if any.
 
-<!-- # Set options for cpp stochastic optimiser -->
-<!-- cpp_ctrl <- list( -->
-<!--   MAXT = 2*n, -->
-<!--   PAIRS_PER_ITERATION = 8 -->
-<!-- ) -->
+The above ingredients are prepared using the code below.
 
-<!-- # Fit the model with stochastic optimiser -->
-<!-- stFit <- fit_plFA( -->
-<!--   DATA = D, -->
-<!--   VALDATA = D, -->
-<!--   CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'= 1), -->
-<!--   METHOD = 'hyper', -->
-<!--   CONTROL = cpp_ctrl, -->
-<!--   ITERATIONS_SUBSET = seq(0, cpp_ctrl$MAXT, 100) -->
-<!-- ) -->
-<!-- stFit -->
-<!-- # extract estimated parameter vector -->
-<!-- stPar <- getPar(stFit) -->
+```{r}
+p <- 25         # number of items
+q <- 5          # number of factors
+n <- nrow(bfi)  # number of observations
 
-<!-- # extract list of parameter estimates -->
-<!-- stParList <- getPar(stFit, OPTION = 'list') -->
-<!-- matrixcalc::is.positive.definite(stParList$latent_correlations) -->
+# Convert data frame to matrix, with each item on a 3-point scale 0,1 and 2
+# (for simplicity)
+D <- as.matrix(data.frame(lapply(bfi[, 1:p], as.numeric)))
+D <- apply(head(D / 2), 2, floor)
+head(D)
 
-<!-- # mean square error -->
-<!-- mean((stPar-theta)^2) -->
-<!-- ``` -->
+# Constraint matrix: NA indicate free loadings
+constrmat <- build_constrMat(P = p, Q = q, STRUCT = "simple")
+head(constrmat, 12)
 
-Numerical estimation as comparison
-```{r num}
-numFit <- fit_plFA(
-  DATA = D,
-  CONSTR_LIST = list('CONSTRMAT' = A, 'CORRFLAG'=1),
-  METHOD = 'ucminf')
-
-# extract estimated parameter vector
-numPar <- getPar(numFit, 'raw')
-
-# extract list of parameter estimates
-numParList <- getPar(numFit, OPTION = 'list')
-
-# mean square error
-mean((numPar-theta)^2)
+# Build constraint list
+constr_list <- list(
+  CONSTRMAT = constrmat,
+  CORRFLAG = TRUE,
+  CONSTRVAR = rep(1, q),  # these options standardise the  
+  STDLV = TRUE,           # factor variances
+  LLC = NULL
+)
 ```
 
-Compute standard errors
+We can now fit the factor model:
 
-<!-- ```{r stovar} -->
-<!-- stovar <- computeVar(OBJ = stFit, DATA = D, NUMDERIV = T) -->
-<!-- stose <- sqrt(stovar$optimisation_noise+stovar$asymptotic_variance) -->
-<!-- stose[1:10] -->
+```{r}
+fit <- fit_plFA(
+  DATA = D, 
+  CONSTR_LIST = constr_list,
+  METHOD = "ucminf",
+  VERBOSE = TRUE
+)
+print(fit)
+```
 
-<!-- ``` -->
+The default method is using the optimiser from the `{ucminf}` package, which works well for small data sizes.
+Alternatively, the user may choose `METHOD = "SA"` to turn on the stochastic approximation algorithm.
+Use the function `getPar()` to extract the parameter estimates:
 
-```{r numvar}
+```{r}
+getPar(fit)
+```
 
-numvar <- computeVar(OBJ = numFit, DATA = D)
-numse <- sqrt(numvar$asymptotic_variance)
-numse[1:10]
+Computing the standard errors is done separately using the `computeVar()` function:
+
+```{r}
+var <- computeVar(OBJ = fit, DATA = D)
+str(var)
+head(sqrt(diag(var$vcov)))
 ```
 
 ## `{lavaan}` wrapper
 
-The package provides a user-friendly `{lavaan}`-style interface to estimate plFA models via the `cfa()` function.
+This package also provides a user-friendly `{lavaan}`-style interface to estimate factor analysis models using the `cfa()` function.
+Let's rerun the above example, but this time using the stochastic approximation algorithm and the original 6-point scale data.
 
 ```{r}
 #| label: plFAlavaan
-dat <- as.data.frame(lapply(as.data.frame(D), ordered))
-names(dat) <- paste0("y", 1:p)
-
-# Model syntax
+# {lavaan} model syntax
 mod <- "
-  eta1 =~ y1 + y2 + y3
-  eta2 =~ y4 + y5 + y6
-  eta3 =~ y7 + y8 + y9
+  Agreeableness     =~ A1 + A2 + A3 + A4 + A5
+  Conscientiousness =~ C1 + C2 + C3 + C4 + C5
+  Extraversion      =~ E1 + E2 + E3 + E4 + E5
+  Neuroticism       =~ N1 + N2 + N3 + N4 + N5
+  Openness          =~ O1 + O2 + O3 + O4 + O5
 "
 
-# Fit the model
-fit <- cfa(model = mod, data = dat, std.lv = TRUE)
+# Fit the model (note, this cfa() function is from the plFA package)
+fit <- cfa(
+  model = mod, 
+  data = bfi, 
+  std.lv = TRUE,
+  estimator.args = list(
+    method = "SA",
+    ncores = 4
+  )
+)
 summary(fit)
 ```
 
+All^[Most :)] `lavaan` methods should carry over, such as:
 
+```{r}
+coef(fit)
+head(partable(fit))
+```
 
-## Session Info
-
+## Session information
 
 ```{r}
 #| label: sessioninfo
