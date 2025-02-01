@@ -132,5 +132,18 @@ test_that("Constraints work", {
 
 # Test for starting values
 #
-fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT)
+# fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT)
 # fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT, start = coef(fit))
+
+test_that("Against lavaan::cfa", {
+  mod <- "eta =~ y1 + y2 + y3 + y4 + y5"
+
+  fit1 <- cfa(mod, LSAT, std.lv = TRUE)
+  # fit2 <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"))
+  fit3 <- lavaan::cfa(mod, LSAT, std.lv = TRUE, estimator = "WLSMV")
+  fit4 <- lavaan::cfa(mod, LSAT, std.lv = TRUE, estimator = "PML")
+
+  expect_equal(coef(fit1), coef(fit3), tolerance = 1e-2)
+  expect_equal(coef(fit1), coef(fit4), tolerance = 1e-5)
+
+})
