@@ -46,15 +46,15 @@ jobs:
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
-        if: ${{ matrix.config.os != 'windows-latest' }}
+        # if: ${{ matrix.config.os != 'windows-latest' }}
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
 
-      - uses: r-lib/actions/check-r-package@v2
-        if: ${{ matrix.config.os == 'windows-latest' }}
-        with:
-          error-on: '"error"'
-          upload-snapshots: true
-          build_args: 'c("--no-tests","--no-manual","--compact-vignettes=gs+qpdf")'
-
+      # - uses: r-lib/actions/check-r-package@v2
+      #   if: ${{ matrix.config.os == 'windows-latest' }}
+      #   with:
+      #     error-on: '"error"'
+      #     upload-snapshots: true
+      #     build_args: 'c("--no-tests","--no-manual","--compact-vignettes=gs+qpdf")'
+      #
