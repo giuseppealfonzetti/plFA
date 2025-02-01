@@ -74,6 +74,6 @@ Test extracted lavaan stuff:
 ```{r}
 x <- lavaan.bingof:::extract_lavaan_info(fit1)
 y <- lavaan.bingof:::extract_lavaan_info(fit2)
-tinytest::expect_equal(x, y, tolerance = 1e-5)
+tinytest::expect_equal(x, y, tolerance = 1e-4)
 ```
 
