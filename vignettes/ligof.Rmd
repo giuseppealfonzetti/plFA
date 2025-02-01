@@ -30,7 +30,21 @@ tinytest::expect_true(inherits(fit, "plFAlavaan"))
 all_tests(fit)
 ```
 
-Doesn't look right, except the WaldVCF. This means the $\Omega_2$ matrix is off. Check the $H^{-1}$ matrix.
+Most tests look fine, except the Wald and WaldDiag -- both of which rely on the $\Omega_2$ matrix.
+<!-- This means either the $\Omega_2$ matrix or the fitted probabilities (or both!) are off.  -->
+Let's do some checking.
+
+Check first the probabilities and proportions.
+
+```{r}
+x <- lavaan.bingof::get_uni_bi_moments(fit)  # plFA
+y <- lavaan.bingof::get_uni_bi_moments(  # lavaan
+  lavaan::cfa(mod, dat, std.lv = TRUE)
+)  
+tinytest::expect_equal(x, y, tolerance = 1e-4)
+```
+
+Check the $H^{-1}$ matrix.
 
 ```{r}
 Hinv1 <- computeVar(fit@external$plFA, fit@external$D)$invH
@@ -45,4 +59,21 @@ tinytest::expect_equal(Hinv1, Hinv2)
 # )
 ```
 
-Seems like if `lavaan.bingof` changes the implementation then we should be good to go.
+So both are off.
+I think we should check the PML fit using lavaan package first.
+
+```{r}
+fit1 <- plFA::cfa(mod, dat, std.lv = TRUE)
+fit2 <- lavaan::cfa(mod, dat, std.lv = TRUE, estimator = "PML")
+tinytest::expect_equal(coef(fit1), coef(fit2), tolerance = 1e-5)
+tinytest::expect_equal(fit1@Fit@Sigma.hat, fit2@Fit@Sigma.hat, tolerance = 1e-5)
+```
+
+Test extracted lavaan stuff:
+
+```{r}
+x <- lavaan.bingof:::extract_lavaan_info(fit1)
+y <- lavaan.bingof:::extract_lavaan_info(fit2)
+tinytest::expect_equal(x, y, tolerance = 1e-5)
+```
+
