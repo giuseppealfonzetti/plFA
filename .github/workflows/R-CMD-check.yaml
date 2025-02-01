@@ -45,9 +45,9 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Install packages from GitHub
-        run: |
-          Rscript -e 'pak::pak("haziqj/lavaan.bingof")'
+      # - name: Install packages from GitHub
+      #   run: |
+      #     Rscript -e 'pak::pak("haziqj/lavaan.bingof")'
 
       - uses: r-lib/actions/check-r-package@v2
         # if: ${{ matrix.config.os != 'windows-latest' }}

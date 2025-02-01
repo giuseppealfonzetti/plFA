@@ -11,8 +11,12 @@ Description: The plFA package provides a fast implementation of numerical and st
 License: MIT + file LICENSE
 Suggests: 
     knitr,
+    lavaan.bingof,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tidyverse,
+    tinytest
+Remote: haziqj/lavaan.bingof
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -36,7 +40,8 @@ Imports:
     methods,
     cli,
     rlang,
-    stringr
+    stringr,
+    stats
 URL: https://github.com/giuseppealfonzetti/plFA
 BugReports: https://github.com/giuseppealfonzetti/plFA/issues
 LazyData: true
