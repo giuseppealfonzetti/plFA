@@ -21,9 +21,9 @@ LinkingTo:
     RcppParallel,
     RcppClock
 Depends:
-    lavaan,
     R (>= 3.5)
 Imports: 
+    lavaan,
     Rcpp (>= 1.0.11),
     RcppEigen (>= 0.3.3.9.3),
     RcppParallel (>= 5.1.7),
