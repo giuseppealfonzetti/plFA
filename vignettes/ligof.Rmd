@@ -1,0 +1,48 @@
+---
+title: "Limited information Goodness-of-Fit tests"
+author: Haziq Jamil
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ligof}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(plFA)
+library(lavaan.bingof)
+```
+
+```{r}
+(dat <- gen_data_bin(n = 1000, seed = 123))
+mod <- "eta =~ y1 + y2 + y3 + y4 + y5"
+fit <- cfa(mod, dat, std.lv = TRUE)
+tinytest::expect_true(inherits(fit, "plFAlavaan"))
+
+# Test statistics
+all_tests(fit)
+```
+
+Doesn't look right, except the WaldVCF. This means the $\Omega_2$ matrix is off. Check the $H^{-1}$ matrix.
+
+```{r}
+Hinv1 <- computeVar(fit@external$plFA, fit@external$D)$invH
+Hinv2 <- lavaan.bingof:::get_sensitivity_inv_mat(fit)
+tinytest::expect_equal(Hinv1, Hinv2)
+
+# lavaan:::lav_model_hessian(
+#     lavmodel = fit@Model,
+#     lavsamplestats = fit@SampleStats,
+#     lavdata = fit@Data,
+#     lavoptions = fit@Options
+# )
+```
+
+Seems like if `lavaan.bingof` changes the implementation then we should be good to go.

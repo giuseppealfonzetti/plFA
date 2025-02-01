@@ -2,3 +2,21 @@ url: ~
 template:
   bootstrap: 5
 
+authors:
+  Giuseppe Alfonzetti:
+    href: https://giuseppealfonzetti.github.io
+  Haziq Jamil:
+    href: https://haziqj.ml/
+
+home:
+  sidebar:
+    structure: [links, license, authors, dev]
+
+navbar:
+  structure:
+    left: [intro, reference, manuscript, articles, tutorials, news]
+    right: [search, twitter, github, lightswitch]
+  # components:
+  #   manuscript:
+  #     text: Manuscript
+  #     href: manuscript/index.html    
