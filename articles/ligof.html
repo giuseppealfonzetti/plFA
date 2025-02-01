@@ -157,13 +157,49 @@ package first.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">lavaan.bingof</span><span class="fu">:::</span><span class="fu">extract_lavaan_info</span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu">lavaan.bingof</span><span class="fu">:::</span><span class="fu">extract_lavaan_info</span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span></span>
-<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span></span>
+<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tolerance <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
-<span><span class="co">#&gt;  call| tinytest::expect_equal(x, y, tolerance = 1e-05)</span></span>
+<span><span class="co">#&gt;  call| tinytest::expect_equal(x, y, tolerance = 1e-04)</span></span>
 <span><span class="co">#&gt;  diff| Component "lavoptions": Component "test": 1 string mismatch</span></span>
 <span><span class="co">#&gt;  diff| Component "lavoptions": Component "optim.method": 1 string mismatch</span></span>
-<span><span class="co">#&gt;  diff| Component "lavpartable": Component "se": Mean relative difference: 0.2506377</span></span>
-<span><span class="co">#&gt;  diff| Component "TH": Mean relative difference: 7.950713e-05</span></span></code></pre></div>
+<span><span class="co">#&gt;  diff| Component "lavpartable": Component "se": Mean relative difference: 0.2506377</span></span></code></pre></div>
+<p>Differences in test statistic values.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wald_test"</span>, <span class="st">"Wald_vcovf_test"</span>, <span class="st">"Wald_diag_test"</span>, <span class="st">"Pearson_test"</span>, <span class="st">"RSS_test"</span>, <span class="st">"Multn_test"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span>.f <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">out1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="va">out2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">out1</span>, <span class="va">out2</span>, tolerance <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $Wald_test</span></span>
+<span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| .f(.x[[i]], ...)</span></span>
+<span><span class="co">#&gt;  diff| Component "X2": Mean relative difference: 22.88075</span></span>
+<span><span class="co">#&gt;  diff| Component "pval": Mean relative difference: 1</span></span>
+<span><span class="co">#&gt;  diff| Component "Xi_rank": Mean relative difference: 0.07142857 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $Wald_vcovf_test</span></span>
+<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| .f(.x[[i]], ...) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $Wald_diag_test</span></span>
+<span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| .f(.x[[i]], ...)</span></span>
+<span><span class="co">#&gt;  diff| Component "X2": Mean relative difference: 0.2682483</span></span>
+<span><span class="co">#&gt;  diff| Component "pval": Mean relative difference: 0.05254296 </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $Pearson_test</span></span>
+<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| .f(.x[[i]], ...) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $RSS_test</span></span>
+<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| .f(.x[[i]], ...) </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $Multn_test</span></span>
+<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| .f(.x[[i]], ...)</span></span></code></pre></div>
   </main>
 </div>
 
