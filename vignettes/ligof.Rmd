@@ -77,3 +77,15 @@ y <- lavaan.bingof:::extract_lavaan_info(fit2)
 tinytest::expect_equal(x, y, tolerance = 1e-4)
 ```
 
+Differences in test statistic values.
+
+```{r}
+c("Wald_test", "Wald_vcovf_test", "Wald_diag_test", "Pearson_test", "RSS_test", "Multn_test") |>
+  purrr::set_names() |>
+  purrr::map(.f = function(x) {
+    out1 <- do.call(x, list(fit1))
+    out2 <- do.call(x, list(fit2))
+    tinytest::expect_equal(out1, out2, tolerance = 1e-2)
+  })
+```
+
