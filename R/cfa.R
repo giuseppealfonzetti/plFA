@@ -251,7 +251,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   x <- c(lambda, tau, psi)
 
-  SE <- sqrt(vars$asymptotic_variance)
+  SE <- sqrt(vars$asymptotic_variance / nobs(fit0))
   vcov <- vars$vcov
 
   # Change version slot
@@ -266,11 +266,27 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   fit0@Model <- lavaan::lav_model_set_parameters(fit0@Model, x)
   fit0@implied <- lavaan::lav_model_implied(fit0@Model)
 
+  # Find Theta matrix (residuals)
+  tmp <- inspect(fit0, "est")
+  Lambda <- tmp$lambda
+  Psi <- tmp$psi
+  LPLT <- Lambda %*% Psi %*% t(Lambda)
+  thetadiag <- as.numeric(1 - diag(LPLT))
+  Sigmay <- LPLT + diag(thetadiag)
+
   # Change ParTable and pta slots
   pt <- lavaan::partable(fit0)
   pt$est[pt$free > 0] <- x
   pt$se <- 0
   pt$se[pt$free > 0] <- SE
+
+  # Put the diag theta values in the pt
+  ov_names <- fit0@Data@ov.names[[1]]  # FIXME: Group 1 only
+  pt$est[pt$lhs %in% ov_names &
+           pt$rhs %in% ov_names &
+           pt$lhs == pt$rhs &
+           pt$op == "~~"] <- thetadiag
+
   # Manually change the slack column
   slack_values <- as.vector(fit0@Model@con.jac %*% x - fit0@Model@ceq.rhs)
   pt$est[pt$op == "=="] <- slack_values
@@ -287,7 +303,8 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   # Change Fit slot (depends whether it is numFit or stoFit)
   fit0@Fit@x <- x
-  fit0@Fit@se <- SE
+  fit0@Fit@est <- pt$est
+  fit0@Fit@se <- pt$se
   fit0@Fit@start <- fit1@init  # FIXME: Need to fix how start values are handled
   if (fit1@method == "ucminf") {
     fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
@@ -296,6 +313,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
     fit0@Fit@iterations <- as.integer(fit1@stoFit@last_iter)
     fit0@Fit@converged <- fit1@stoFit@convergence == 1L  # FIXME: Check!!
   }
+  fit0@Fit@Sigma.hat[[1]] <- Sigmay  # implied variance-covariance matrix for group 1!!
 
   # Change optim slot
   fit0@optim$x <- x
