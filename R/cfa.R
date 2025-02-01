@@ -273,12 +273,11 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   thetadiag <- diag(fit0@Model@GLIST$theta)
   Sigmay <- fit0@implied$cov[[1]]  # FIXME: Group 1 only
 
-  Lambda <- fit0@Model@GLIST$lambda
-  Psi    <- fit0@Model@GLIST$psi
-  LPLT <- Lambda %*% Psi %*% t(Lambda)
-  thetadiag <- as.numeric(1 - diag(LPLT))
-  Sigmay <- LPLT + diag(thetadiag)
-
+  # Lambda <- fit0@Model@GLIST$lambda
+  # Psi    <- fit0@Model@GLIST$psi
+  # LPLT <- Lambda %*% Psi %*% t(Lambda)
+  # thetadiag <- as.numeric(1 - diag(LPLT))
+  # Sigmay <- LPLT + diag(thetadiag)
 
   # Change ParTable and pta slots
   pt <- lavaan::partable(fit0)
