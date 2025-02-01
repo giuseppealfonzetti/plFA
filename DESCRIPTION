@@ -1,14 +1,37 @@
 Package: plFA
-Title: Fast pairwise likelihood estimation of factor models for ordinal data
+Title: Fast pairwise likelihood estimation of factor models for ordinal
+    data
 Version: 0.1.0
 Authors@R: c(
-    person("Giuseppe", "Alfonzetti", email = "giuseppe.alfonzetti@uniud.it", 
-           role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6118-6553")),
-    person("Haziq", "Jamil", , "haziq.jamil@gmail.com", role = c("aut"),
+    person("Giuseppe", "Alfonzetti", , "giuseppe.alfonzetti@uniud.it", 
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-6118-6553")),
+    person("Haziq", "Jamil", , "haziq.jamil@gmail.com", 
+           role = "aut",
            comment = c(ORCID = "0000-0003-3298-1010"))
   )
-Description: The plFA package provides a fast implementation of numerical and stochastic pairiwse likelihood estimation for latent variable models with ordinal data. 
+Description: The plFA package provides a fast implementation of numerical
+    and stochastic pairiwse likelihood estimation for latent variable
+    models with ordinal data.
 License: MIT + file LICENSE
+URL: https://github.com/giuseppealfonzetti/plFA
+BugReports: https://github.com/giuseppealfonzetti/plFA/issues
+Depends:
+    R (>= 3.5)
+Imports: 
+    cli,
+    lavaan,
+    methods,
+    mvtnorm,
+    numDeriv,
+    Rcpp (>= 1.0.11),
+    RcppClock (>= 1.1),
+    RcppEigen (>= 0.3.3.9.3),
+    RcppParallel (>= 5.1.7),
+    rlang,
+    stats,
+    stringr,
+    ucminf
 Suggests: 
     knitr,
     lavaan.bingof,
@@ -16,33 +39,17 @@ Suggests:
     testthat (>= 3.0.0),
     tidyverse,
     tinytest
-Remote: haziqj/lavaan.bingof
-Config/testthat/edition: 3
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 LinkingTo: 
     Rcpp,
+    RcppClock,
     RcppEigen,
-    RcppParallel,
-    RcppClock
-Depends:
-    R (>= 3.5)
-Imports: 
-    lavaan,
-    Rcpp (>= 1.0.11),
-    RcppEigen (>= 0.3.3.9.3),
-    RcppParallel (>= 5.1.7),
-    RcppClock (>= 1.1),
-    mvtnorm,
-    ucminf,
-    numDeriv,
-    methods,
-    cli,
-    rlang,
-    stringr,
-    stats
-URL: https://github.com/giuseppealfonzetti/plFA
-BugReports: https://github.com/giuseppealfonzetti/plFA/issues
+    RcppParallel
+VignetteBuilder: 
+    knitr
+Remotes: 
+    haziqj/lavaan.bingof
+Config/testthat/edition: 3
+Encoding: UTF-8
 LazyData: true
-VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2

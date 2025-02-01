@@ -9,7 +9,6 @@
 #' @importFrom methods new slot
 #' @importFrom Rcpp sourceCpp
 #' @importFrom rlang inform
-#' @importFrom stats nobs
 #' @importFrom stats runif
 #' @importFrom stringr str_pad
 #' @useDynLib plFA, .registration = TRUE

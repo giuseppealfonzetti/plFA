@@ -2,7 +2,7 @@
 title: "Data generation"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{datagen}
+  %\VignetteIndexEntry{Data generation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

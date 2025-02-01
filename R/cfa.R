@@ -233,6 +233,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   # Get coefficients and standard errors
   FREE <- lavaan::inspect(fit0, what = "free")
+  n <- fit0@Data@nobs[[1]]  # FIXME: Group 1 only
 
   parlist <- extract_par(
     THETA = fit1@theta,
@@ -254,7 +255,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   x <- c(lambda, tau, psi)
 
-  SE <- sqrt(vars$asymptotic_variance / nobs(fit0))
+  SE <- sqrt(vars$asymptotic_variance / n)
   vcov <- vars$vcov
 
   # Change version slot

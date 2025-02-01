@@ -3,7 +3,7 @@ title: "Limited information Goodness-of-Fit tests"
 author: Haziq Jamil
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ligof}
+  %\VignetteIndexEntry{Limited information Goodness-of-Fit tests}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
