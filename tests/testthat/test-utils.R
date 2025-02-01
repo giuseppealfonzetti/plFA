@@ -1,7 +1,3 @@
-if (.Platform$OS.type == "windows") {
-  testthat::skip("Skipping this file on Windows because of time constraints")
-}
-
 ############################################
 # Test file for utils.R and generalUtils.h #
 # functions as exported by exportedFuns.h  #                                 #
