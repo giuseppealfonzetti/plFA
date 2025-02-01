@@ -247,7 +247,10 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   )
   lambda <- parlist$loadings[FREE$lambda > 0]
   tau <- parlist$thresholds[FREE$tau > 0]
-  psi <- parlist$latent_correlations[FREE$psi > 0 & lower.tri(FREE$psi, diag = TRUE)]
+  psi <- c(
+    parlist$latent_correlations[FREE$psi > 0 & diag(TRUE, nrow(FREE$psi))],
+    parlist$latent_correlations[FREE$psi > 0 & lower.tri(FREE$psi)]
+  )
 
   x <- c(lambda, tau, psi)
 
@@ -269,6 +272,13 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   # Find Theta matrix (residuals) and Sigmay (implied covariance matrix)
   thetadiag <- diag(fit0@Model@GLIST$theta)
   Sigmay <- fit0@implied$cov[[1]]  # FIXME: Group 1 only
+
+  Lambda <- fit0@Model@GLIST$lambda
+  Psi    <- fit0@Model@GLIST$psi
+  LPLT <- Lambda %*% Psi %*% t(Lambda)
+  thetadiag <- as.numeric(1 - diag(LPLT))
+  Sigmay <- LPLT + diag(thetadiag)
+
 
   # Change ParTable and pta slots
   pt <- lavaan::partable(fit0)

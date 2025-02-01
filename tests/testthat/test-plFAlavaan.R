@@ -87,11 +87,17 @@ test_that("`std.lv` argument works", {
     C =~ C1 + C2 + C3
     E =~ E1 + E2 + E3
   "
-  fit1 <- cfa(mod, bfi)
+  fit1 <- cfa(mod, bfi, std.lv = FALSE)
   fit2 <- cfa(mod, bfi, std.lv = TRUE)
   expect_equal(
     fit1@external$plFA@numFit$value,
     fit2@external$plFA@numFit$value
+  )
+  expect_equal(
+    fit1@implied$cov[[1]],
+    fit2@implied$cov[[1]],
+    tolerance = 1e-3,
+    label = "Implied covariance matrix not equal"
   )
 })
 
