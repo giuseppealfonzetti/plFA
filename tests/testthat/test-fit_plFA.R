@@ -1,6 +1,6 @@
-if (.Platform$OS.type == "windows") {
-  testthat::skip("Skipping this file on Windows because of time constraints")
-}
+# if (.Platform$OS.type == "windows") {
+#   testthat::skip("Skipping this file on Windows because of time constraints")
+# }
 
 # p = number of items, q = number of latent variables, n = number of observations
 p <- 30; q <- 8; n <- 1000
@@ -73,6 +73,7 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
+    INIT = theta,
     METHOD = 'ucminf')
 
   numFit
@@ -303,6 +304,7 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
+    INIT = theta,
     METHOD = 'ucminf')
 
   numFit
@@ -421,6 +423,7 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
+    INIT = theta,
     METHOD = 'ucminf')
 
   numFit
@@ -535,6 +538,7 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
+    INIT = theta,
     METHOD = 'ucminf')
 
   numFit
