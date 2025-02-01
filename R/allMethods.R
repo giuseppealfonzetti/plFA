@@ -343,6 +343,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     list(
       trJacob = trJacob,
       H = Hhat,
+      invH = invH,
       J = Jhat,
       vcov = vcov,
       asymptotic_variance = asy_var,
