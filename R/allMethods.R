@@ -189,6 +189,7 @@ setGeneric('computeVar', function(OBJ, DATA, NUMDERIV = F, OPTION = 'transformed
 #' @param DATA Original data
 #' @param NUMDERIV TRUE if the hessian must be computed using \link[numDeriv]{jacobian}
 #' @param OPTION `transformed` if correlations are of interest. `raw` for inference on the reparametrised level.
+#' @param VERBOSE TRUE if the function must print messages
 setMethod('computeVar', 'PlFaFit',
           function(OBJ, DATA, NUMDERIV, OPTION, VERBOSE){ if(OBJ@method == 'ucminf'){
             compute_var(THETA      = OBJ@theta,

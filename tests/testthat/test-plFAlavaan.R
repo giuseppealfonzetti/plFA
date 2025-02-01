@@ -35,6 +35,11 @@ test_that("[binary] cfa function works", {
   expect_true(inherits(coef(fit), "lavaan.vector"))
 })
 
+test_that("Revert to lavaan works", {
+  fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT, estimator = "DWLS")
+  expect_false(inherits(fit, "plFAlavaan"))
+})
+
 test_that("[ordinal] cfa function works", {
 
   # Generate some data
@@ -100,8 +105,7 @@ test_that("Method = 'SA' works", {
   "
 
   expect_warning({
-    fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA",
-                                                              ncores = 4))
+    fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"))
   })
 
   expect_s4_class(fit, "lavaan")

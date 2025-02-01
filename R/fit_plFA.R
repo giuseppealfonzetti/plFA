@@ -108,7 +108,7 @@ fit_plFA <- function(
              method = METHOD)
 
   # Version
-  tmp@version <- as.character(packageVersion("plFA"))
+  tmp@version <- as.character(utils::packageVersion("plFA"))
 
   # Set up multi-threads computations
   tmp@cores <- NCORES

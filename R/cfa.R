@@ -1,4 +1,16 @@
-#' Fit Confirmatory Factor Analysis Models using plFA
+#' Fit Confirmatory Factor Analysis Models
+#'
+#' Fit a Confirmatory Factor Analysis (CFA) model using the `plFA()` engine
+#' using the [`lavaan`] framework. By default, a quasi-Newton BFGS optimiser
+#' from the [`ucminf`] package is used. For large data sets, the stochastic
+#' approximation algorithm can be used.
+#'
+#' @details Not all [`lavaan`] options can be used at present. Some options of
+#'   interest are:
+#' \describe{
+#'   \item{\code{information}}{The information matrix to use. Only `observed` is currently supported.}
+#'   \item{\code{se}}{The standard error method to use. Only `robust.huber.white` is currently supported.}
+#' }
 #'
 #' @param model A description of the user-specified model. Typically, the model
 #'   is described using the lavaan model syntax. See [`lavaan::model.syntax`]
@@ -6,15 +18,53 @@
 #'   the [`lavaan::lavaanify()`] function) is also accepted.
 #' @param data A data frame containing the observed variables used in the model.
 #'   Variables must be declared as ordered factors.
-#' @param std.lv TBC
-#' @param start Starting values to use.
-#' @param estimator (For `lavaan` compatibility only). The estimator is `PML`.
-#' @param estimator.args A list of arguments for [fit_plFA()]. TBC.
-#' @param information (For `lavaan` compatibility only). The information matrix is...
-#' @param control A list of control parameters for the estimation algorithm. See [fit_plFA()] for more information.
+#' @param std.lv If `TRUE`, the metric of each latent variable is determined by
+#'   fixing their (residual) variances to 1.0. If `FALSE`, the metric of each
+#'   latent variable is determined by fixing the factor loading of the first
+#'   indicator to 1.0.
+#' @param start A vector of starting values to use (in the order of free
+#'   loadings, thresholds, and then factor correlations). If not provided, the
+#'   starting point is computed according to [`fit_plFA()`]'s `INIT_METHOD`.
+#' @param estimator The estimator is `PML`. If any other estimator is provided,
+#'   then [`lavaan::cfa()`] is used.
+#' @param estimator.args A list of arguments for [fit_plFA()]--see the help file
+#'   for more details. Possible options are:
+#'   \describe{
+#'     \item{\code{method}}{One of \code{"ucminf"} (default) for the quasi-Newton BFGS optimiser, or \code{"SA"} for stochastic approximation.}
+#'     \item{\code{init_method}}{One of \code{"SA"} (default) for stochastic approximation, \code{"custom"} for user-defined starting values, or \code{"standard"} for standard starting values.}
+#'     \item{\code{cpp_control_init}}{A list of control parameters for the initialisation algorithm.}
+#'     \item{\code{ncores}}{The number of cores to use for parallel computation.}
+#'     \item{\code{valdata}}{Validation data.}
+#'     \item{\code{computevar_numderiv}}{If `TRUE`, the asymptotic variance-covariance matrix is computed using numerical derivatives.}
+#'   }
+#' @param control A list of control parameters for the estimation algorithm. See
+#'   [fit_plFA()] for more information.
+#' @param verbose If `TRUE`, print additional information during the estimation
+#'   process.
 #' @param ... Additional arguments to be passed to [lavaan()].
 #'
-#' @returns A `plFAlavaan` object.
+#' @returns A `plFAlavaan` object, which is a subclass of the `lavaan` class.
+#'   Therefore, all methods available for `lavaan` objects are expected to be
+#'   compatible with `plFAlavaan` objects.
+#'
+#' @references
+#'
+#' Katsikatsou, M., Moustaki, I., Yang-Wallentin, F., & Jöreskog, K. G. (2012).
+#' Pairwise likelihood estimation for factor analysis models with ordinal data.
+#' *Computational Statistics & Data Analysis*, *56*(12), 4243--4258.
+#' <https://doi.org/10.1016/j.csda.2012.04.010>
+#'
+#' Alfonzetti, G., Bellio, R., Chen, Y., & Moustaki, I. (2025). Pairwise
+#' stochastic approximation for confirmatory factor analysis of categorical
+#' data. *British Journal of Mathematical and Statistical Psychology*, *78*(1),
+#' 22--43. <https://doi.org/10.1111/bmsp.12347>
+#'
+#' @examples
+#'
+#' # A simple binary factor model using the LSAT data
+#' fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT, std.lv = TRUE)
+#' summary(fit)
+#'
 #' @export
 cfa <- function(
     model,
@@ -30,7 +80,6 @@ cfa <- function(
       computevar_numderiv = FALSE
     ),
     start = NULL,
-    information = "observed",
     control = list(),
     verbose = FALSE,
     ...
@@ -59,8 +108,29 @@ cfa <- function(
   lavargs$model <- model
   lavargs$data <- data
   lavargs$std.lv <- std.lv
+  lavargs$estimator <- estimator
   lavargs$do.fit <- FALSE
-  fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
+
+  if (estimator == "PML") {
+    if ("information" %in% names(lavargs)) {
+      if (lavargs$information != "observed") {
+        cli::cli_abort("Only 'observed' information is currently supported.")
+      }
+    }
+    lavargs$information <- "observed"
+    if ("se" %in% names(lavargs)) {
+      if (lavargs$se != "robust.huber.white") {
+        cli::cli_abort("Only 'robust.huber.white' is currently supported.")
+      }
+    }
+    lavargs$se <- "robust.huber.white"
+    fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
+  } else{
+    # In case user selects "DWLS" or "WLSMV", revert to lavaan::cfa()
+    lavargs$do.fit <- TRUE
+    fit <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
+    return(fit)
+  }
 
   # Check any ordinal data or not?
   if (!all(fit0@Data@ov$type == "ordered")) {
@@ -100,7 +170,7 @@ cfa <- function(
 
   # Linear loadings constraints
   llc <- NULL
-  pt <- partable(fit0)
+  pt <- lavaan::partable(fit0)
   ptlc <- pt[pt$op == "==", ]
   Lambdaid <- lavaan::inspect(fit0, "free")$lambda
 
@@ -208,11 +278,11 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   fit0@pta$names <- names(pt)
 
   # Change Options slot
-  fit0@Options$estimator <- "PML"
+  # fit0@Options$estimator <- "PML"
   fit0@Options$optim.method <- fit1@method
   # fit0@Options$estimator.args <- list()
   # fit0@Options$test <- "standard"
-  fit0@Options$se <- "robust.huber.white"  # this is the sandwich
+  # fit0@Options$se <- "robust.huber.white"  # this is the sandwich
   fit0@Options$do.fit <- TRUE
 
   # Change Fit slot (depends whether it is numFit or stoFit)
@@ -245,8 +315,8 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   fit0@loglik$estimator <- "PML"
 
   # Change vcov slot
-  fit0@vcov$se <- "robust.sem"
-  fit0@vcov$information <- "expected"
+  # fit0@vcov$se <- "robust.sem"
+  # fit0@vcov$information <- "expected"
   fit0@vcov$vcov <- vcov
 
   # fit0@test <- fit_lav@test

@@ -1,32 +1,16 @@
 ## usethis namespace: start
-#' @useDynLib plFA, .registration = TRUE
-## usethis namespace: end
-NULL
-## usethis namespace: start
-#' @importFrom Rcpp sourceCpp
-## usethis namespace: end
-NULL
-## usethis namespace: start
-#' @import RcppEigen
-## usethis namespace: end
-NULL
-
-## usethis namespace: start
-#' @import RcppParallel
-## usethis namespace: end
-NULL
-
-## usethis namespace: start
 #' @import RcppClock
-## usethis namespace: end
-NULL
-
-## usethis namespace: start
+#' @import RcppEigen
+#' @import RcppParallel
+#' @importFrom cli col_blue
+#' @importFrom cli col_green
+#' @importFrom cli symbol
+#' @importFrom methods callNextMethod
 #' @importFrom methods new slot
-## usethis namespace: end
-NULL
-
-## usethis namespace: start
+#' @importFrom Rcpp sourceCpp
+#' @importFrom rlang inform
 #' @importFrom stats runif
+#' @importFrom stringr str_pad
+#' @useDynLib plFA, .registration = TRUE
 ## usethis namespace: end
 NULL
