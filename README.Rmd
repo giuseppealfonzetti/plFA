@@ -112,7 +112,9 @@ Computing the standard errors is done separately using the `computeVar()` functi
 ```{r}
 var <- computeVar(OBJ = fit, DATA = D, VERBOSE = TRUE)
 str(var)
-head(sqrt(diag(var$vcov)))
+
+# Standard errors
+head(sqrt(diag(var$vcov) / n))
 ```
 
 ## `{lavaan}` wrapper
