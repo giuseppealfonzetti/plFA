@@ -69,10 +69,8 @@ p <- 25         # number of items
 q <- 5          # number of factors
 n <- nrow(bfi)  # number of observations
 
-# Convert data frame to matrix, with each item on a 3-point scale 0,1 and 2
-# (for simplicity)
-D <- as.matrix(data.frame(lapply(bfi[, 1:p], as.numeric)))
-D <- apply(head(D / 2), 2, floor)
+# Convert data frame to matrix, with each item taking values 0,1,2,...,5
+D <- as.matrix(data.frame(lapply(bfi[, 1:p], as.numeric))) - 1
 head(D)
 
 # Constraint matrix: NA indicate free loadings
@@ -112,7 +110,7 @@ getPar(fit)
 Computing the standard errors is done separately using the `computeVar()` function:
 
 ```{r}
-var <- computeVar(OBJ = fit, DATA = D)
+var <- computeVar(OBJ = fit, DATA = D, VERBOSE = TRUE)
 str(var)
 head(sqrt(diag(var$vcov)))
 ```
@@ -120,17 +118,17 @@ head(sqrt(diag(var$vcov)))
 ## `{lavaan}` wrapper
 
 This package also provides a user-friendly `{lavaan}`-style interface to estimate factor analysis models using the `cfa()` function.
-Let's rerun the above example, but this time using the stochastic approximation algorithm and the original 6-point scale data.
+Let's rerun the above example, but this time using the stochastic approximation algorithm.
 
 ```{r}
 #| label: plFAlavaan
-# {lavaan} model syntax
+# {lavaan} model syntax, not in the same order as the data
 mod <- "
-  Agreeableness     =~ A1 + A2 + A3 + A4 + A5
-  Conscientiousness =~ C1 + C2 + C3 + C4 + C5
-  Extraversion      =~ E1 + E2 + E3 + E4 + E5
-  Neuroticism       =~ N1 + N2 + N3 + N4 + N5
-  Openness          =~ O1 + O2 + O3 + O4 + O5
+  opn =~ O1 + O2 + O3 + O4 + O5  # Openness
+  con =~ C1 + C2 + C3 + C4 + C5  # Conscientiousness
+  ext =~ E1 + E2 + E3 + E4 + E5  # Extraversion
+  agr =~ A1 + A2 + A3 + A4 + A5  # Agreeableness
+  neu =~ N1 + N2 + N3 + N4 + N5  # Neuroticism
 "
 
 # Fit the model (note, this cfa() function is from the plFA package)
@@ -138,15 +136,15 @@ fit <- cfa(
   model = mod, 
   data = bfi, 
   std.lv = TRUE,
-  estimator.args = list(
-    method = "SA",
-    ncores = 4
-  )
+  estimator.args = list(method = "SA", ncores = 4)
 )
+
+fit@timing$total  # total time in seconds
+
 summary(fit)
 ```
 
-All^[Most :)] `lavaan` methods should carry over, such as:
+All^[Most :)--we're working on it!] `lavaan` methods should carry over, such as:
 
 ```{r}
 coef(fit)
@@ -159,4 +157,3 @@ head(partable(fit))
 #| label: sessioninfo
 sessioninfo::session_info()
 ```
-
