@@ -347,7 +347,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   # fit0@baseline <- fit_lav@baseline
 
   # Include the entire output of fit_sem
-  fit0@external <- list(plFA = fit1, D = D)
+  fit0@external <- list(plFA = fit1, vars = vars, D = D)
 
   fit0
 }
