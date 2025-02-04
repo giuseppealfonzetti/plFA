@@ -110,7 +110,7 @@ test_that("Method = 'SA' works", {
     O =~ O1 + O2 + O3 + O4 + O5
   "
 
-  skip_if(.Platform$OS.type == "windows")
+  # skip_if(.Platform$OS.type == "windows")
   expect_warning({
     fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"))
   })

@@ -69,7 +69,6 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
-    INIT = theta,
     METHOD = 'ucminf')
 
   numFit
@@ -300,7 +299,6 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
-    INIT = theta,
     METHOD = 'ucminf')
 
   numFit
@@ -419,7 +417,6 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
-    INIT = theta,
     METHOD = 'ucminf')
 
   numFit
@@ -534,7 +531,6 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
-    INIT = theta,
     METHOD = 'ucminf')
 
   numFit

@@ -111,9 +111,13 @@ fit_plFA <- function(
   tmp@version <- as.character(utils::packageVersion("plFA"))
 
   # Set up multi-threads computations
+  if (is.null(NCORES)) NCORES <- 1L
   tmp@cores <- NCORES
-  RcppParallel::setThreadOptions(numThreads = NCORES)
-
+  if (.Platform$OS.type == "windows" & NCORES > 1L) {
+    cli::cli_alert_info("Windows OS detected. Multi-threading is not supported yet.")
+  } else {
+    RcppParallel::setThreadOptions(numThreads = NCORES)
+  }
 
   if(VERBOSE) message('- Computing frequencies...')
   freq_start_time <- Sys.time()
