@@ -3,11 +3,9 @@ Title: Fast pairwise likelihood estimation of factor models for ordinal
     data
 Version: 0.1.0
 Authors@R: c(
-    person("Giuseppe", "Alfonzetti", , "giuseppe.alfonzetti@uniud.it", 
-           role = c("aut", "cre"),
+    person("Giuseppe", "Alfonzetti", , "giuseppe.alfonzetti@uniud.it", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-6118-6553")),
-    person("Haziq", "Jamil", , "haziq.jamil@gmail.com", 
-           role = "aut",
+    person("Haziq", "Jamil", , "haziq.jamil@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0003-3298-1010"))
   )
 Description: The plFA package provides a fast implementation of numerical
@@ -35,6 +33,7 @@ Imports:
 Suggests: 
     knitr,
     lavaan.bingof,
+    purrr,
     rmarkdown,
     testthat (>= 3.0.0),
     tidyverse,
