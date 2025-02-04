@@ -83,7 +83,7 @@ fit_plFA <- function(
   constr_list <- check_cnstr(CONSTR_LIST)
   METHOD <- match.arg(METHOD)
   if (.Platform$OS.type == "windows" & METHOD=="SA"){
-    cli::cli_alert_info("METHOD='SA' not available on Windows yet. METHOD set to 'ucminf'.")
+    warning("METHOD='SA' not available on Windows yet. METHOD set to 'ucminf'.")
     METHOD <- "ucminf"
   }
 
