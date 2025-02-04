@@ -28,7 +28,7 @@ namespace biprobs{
 
     // Phi(t_sk, t_sl; rho_kl)
     double cum1;
-    if(sk == (ck-1) & sl == (cl-1)){
+    if ((sk == (ck-1)) && (sl == (cl-1))) {
       cum1 = 1;
     } else if(sk == (ck-1)){
       cum1 = R::pnorm(t_sl, 0, 1, 1, 0);
@@ -49,14 +49,14 @@ namespace biprobs{
     double cum3;
     if(sk == 0){
       cum3 = 0;
-    } else{
+    } else {
       cum3 = binorm::pbvnorm( t_sk_prev, t_sl, rho_kl);
     }
     // Phi(t_sk-1, t_sl-1; rho_kl)
     double cum4;
-    if(sl == 0 | sk == 0){
+    if ((sl == 0) || (sk == 0)) {
       cum4 = 0;
-    }else{
+    } else {
       cum4 = binorm::pbvnorm( t_sk_prev, t_sl_prev, rho_kl);
     }
 
