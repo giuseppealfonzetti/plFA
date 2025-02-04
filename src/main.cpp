@@ -217,7 +217,7 @@ Rcpp::List cpp_plSA(
       /////////////////////////
       // STORE PREVIOUS ITER //
       /////////////////////////
-      if(((t)%PATH_WINDOW == 0) | (CHECK_TOL && tol_counter==CHECK_WINDOW) | (t==maxt)){
+      if(((t) % PATH_WINDOW == 0) || (CHECK_TOL && tol_counter == CHECK_WINDOW) || (t == maxt)){
         path_iters.push_back(t);
         path_theta.push_back(theta);
         path_avtheta.push_back(avtheta);
@@ -230,7 +230,7 @@ Rcpp::List cpp_plSA(
       ///////////////////////
       // COMPUTE FULL NLL //
       ///////////////////////
-      if((CHECK_TOL && (t%CHECK_WINDOW == 0)) | (t==maxt)){
+      if((CHECK_TOL && (t % CHECK_WINDOW == 0)) || (t == maxt)){
         if(t % CLOCK_WINDOW == 0) clock.tick("Obj eval");
 
         double prev_nll = nll;
@@ -267,7 +267,7 @@ Rcpp::List cpp_plSA(
       if(t==burn){
         if(VERBOSE) Rcpp::Rcout << "Burn-in ended at iter " << t << "\n";
         convergence_burn=false;
-      }else if((CHECK_TOL & (tol_counter_burn>=TOL_WINDOW) & (t<=burn))){
+      }else if((CHECK_TOL && (tol_counter_burn >= TOL_WINDOW) && (t <= burn))){
         if(VERBOSE) Rcpp::Rcout << "Burn-in stopped at iter " << t << " | full npll: "<< nll << "\n";
         burn = t;
         tol_counter_burn=0;

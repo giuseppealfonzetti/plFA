@@ -218,8 +218,8 @@ namespace params{
         for( int col = 0; col < Q; col++){
           for( int row = 0; row < Q; row++){
             if(row > col) U(row, col) = 0;
-            else if(row == col & row == 0) U(row, col) = 1;
-            else if(row > 0 & row == col) {
+            else if ((row == col) && (row == 0)) U(row, col) = 1;
+            else if ((row > 0) && (row == col)) {
               if(Z(row-1,col)==0){
                 double prod = 1;
                 for(unsigned int row1 = 0; row1 < row; row1++){
@@ -230,8 +230,8 @@ namespace params{
                 U(row, col) = U(row-1, col)*pow(1-pow(Z(row-1, col),2), .5)/Z(row-1, col);
               }
             }
-            else if(row == 0 & row < col) U(row, col) = Z(row, col);
-            else if(row > 0 & row < col) {
+            else if ((row == 0) && (row < col)) U(row, col) = Z(row, col);
+            else if ((row > 0) && (row < col)) {
               if(Z(row-1,col)==0){
                 double prod = Z(row, col);
                 for( int row1 = 0; row1 < row; row1++){
