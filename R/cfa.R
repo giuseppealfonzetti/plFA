@@ -142,6 +142,8 @@ cfa <- function(
 
   # Fit plFA -------------------------------------------------------------------
   D <- fit0@Data@X[[1]] - 1
+  # Starting values if we want to follow lavaan?
+  # if (is.null(start)) start <- partable(fit0)$start[partable(fit0)$free > 0]
 
   # Build the p x q loading constraints matrix
   FREE <- lavaan::inspect(fit0, what = "free")
@@ -256,7 +258,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   x <- c(lambda, tau, psi)
 
   SE <- sqrt(vars$asymptotic_variance / n)
-  vcov <- vars$vcov
+  vcov <- vars$vcov / n
 
   # Change version slot
   # fit0@version <- as.character(packageVersion("plFA"))
@@ -285,6 +287,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   pt$est[pt$free > 0] <- x
   pt$se <- 0
   pt$se[pt$free > 0] <- SE
+  pt$start[pt$free > 0] <- fit1@init
 
   # Put the diag theta values in the pt
   ov_names <- fit0@Data@ov.names[[1]]  # FIXME: Group 1 only
@@ -309,9 +312,10 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
 
   # Change Fit slot (depends whether it is numFit or stoFit)
   fit0@Fit@x <- x
+  fit0@Fit@TH[[1]] <- tau  # FIXME: Group 1
   fit0@Fit@est <- pt$est
   fit0@Fit@se <- pt$se
-  fit0@Fit@start <- fit1@init  # FIXME: Need to fix how start values are handled
+  fit0@Fit@start <- pt$start
   if (fit1@method == "ucminf") {
     fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
     fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
