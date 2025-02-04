@@ -237,7 +237,7 @@ check_init_method <- function(DIMS, INIT_METHOD = c("SA", "custom", "standard"),
   if(!is.null(INIT)) INIT_METHOD <- "custom"
   INIT_METHOD <- match.arg(INIT_METHOD)
   if (.Platform$OS.type == "windows" & INIT_METHOD=="SA"){
-    INIT_METHOD=="standard"
+    INIT_METHOD <- "standard"
   }
 
   if(INIT_METHOD=="SA"){
