@@ -73,8 +73,9 @@ approximation algorithm can be used.
 Not all \code{\link{lavaan}} options can be used at present. Some options of
 interest are:
 \describe{
-\item{\code{information}}{The information matrix to use. Only \code{observed} is currently supported.}
-\item{\code{se}}{The standard error method to use. Only \code{robust.huber.white} is currently supported.}
+\item{\code{information}}{The information matrix to use. Only \code{"observed"} is currently supported.}
+\item{\code{se}}{The standard error method to use. Only \code{"robust.huber.white"} is currently supported.}
+\item{\code{test}}{No GOF tests are available as of now, so this is set to \code{"none"}.}
 }
 }
 \examples{

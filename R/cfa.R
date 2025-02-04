@@ -8,8 +8,9 @@
 #' @details Not all [`lavaan`] options can be used at present. Some options of
 #'   interest are:
 #' \describe{
-#'   \item{\code{information}}{The information matrix to use. Only `observed` is currently supported.}
-#'   \item{\code{se}}{The standard error method to use. Only `robust.huber.white` is currently supported.}
+#'   \item{\code{information}}{The information matrix to use. Only `"observed"` is currently supported.}
+#'   \item{\code{se}}{The standard error method to use. Only `"robust.huber.white"` is currently supported.}
+#'   \item{\code{test}}{No GOF tests are available as of now, so this is set to `"none"`.}
 #' }
 #'
 #' @param model A description of the user-specified model. Typically, the model
