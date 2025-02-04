@@ -1,8 +1,8 @@
 check_data <- function(DATA){
   stopifnot(is.matrix(DATA))
-  stopifnot(is.finite(DATA))
+  stopifnot(is.finite(DATA) | is.na(DATA))
   stopifnot(is.numeric(DATA))
-  stopifnot(min(DATA)==0)
+  stopifnot(min(DATA, na.rm = TRUE)==0)
   return(round(DATA,0))
 }
 check_cnstr_corrflag <- function(CORRFLAG){
