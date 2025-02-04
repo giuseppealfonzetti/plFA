@@ -244,7 +244,7 @@ Rcpp::List cpp_plSA(
         double pdiff = - (nll - prev_nll)/prev_nll;
         if(pdiff<TOL_NLL){tol_counter++;}else{tol_counter=0;}
         if(pdiff<(TOL_NLL*10)){tol_counter_burn++;}else{tol_counter_burn=0;}
-        if(pdiff<0 & t<=burn) neg_pdiff=true;
+        if((pdiff<0) && (t<=burn)) neg_pdiff=true;
 
 
 
