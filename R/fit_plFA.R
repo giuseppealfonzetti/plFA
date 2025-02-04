@@ -82,6 +82,10 @@ fit_plFA <- function(
   dat <- check_data(DATA)
   constr_list <- check_cnstr(CONSTR_LIST)
   method <- match.arg(METHOD)
+  if (.Platform$OS.type == "windows" & method=="SA"){
+    cli::cli_alert_info("METHOD='SA' not available on Windows yet. METHOD set to 'ucminf'.")
+    method <- "ucminf"
+  }
 
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
