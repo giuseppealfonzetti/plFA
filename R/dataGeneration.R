@@ -13,7 +13,6 @@
 #'
 #' @export
 compute_frequencies <- function(Y, C_VEC){
-  if(sum(!is.finite(Y))>0 | !is.matrix(Y))stop('Y is not a numeric matrix.')
   if(sum(!is.finite(C_VEC))>0 | is.matrix(C_VEC))stop('C_VEC is not a numeric vector.')
   if(length(C_VEC) != ncol(Y))stop('Y and C_VEC dimensions do not match.')
 
