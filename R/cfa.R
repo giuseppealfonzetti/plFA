@@ -374,7 +374,9 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   } else if (fit1@method == "SA") {
     fit0@loglik$loglik <- fit1@stoFit@nll
   }
-  fit0@loglik$estimator <- "PML"
+  fit0@loglik$estimator <- "ML"  # FIXME: to turn off warning for now
+  fit0@loglik$AIC <- get_AIC(NLL = fit0@loglik$loglik, INVH = vars$invH, J = vars$J)
+  fit0@loglik$BIC <- get_BIC(NLL = fit0@loglik$loglik, INVH = vars$invH, J = vars$J, N = n)
 
   # Change vcov slot
   # fit0@vcov$se <- "robust.sem"

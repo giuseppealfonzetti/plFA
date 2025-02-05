@@ -42,3 +42,17 @@ setMethod("coef", "plFAlavaan", function(object, ...) {
   class(object) <- "lavaan"
   callNextMethod()
 })
+
+setMethod("logLik", "plFAlavaan", function(object, ...) {
+  class(object) <- "lavaan"
+  object@Options$estimator <- "ML"
+  callNextMethod()
+})
+
+setMethod("AIC", "plFAlavaan", function(object, ...) {
+  object@loglik$AIC
+})
+
+setMethod("BIC", "plFAlavaan", function(object, ...) {
+  object@loglik$BIC
+})
