@@ -104,9 +104,9 @@ Jamil</h4>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
 <span><span class="co">#&gt;      X2    df name          pval Xi_rank     S</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2.81   5    Wald         0.729      14    15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2.82   5    Wald         0.728      14    15</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 2.80   5    WaldVCF      0.730       5    15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 0.863  3.31 WaldDiag,MM3 0.872      15    15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 0.862  3.31 WaldDiag,MM3 0.872      15    15</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 1.86   3.63 Pearson,MM3  0.709      15    15</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 2.30   4.18 RSS,MM3      0.707      15    15</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 1.86   3.62 Multn,MM3    0.708      15    15</span></span></code></pre></div>
@@ -134,7 +134,7 @@ matrix.</p>
 <span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">Hinv1</span>, <span class="va">Hinv2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
 <span><span class="co">#&gt;  call| tinytest::expect_equal(Hinv1, Hinv2)</span></span>
-<span><span class="co">#&gt;  diff| Mean relative difference: 1.617763</span></span>
+<span><span class="co">#&gt;  diff| Mean relative difference: 1.61476</span></span>
 <span></span>
 <span><span class="co"># lavaan:::lav_model_hessian(</span></span>
 <span><span class="co">#     lavmodel = fit@Model,</span></span>
@@ -163,8 +163,7 @@ package first.</p>
 <span><span class="co">#&gt;  call| tinytest::expect_equal(x, y, tolerance = 1e-04)</span></span>
 <span><span class="co">#&gt;  diff| Component "lavoptions": Component "test": 1 string mismatch</span></span>
 <span><span class="co">#&gt;  diff| Component "lavoptions": Component "optim.method": 1 string mismatch</span></span>
-<span><span class="co">#&gt;  diff| Component "lavpartable": Component "start": Mean relative difference: 1.181331</span></span>
-<span><span class="co">#&gt;  diff| Component "lavpartable": Component "se": Mean relative difference: 0.2506377</span></span></code></pre></div>
+<span><span class="co">#&gt;  diff| Component "lavpartable": Component "se": Mean relative difference: 0.03419516</span></span></code></pre></div>
 <p>Differences in test statistic values.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wald_test"</span>, <span class="st">"Wald_vcovf_test"</span>, <span class="st">"Wald_diag_test"</span>, <span class="st">"Pearson_test"</span>, <span class="st">"RSS_test"</span>, <span class="st">"Multn_test"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
