@@ -275,7 +275,9 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
         NVAR       = NVAR,
         GRFLAG     = 1,
         SILENTFLAG = 1
-      )}
+      )
+      mod$iter_ngradient
+    }
 
     Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
   }else{
