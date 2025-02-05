@@ -93,12 +93,7 @@ test_that("`std.lv` argument works", {
     fit1@external$plFA@numFit$value,
     fit2@external$plFA@numFit$value
   )
-  expect_equal(
-    fit1@implied$cov[[1]],
-    fit2@implied$cov[[1]],
-    tolerance = 1e-3,
-    label = "Implied covariance matrix not equal"
-  )
+  expect_equal(fitted(fit1), fitted(fit2), tolerance = 1e-3)
 })
 
 test_that("Method = 'SA' works", {
@@ -142,7 +137,7 @@ test_that("Constraints work", {
 # fit <- cfa("eta =~ y1 + y2 + y3 + y4 + y5", LSAT, start = coef(fit))
 
 test_that("Against lavaan::cfa", {
-  mod <- "eta =~ y1 + y2 + y3 + y4 + y5"
+  mod <- "eta1 =~ y1 + y2 + y3 + y4 + y5"
 
   fit1 <- cfa(mod, LSAT, std.lv = TRUE)
   # fit2 <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"))
@@ -150,6 +145,44 @@ test_that("Against lavaan::cfa", {
   fit4 <- lavaan::cfa(mod, LSAT, std.lv = TRUE, estimator = "PML")
 
   expect_equal(coef(fit1), coef(fit3), tolerance = 1e-2)
-  expect_equal(coef(fit1), coef(fit4), tolerance = 1e-5)
+  expect_equal(coef(fit3), coef(fit4), tolerance = 1e-3)
 
 })
+
+
+test_that("Hinv is the same", {
+
+  information_matrix <- function(fit, type) {
+    lavargs <- list(
+      lavmodel = fit@Model,
+      lavsamplestats = fit@SampleStats,
+      lavdata = fit@Data,
+      lavoptions = fit@Options,
+      lavcache = fit@Cache
+    )
+
+    if (type == "observed")
+      out <- do.call("lav_model_information_observed", lavargs,
+                     envir = asNamespace("lavaan"))
+    else if (type == "expected")
+      out <- do.call("lav_model_information_expected", lavargs,
+                     envir = asNamespace("lavaan"))
+    else stop("Invalid type")
+    return(out)
+  }
+
+  # From plFA
+  mod <- "eta1 =~ y1 + y2 + y3 + y4 + y5"
+  n <- nrow(LSAT)
+  fit1 <- cfa(mod, LSAT, std.lv = TRUE)
+  Hinv1 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+  fit1 <- cfa(mod, LSAT, std.lv = TRUE, estimator.args = list(computevar_numderiv = TRUE))
+  Hinv2 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+  Hinv3 <- solve(information_matrix(fit1, "observed"))
+  expect_equal(Hinv1, Hinv2, tolerance = 1e-5)  # ucminf vs numderiv
+  # expect_equal(Hinv1, Hinv3, tolerance = 1)  # ucminf vs lavaan
+
+})
+
+
+

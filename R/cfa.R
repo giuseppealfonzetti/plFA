@@ -142,9 +142,6 @@ cfa <- function(
 
   # Fit plFA -------------------------------------------------------------------
   D <- fit0@Data@X[[1]] - 1
-  p <-
-  # Starting values if we want to follow lavaan?
-  # if (is.null(start)) start <- partable(fit0)$start[partable(fit0)$free > 0]
 
   # Build the p x q loading constraints matrix
   FREE <- lavaan::inspect(fit0, what = "free", add.class = FALSE)
