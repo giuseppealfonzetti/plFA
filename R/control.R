@@ -202,7 +202,7 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("SA", "custo
   INIT_METHOD <- match.arg(INIT_METHOD)
 
   if(INIT_METHOD=="custom"){
-    if(VERBOSE) message('- Initialised at INIT vector.\n')
+    if(VERBOSE) message('- Initialised at user-supplied values.')
   }else if(INIT_METHOD=="standard"){
     if(VERBOSE) message('- Initialising at default values ...', appendLF = FALSE)
     lambda0_init <- init_thresholds(DIMS, CONSTR_LIST)

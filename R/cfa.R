@@ -102,7 +102,6 @@ cfa <- function(
   cpp_control_init <- estimator.args$cpp_control_init
   computevar_numderiv <- estimator.args$computevar_numderiv
   if (is.null(computevar_numderiv)) computevar_numderiv <- FALSE
-  if (!is.null(start)) start <- as.numeric(start)
 
   # Initialise {lavaan} model object -------------------------------------------
   lavargs <- list(...)
@@ -143,15 +142,15 @@ cfa <- function(
 
   # Fit plFA -------------------------------------------------------------------
   D <- fit0@Data@X[[1]] - 1
+  p <-
   # Starting values if we want to follow lavaan?
   # if (is.null(start)) start <- partable(fit0)$start[partable(fit0)$free > 0]
 
   # Build the p x q loading constraints matrix
-  FREE <- lavaan::inspect(fit0, what = "free")
+  FREE <- lavaan::inspect(fit0, what = "free", add.class = FALSE)
   lambda <- lavaan::inspect(fit0, what = "est")$lambda
   p <- nrow(lambda)
   q <- ncol(lambda)
-  # A <- build_constrMat(P = p, Q = q, STRUCT = "simple")
   A <- lambda
   class(A) <- "matrix"
   A[] <- NA
@@ -206,6 +205,40 @@ cfa <- function(
     LLC = llc
   )
 
+  # Starting values are always computed (for lav<->plFA indices). Note: the
+  # values in plFA are always in the order of thresholds, loadings, latent
+  # correlations, then latent variances.
+  startlist <- lavaan::inspect(fit0, what = "start", add.class = FALSE)
+  lambda <- startlist$lambda[FREE$lambda > 0]
+  tau <- startlist$tau[FREE$tau > 0]
+  rho <- startlist$psi[FREE$psi > 0 & lower.tri(FREE$psi)]
+  logsd <- log(sqrt(startlist$psi[FREE$psi > 0 & diag(TRUE, nrow(FREE$psi))]))
+  init <- c(tau, lambda, rho, logsd)
+
+  # init <- get_theta(
+  #   THRESHOLDS = as.numeric(startlist$tau),
+  #   LOADINGS = startlist$lambda,
+  #   LATENT_COV = startlist$psi,
+  #   CAT = fit0@Data@ov$nlev,
+  #   CONSTRMAT = A,
+  #   CONSTRVAR = constrvar,
+  #   CORRFLAG = corrflag,
+  #   STDLV = std.lv
+  # )
+  idx_lav2plFA <- c(
+    FREE$tau[FREE$tau > 0],
+    FREE$lambda[FREE$lambda > 0],
+    FREE$psi[FREE$psi > 0 & lower.tri(FREE$psi)],
+    FREE$psi[FREE$psi > 0 & diag(TRUE, nrow(FREE$psi))]
+  )
+  idx_plFA2lav <- order(idx_lav2plFA)
+
+  if (!is.null(start)) {
+    init <- as.numeric(start)
+    init <- init[idx_lav2plFA]
+  }
+
+  # Send to plFA
   fit1 <- fit_plFA(
     DATA = D,
     CONSTR_LIST = constr_list,
@@ -216,9 +249,11 @@ cfa <- function(
     CONTROL = control,
     CPP_CONTROL_MAIN = cpp_control_main,
     CPP_CONTROL_INIT = cpp_control_init,
-    INIT = start,
+    INIT = init,
     VERBOSE = verbose
   )
+
+  # Compute standard errors
   vars <- computeVar(
     OBJ = fit1,
     DATA = D,
@@ -227,12 +262,11 @@ cfa <- function(
     VERBOSE = verbose
   )
 
-  # list(fit0 = fit0, fit1 = fit1, vars = vars)
-  out <- create_lav_from_fitplFA(fit0, fit1, vars, D)
+  out <- create_lav_from_fitplFA(fit0, fit1, vars, D, idx_plFA2lav)
   new("plFAlavaan", out)
 }
 
-create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
+create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
 
   # Get coefficients and standard errors
   FREE <- lavaan::inspect(fit0, what = "free")
@@ -257,9 +291,11 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   )
 
   x <- c(lambda, tau, psi)
+  # x <- fit1@theta[idx_plFA2lav]
 
-  SE <- sqrt(vars$asymptotic_variance / n)
+  SE <- sqrt(vars$asymptotic_variance / n)[idx_plFA2lav]
   vcov <- vars$vcov / n
+  vcov <- vcov[idx_plFA2lav, idx_plFA2lav]
 
   # Change version slot
   # fit0@version <- as.character(packageVersion("plFA"))
@@ -288,7 +324,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   pt$est[pt$free > 0] <- x
   pt$se <- 0
   pt$se[pt$free > 0] <- SE
-  pt$start[pt$free > 0] <- fit1@init
+  pt$start[pt$free > 0] <- fit1@init[idx_plFA2lav]
 
   # Put the diag theta values in the pt
   ov_names <- fit0@Data@ov.names[[1]]  # FIXME: Group 1 only
@@ -352,7 +388,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D) {
   # fit0@baseline <- fit_lav@baseline
 
   # Include the entire output of fit_sem
-  fit0@external <- list(plFA = fit1, vars = vars, D = D)
+  fit0@external <- list(plFA = fit1, vars = vars, D = D, idx_plFA2lav = idx_plFA2lav)
 
   fit0
 }
