@@ -81,7 +81,11 @@ fit_plFA <- function(
 
   dat <- check_data(DATA)
   constr_list <- check_cnstr(CONSTR_LIST)
-  method <- match.arg(METHOD)
+  METHOD <- match.arg(METHOD)
+  if (.Platform$OS.type == "windows" & METHOD=="SA"){
+    warning("METHOD='SA' not available on Windows yet. METHOD set to 'ucminf'.")
+    METHOD <- "ucminf"
+  }
 
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
@@ -113,13 +117,14 @@ fit_plFA <- function(
   # Set up multi-threads computations
   if (is.null(NCORES)) NCORES <- 1L
   tmp@cores <- NCORES
-  if (.Platform$OS.type == "windows") {
-    if (NCORES > 1L) {
-      cli::cli_alert_info("Windows OS detected. Multi-threading is not supported yet.")
-    }
-  } else {
-    RcppParallel::setThreadOptions(numThreads = NCORES)
-  }
+  # if (.Platform$OS.type == "windows" & NCORES > 1L) {
+  #   cli::cli_alert_info("Windows OS detected. Multi-threading is not supported yet.")
+  # } else {
+  #   RcppParallel::setThreadOptions(numThreads = NCORES)
+  # }
+
+  RcppParallel::setThreadOptions(numThreads = NCORES)
+
 
   if(VERBOSE) message('- Computing frequencies...')
   freq_start_time <- Sys.time()

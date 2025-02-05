@@ -356,3 +356,10 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
 }
 
+get_AIC <- function(NLL, INVH, J){
+  return(NLL+sum(diag(J%*%INVH)))
+}
+
+get_BIC <- function(NLL, INVH, J, N){
+  return(2*NLL+sum(diag(J%*%INVH))*log(N))
+}

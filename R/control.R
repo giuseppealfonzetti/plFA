@@ -1,8 +1,8 @@
 check_data <- function(DATA){
   stopifnot(is.matrix(DATA))
-  stopifnot(is.finite(DATA))
+  stopifnot(is.finite(DATA) | is.na(DATA))
   stopifnot(is.numeric(DATA))
-  stopifnot(min(DATA)==0)
+  stopifnot(min(DATA, na.rm = TRUE)==0)
   return(round(DATA,0))
 }
 check_cnstr_corrflag <- function(CORRFLAG){
@@ -236,6 +236,9 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("SA", "custo
 check_init_method <- function(DIMS, INIT_METHOD = c("SA", "custom", "standard"), INIT =NULL){
   if(!is.null(INIT)) INIT_METHOD <- "custom"
   INIT_METHOD <- match.arg(INIT_METHOD)
+  if (.Platform$OS.type == "windows" & INIT_METHOD=="SA"){
+    INIT_METHOD <- "standard"
+  }
 
   if(INIT_METHOD=="SA"){
     if(DIMS$p<15)INIT_METHOD <- "standard"
