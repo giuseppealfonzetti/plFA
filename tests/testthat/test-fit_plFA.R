@@ -1,5 +1,5 @@
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 30; q <- 8; n <- 1000
+p <- 16; q <- 4; n <- 1000
 
 # Thresholds vector for each item
 thr <- c(-1.5, 0, 1.5)
@@ -133,8 +133,7 @@ if(1){
   # Simple loading matrix constraints
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
   llc <- list(list(c(2,1), c(1,5,2)),
-              list(c(3,1), c(1,6,2)),
-              list(c(8,3), c(.5, 11, 4), c(.5, 14, 5)))
+              list(c(3,1), c(1,6,2)))
   A <- check_cnstr_loadings(A, stdlv, LLC=llc)
   # Draw some random loadings according to constraints
   Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv, LLC=llc)
