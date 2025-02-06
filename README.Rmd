@@ -84,6 +84,30 @@ head(parameterestimates(fit, se = TRUE))
 head(fitted(fit)$cov)  # model-implied covariance matrix for the UVs
 ```
 
+And also plot from the `{semPlot}` package:
+
+```{r}
+#| label: fig-bfi
+#| out-width: 100%
+#| dpi: 300
+library(semPlot)
+
+grouplist <- list(
+  lat = c("opn", "con", "ext", "agr", "neu"),
+  man = rep(c("opn", "con", "ext", "agr", "neu"), each = 5)
+)
+
+# Define a named vector of colors for each group (latent factor)
+groupcols <- RColorBrewer::brewer.pal(5, "Set2") |>
+  rep(each = 5) |>
+  adjustcolor(alpha.f = 0.5)
+
+# Now call semPaths
+semPaths(fit, whatLabels = "est", layout = "circle", residuals = FALSE, 
+         intercept = FALSE, groups = grouplist, color = groupcols, 
+         legend = FALSE)
+```
+
 ## Session information
 
 ```{r}
