@@ -32,15 +32,31 @@ Rcpp::List cpp_compute_pair_ext(
    double ll = 0;
    Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
    if(OPTION==0){
-     pairs::pair_contribution_extended(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA, CORRFLAG,
-                                       NTHR, NLOAD, NCORR, NVAR, K, L,
+     const unsigned int p = CONSTRMAT.rows();
+     const unsigned int q = CONSTRMAT.cols();
+     Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, CONSTRMAT, LLC, NTHR, NLOAD);
+     Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
+     Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
+     Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+     Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
+     pairs::pair_contribution_extended(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA,
+                                       Lam, Ru, Du, Sigma_u, tau,
+                                       CORRFLAG,NTHR, NLOAD, NCORR, NVAR, K, L,
                                        PAIRS_TABLE, SILENTFLAG, GRADFLAG,
                                        ll, gradient);
      }else if(OPTION==1){
-       pairs::pair_contribution2(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA, CORRFLAG,
-                                         NTHR, NLOAD, NCORR, NVAR, K, L,
-                                         PAIRS_TABLE, SILENTFLAG, GRADFLAG,
-                                         ll, gradient);
+       const unsigned int p = CONSTRMAT.rows();
+       const unsigned int q = CONSTRMAT.cols();
+       Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, CONSTRMAT, LLC, NTHR, NLOAD);
+       Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
+       Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
+       Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+       Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
+       pairs::pair_contribution2(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA,
+                                 Lam, Ru, Du, Sigma_u, tau,
+                                 CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L,
+                                 PAIRS_TABLE, SILENTFLAG, GRADFLAG,
+                                 ll, gradient);
        }
 
 

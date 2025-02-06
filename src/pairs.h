@@ -8,7 +8,7 @@
 
 namespace pairs{
 
-// Single pair contribution to
+  // Single pair contribution to
   // 1. Log-likelihood
   // 2. Gradient
   void pair_contribution_extended(
@@ -18,6 +18,11 @@ namespace pairs{
       const std::vector<std::vector<std::vector<double>>> LLC,
       const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> THETA,
+      const Eigen::Ref<const Eigen::MatrixXd> LAM,
+      const Eigen::Ref<const Eigen::MatrixXd> RU,
+      const Eigen::Ref<const Eigen::MatrixXd> DU,
+      const Eigen::Ref<const Eigen::MatrixXd> SIGMAU,
+      const Eigen::Ref<const Eigen::VectorXd> TAU,
       const int CORRFLAG,
       const int NTHR,
       const int NLOAD,
@@ -34,19 +39,19 @@ namespace pairs{
     const unsigned int p = A.rows();
     const unsigned int q = A.cols();
 
-    // rearrange parameters
-    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
-    Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
-    Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
-    Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-    Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
+    // // rearrange parameters
+    // Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
+    // Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
+    // Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
+    // Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+    // Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
 
     // Identifies quantities related to pair (k,l)
     const unsigned int ck          = C_VEC(K);
     const unsigned int cl          = C_VEC(L);
-    const Eigen::VectorXd lambdak  = Lam.row(K);
-    const Eigen::VectorXd lambdal  = Lam.row(L);
-    const double rho_kl            = lambdak.transpose() * Sigma_u * lambdal;
+    const Eigen::VectorXd lambdak  = LAM.row(K);
+    const Eigen::VectorXd lambdal  = LAM.row(L);
+    const double rho_kl            = lambdak.transpose() * SIGMAU * lambdal;
 
     // Rcpp::Rcout<<"LAM:\n"<<Lam<<"\n";
     //
@@ -91,7 +96,7 @@ namespace pairs{
         const unsigned int n_sksl = PAIRS_TABLE(4, r);
 
         // identify thresholds
-        const Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, K, L, sk, sl);
+        const Eigen::VectorXd pi_thresholds = params::extract_thresholds(TAU, C_VEC, K, L, sk, sl);
 
         // compute pi
         const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, K, L, sk, sl);
@@ -113,27 +118,27 @@ namespace pairs{
       /////////////////////////////////////////////////////
       // (k,l)-pair likelihood derivative wrt thresholds //
       /////////////////////////////////////////////////////
-      grads::thresholds(GRADIENT, pairs_tab, C_VEC, tau, rho_kl, K, L, ck, cl, i1, i2, iter);
+      grads::thresholds(GRADIENT, pairs_tab, C_VEC, TAU, rho_kl, K, L, ck, cl, i1, i2, iter);
 
       ///////////////////////////////////////////////////////////
       // (k,l)-pair likelihood derivative wrt URV correlation: //
       // intermediate step for derivatives wrt                 //
       // loadings and factor correlations                      //
       ///////////////////////////////////////////////////////////
-      double tmp_kl = grads::rho_urv(pairs_tab, C_VEC, tau, rho_kl, K, L, ck, cl, i1, i2);
+      double tmp_kl = grads::rho_urv(pairs_tab, C_VEC, TAU, rho_kl, K, L, ck, cl, i1, i2);
 
 
       ///////////////////////////////////////////////////
       // (k,l)-pair likelihood derivative wrt loadings //
       ///////////////////////////////////////////////////
-      grads::loadings(GRADIENT, A, LLC, Sigma_u, lambdak, lambdal, tmp_kl, p, q, K, L, iter);
+      grads::loadings(GRADIENT, A, LLC, SIGMAU, lambdak, lambdal, tmp_kl, p, q, K, L, iter);
 
       /////////////////////////////////////////////////////////////////////////////
       // (k,l)-pair likelihood derivative wrt reparametrised latent correlations //
       /////////////////////////////////////////////////////////////////////////////
       if(CORRFLAG == 1){
         Eigen::VectorXd transformed_rhos = params::latvar::theta2vec(THETA, NTHR, NLOAD, NCORR, NVAR).segment(0, NCORR);
-        grads::lat_corr(GRADIENT, A, lambdak.transpose()*Du, Du*lambdal, transformed_rhos, tmp_kl, q, NCORR, iter);
+        grads::lat_corr(GRADIENT, A, lambdak.transpose()*DU, DU*lambdal, transformed_rhos, tmp_kl, q, NCORR, iter);
       }
 
       ///////////////////////////////////////////////////////////////////////////
@@ -143,8 +148,8 @@ namespace pairs{
         for(int j=0; j<q; j++){
           if(!std::isfinite(CONSTRLOGSD(j))){
             // Eigen::VectorXd ej = Eigen::VectorXd::Zero(q); ej(j) = 1;
-            Eigen::MatrixXd dD = Eigen::MatrixXd::Zero(q,q); dD(j,j)=Du(j,j);
-            GRADIENT(iter) = tmp_kl*lambdak.transpose()*(dD*Ru*Du+Du*Ru*dD)*lambdal;
+            Eigen::MatrixXd dD = Eigen::MatrixXd::Zero(q,q); dD(j,j)=DU(j,j);
+            GRADIENT(iter) = tmp_kl*lambdak.transpose()*(dD*RU*DU+DU*RU*dD)*lambdal;
             // Rcpp::Rcout<<"idx:"<<iter<<", gr:"<< GRADIENT(iter)<<"\n";
             iter++;
           }
@@ -164,6 +169,11 @@ namespace pairs{
       const std::vector<std::vector<std::vector<double>>> LLC,
       const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> THETA,
+      const Eigen::Ref<const Eigen::MatrixXd> LAM,
+      const Eigen::Ref<const Eigen::MatrixXd> RU,
+      const Eigen::Ref<const Eigen::MatrixXd> DU,
+      const Eigen::Ref<const Eigen::MatrixXd> SIGMAU,
+      const Eigen::Ref<const Eigen::VectorXd> TAU,
       const int CORRFLAG,
       const int NTHR,
       const int NLOAD,
@@ -181,19 +191,19 @@ namespace pairs{
     const unsigned int q = A.cols();
     const unsigned int d = NTHR+NLOAD+NCORR+NVAR;
 
-    // rearrange parameters
-    Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
-    Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
-    Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
-    Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-    Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
+    // // rearrange parameters
+    // Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
+    // Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
+    // Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
+    // Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+    // Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
 
     // Identifies quantities related to pair (k,l)
     const unsigned int ck          = C_VEC(K);
     const unsigned int cl          = C_VEC(L);
-    const Eigen::VectorXd lambdak  = Lam.row(K);
-    const Eigen::VectorXd lambdal  = Lam.row(L);
-    const double rho_kl            = lambdak.transpose() * Sigma_u * lambdal;
+    const Eigen::VectorXd lambdak  = LAM.row(K);
+    const Eigen::VectorXd lambdal  = LAM.row(L);
+    const double rho_kl            = lambdak.transpose() * SIGMAU * lambdal;
 
     // Initialize pairs table
     Eigen::MatrixXd pairs_tab     = PAIRS_TABLE;
@@ -233,7 +243,7 @@ namespace pairs{
         const unsigned int n_sksl = PAIRS_TABLE(4, r);
 
         // identify thresholds
-        const Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, C_VEC, K, L, sk, sl);
+        const Eigen::VectorXd pi_thresholds = params::extract_thresholds(TAU, C_VEC, K, L, sk, sl);
 
         // compute pi
         const double pi_sksl = biprobs::compute_pi(C_VEC, pi_thresholds, rho_kl, K, L, sk, sl);
@@ -252,9 +262,9 @@ namespace pairs{
                        LLC,
                        C_VEC,
                        pi_thresholds,
-                       Sigma_u,
-                       Du,
-                       Ru,
+                       SIGMAU,
+                       DU,
+                       RU,
                        lambdak,
                        lambdal,
                        rho_kl,
@@ -365,7 +375,17 @@ namespace pairs{
       Eigen::VectorXd pair_gradient = Eigen::VectorXd::Zero(d);
 
       // computation of log-likelihood, gradient
-      pair_contribution_extended(constrmat, constrsd, llc, c_vec, theta, corrFLAG, nthr, nload, ncorr, nvar, k, l, pairs_table, silentFLAG, gradFLAG, pair_ll, pair_gradient);
+      // rearrange parameters
+      const unsigned int p = constrmat.rows();
+      const unsigned int q = constrmat.cols();
+      Eigen::MatrixXd Lam             = params::loadings::theta2mat(theta, constrmat, llc, nthr, nload);
+      Eigen::MatrixXd Ru              = params::latvar::theta2cmat(theta, nthr, nload, ncorr, nvar, q);
+      Eigen::MatrixXd Du              = params::latvar::theta2dmat(theta, constrsd, nthr, nload, ncorr, nvar, q);
+      Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+      Eigen::VectorXd tau             = params::thresholds::theta2vec(theta, nthr);
+      pair_contribution_extended(constrmat, constrsd, llc, c_vec, theta,
+                                 Lam, Ru, Du, Sigma_u, tau,
+                                 corrFLAG, nthr, nload, ncorr, nvar, k, l, pairs_table, silentFLAG, gradFLAG, pair_ll, pair_gradient);
 
       // update
       {
