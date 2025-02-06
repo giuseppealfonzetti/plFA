@@ -4,8 +4,10 @@ author: Haziq Jamil
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Limited information Goodness-of-Fit tests}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, include = FALSE}
@@ -13,7 +15,14 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(tidyverse)
+library(tinytest)
 ```
+
+## Limited information GOF tests
+
+The `{lavaan.bingof}` package provides a set of LIGOF tests for CFA models with binary data.
+Models estimated using the `{plFA}` package are directly compatible.
 
 ```{r setup}
 library(plFA)
@@ -24,68 +33,95 @@ library(lavaan.bingof)
 (dat <- gen_data_bin(n = 1000, seed = 123))
 mod <- "eta =~ y1 + y2 + y3 + y4 + y5"
 fit <- cfa(mod, dat, std.lv = TRUE)
-tinytest::expect_true(inherits(fit, "plFAlavaan"))
+expect_true(inherits(fit, "plFAlavaan"))
 
 # Test statistics
 all_tests(fit)
 ```
 
-Most tests look fine, except the Wald and WaldDiag -- both of which rely on the $\Omega_2$ matrix.
-<!-- This means either the $\Omega_2$ matrix or the fitted probabilities (or both!) are off.  -->
-Let's do some checking.
-
-Check first the probabilities and proportions.
-
-```{r}
-x <- lavaan.bingof::get_uni_bi_moments(fit)  # plFA
-y <- lavaan.bingof::get_uni_bi_moments(  # lavaan
-  lavaan::cfa(mod, dat, std.lv = TRUE)
-)  
-tinytest::expect_equal(x, y, tolerance = 1e-4)
-```
-
-Check the $H^{-1}$ matrix.
-
-```{r}
-Hinv1 <- computeVar(fit@external$plFA, fit@external$D)$invH
-Hinv2 <- lavaan.bingof:::get_sensitivity_inv_mat(fit)
-tinytest::expect_equal(Hinv1, Hinv2)
-
-# lavaan:::lav_model_hessian(
-#     lavmodel = fit@Model,
-#     lavsamplestats = fit@SampleStats,
-#     lavdata = fit@Data,
-#     lavoptions = fit@Options
-# )
-```
-
-So both are off.
-I think we should check the PML fit using lavaan package first.
+As a comparison, we can look at the output from using the `cfa()` function in the `{lavaan}` package.
 
 ```{r}
 fit1 <- plFA::cfa(mod, dat, std.lv = TRUE)
 fit2 <- lavaan::cfa(mod, dat, std.lv = TRUE, estimator = "PML")
-tinytest::expect_equal(coef(fit1), coef(fit2), tolerance = 1e-5)
-tinytest::expect_equal(fit1@Fit@Sigma.hat, fit2@Fit@Sigma.hat, tolerance = 1e-5)
-```
 
-Test extracted lavaan stuff:
+# Test equality of coefficients and standard errors
+expect_equal(coef(fit1), coef(fit2), tolerance = 1e-5)  
+expect_equal(fit1@Fit@se, fit2@Fit@se, tolerance = 1e-5)
 
-```{r}
-x <- lavaan.bingof:::extract_lavaan_info(fit1)
-y <- lavaan.bingof:::extract_lavaan_info(fit2)
-tinytest::expect_equal(x, y, tolerance = 1e-4)
-```
-
-Differences in test statistic values.
-
-```{r}
-c("Wald_test", "Wald_vcovf_test", "Wald_diag_test", "Pearson_test", "RSS_test", "Multn_test") |>
-  purrr::set_names() |>
-  purrr::map(.f = function(x) {
+# Test equality of test statistics and p-values
+c(
+  "Wald_test",
+  "Wald_vcovf_test",
+  "Wald_diag_test",
+  "Pearson_test",
+  "RSS_test",
+  "Multn_test"
+) |>
+  set_names() |>
+  map(.f = function(x) {
     out1 <- do.call(x, list(fit1))
     out2 <- do.call(x, list(fit2))
-    tinytest::expect_equal(out1, out2, tolerance = 1e-2)
+    expect_equal(out1, out2, tolerance = 5e-3)
   })
 ```
 
+## Testing differences
+
+
+```{r}
+information_matrix <- function(fit, type) {
+  lavargs <- list(
+    lavmodel = fit@Model,
+    lavsamplestats = fit@SampleStats,
+    lavdata = fit@Data,
+    lavoptions = fit@Options,
+    lavcache = fit@Cache,
+    inverted = FALSE
+  )
+
+  if (type == "observed") 
+    out <- do.call("lav_model_information_observed", lavargs, 
+                   envir = asNamespace("lavaan"))
+  else if (type == "expected")
+    out <- do.call("lav_model_information_expected", lavargs, 
+                   envir = asNamespace("lavaan"))
+  else if (type == "first.order")
+    out <- do.call("lav_model_information_firstorder", lavargs, 
+                   envir = asNamespace("lavaan"))
+  else stop("Invalid type")
+  return(out)
+}
+```
+
+
+### Sensitivity (inverted) matrix
+
+
+```{r}
+# From plFA
+Hinv1 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+fit1 <- cfa(mod, dat, std.lv = TRUE, estimator.args = list(computevar_numderiv = TRUE), verbose = TRUE)
+Hinv2 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+Hinv3 <- solve(information_matrix(fit1, "observed"))
+
+expect_equal(Hinv1, Hinv2, tolerance = 1e-5)  # ucminf vs numderiv
+expect_equal(Hinv1, Hinv3, tolerance = 1e-5)  # ucminf vs lavaan
+expect_equal(Hinv2, Hinv3, tolerance = 1e-5)  # numderiv vs lavaan
+```
+
+### Variability matrix
+
+```{r}
+# From plFA
+J1 <- with(fit1@external, computeVar(plFA, D)$J[idx_plFA2lav, idx_plFA2lav])
+J2 <- information_matrix(fit1, "first.order")
+
+expect_equal(J1, J2, tolerance = 1e-5)  # ucminf vs numderiv
+```
+
+## Session information
+
+```{r}
+sessioninfo::session_info()
+```
