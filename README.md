@@ -373,6 +373,29 @@ head(fitted(fit)$cov)  # model-implied covariance matrix for the UVs
 #> C1 -0.09686632
 ```
 
+And also plot from the `{semPlot}` package:
+
+``` r
+library(semPlot)
+
+grouplist <- list(
+  lat = c("opn", "con", "ext", "agr", "neu"),
+  man = rep(c("opn", "con", "ext", "agr", "neu"), each = 5)
+)
+
+# Define a named vector of colors for each group (latent factor)
+groupcols <- RColorBrewer::brewer.pal(5, "Set2") |>
+  rep(each = 5) |>
+  adjustcolor(alpha.f = 0.5)
+
+# Now call semPaths
+semPaths(fit, whatLabels = "est", layout = "circle", residuals = FALSE, 
+         intercept = FALSE, groups = grouplist, color = groupcols, 
+         legend = FALSE)
+```
+
+<img src="man/figures/README-fig-bfi-1.png" width="100%" />
+
 ## Session information
 
 ``` r
@@ -392,38 +415,84 @@ sessioninfo::session_info()
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
 #>  package      * version    date (UTC) lib source
+#>  abind          1.4-8      2024-09-12 [1] CRAN (R 4.4.1)
+#>  arm            1.14-4     2024-04-01 [1] CRAN (R 4.4.0)
+#>  backports      1.5.0      2024-05-23 [1] CRAN (R 4.4.0)
+#>  base64enc      0.1-3      2015-07-28 [1] CRAN (R 4.4.0)
+#>  boot           1.3-31     2024-08-28 [1] CRAN (R 4.4.1)
+#>  carData        3.0-5      2022-01-06 [1] CRAN (R 4.4.0)
+#>  checkmate      2.3.2      2024-07-29 [1] CRAN (R 4.4.0)
 #>  cli            3.6.3      2024-06-21 [1] CRAN (R 4.4.0)
+#>  cluster        2.1.8      2024-12-11 [1] CRAN (R 4.4.1)
+#>  coda           0.19-4.1   2024-01-31 [1] CRAN (R 4.4.0)
 #>  colorspace     2.1-1      2024-07-26 [1] CRAN (R 4.4.0)
+#>  corpcor        1.6.10     2021-09-16 [1] CRAN (R 4.4.0)
+#>  data.table     1.16.4     2024-12-06 [1] CRAN (R 4.4.1)
 #>  digest         0.6.37     2024-08-19 [1] CRAN (R 4.4.1)
 #>  dplyr          1.1.4      2023-11-17 [1] CRAN (R 4.4.0)
 #>  evaluate       1.0.3      2025-01-10 [1] CRAN (R 4.4.1)
 #>  fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.4.0)
+#>  fdrtool        1.2.18     2024-08-20 [1] CRAN (R 4.4.1)
+#>  foreign        0.8-87     2024-06-26 [1] CRAN (R 4.4.0)
+#>  Formula        1.2-5      2023-02-24 [1] CRAN (R 4.4.0)
 #>  generics       0.1.3      2022-07-05 [1] CRAN (R 4.4.0)
 #>  ggplot2        3.5.1      2024-04-23 [1] CRAN (R 4.4.0)
+#>  glasso         1.11       2019-10-01 [1] CRAN (R 4.4.0)
 #>  glue           1.8.0      2024-09-30 [1] CRAN (R 4.4.1)
+#>  gridExtra      2.3        2017-09-09 [1] CRAN (R 4.4.0)
 #>  gtable         0.3.6      2024-10-25 [1] CRAN (R 4.4.1)
+#>  gtools         3.9.5      2023-11-20 [1] CRAN (R 4.4.0)
+#>  Hmisc          5.2-1      2024-12-02 [1] CRAN (R 4.4.1)
+#>  htmlTable      2.4.3      2024-07-21 [1] CRAN (R 4.4.0)
 #>  htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.4.0)
+#>  htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.4.0)
+#>  igraph         2.1.2      2024-12-07 [1] CRAN (R 4.4.1)
+#>  jpeg           0.1-10     2022-11-29 [1] CRAN (R 4.4.0)
 #>  knitr          1.49       2024-11-08 [1] CRAN (R 4.4.1)
+#>  kutils         1.73       2023-09-17 [1] CRAN (R 4.4.0)
+#>  lattice        0.22-6     2024-03-20 [1] CRAN (R 4.4.1)
 #>  lavaan       * 0.6-19     2024-09-26 [1] CRAN (R 4.4.1)
 #>  lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.4.0)
+#>  lisrelToR      0.3        2024-02-07 [1] CRAN (R 4.4.0)
+#>  lme4           1.1-35.5   2024-07-03 [1] CRAN (R 4.4.0)
 #>  magrittr       2.0.3      2022-03-30 [1] CRAN (R 4.4.0)
+#>  MASS           7.3-61     2024-06-13 [1] CRAN (R 4.4.0)
+#>  Matrix         1.7-1      2024-10-18 [1] CRAN (R 4.4.1)
+#>  mi             1.1        2022-06-06 [1] CRAN (R 4.4.0)
+#>  minqa          1.2.8      2024-08-17 [1] CRAN (R 4.4.0)
 #>  mnormt         2.1.1      2022-09-26 [1] CRAN (R 4.4.0)
 #>  munsell        0.5.1      2024-04-01 [1] CRAN (R 4.4.0)
+#>  nlme           3.1-166    2024-08-14 [1] CRAN (R 4.4.0)
+#>  nloptr         2.1.1      2024-06-25 [1] CRAN (R 4.4.0)
+#>  nnet           7.3-19     2023-05-03 [1] CRAN (R 4.4.1)
 #>  numDeriv       2016.8-1.1 2019-06-06 [1] CRAN (R 4.4.0)
+#>  OpenMx         2.21.13    2024-10-19 [1] CRAN (R 4.4.1)
+#>  openxlsx       4.2.7.1    2024-09-20 [1] CRAN (R 4.4.1)
+#>  pbapply        1.7-2      2023-06-27 [1] CRAN (R 4.4.0)
 #>  pbivnorm       0.6.0      2015-01-23 [1] CRAN (R 4.4.0)
 #>  pillar         1.10.1     2025-01-07 [1] CRAN (R 4.4.1)
 #>  pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.4.0)
 #>  plFA         * 0.1.0      2025-02-06 [1] local
+#>  plyr           1.8.9      2023-10-02 [1] CRAN (R 4.4.0)
+#>  png            0.1-8      2022-11-29 [1] CRAN (R 4.4.0)
+#>  psych          2.4.6.26   2024-06-27 [1] CRAN (R 4.4.0)
+#>  qgraph         1.9.8      2023-11-03 [1] CRAN (R 4.4.0)
 #>  quadprog       1.5-8      2019-11-20 [1] CRAN (R 4.4.0)
 #>  R6             2.5.1      2021-08-19 [1] CRAN (R 4.4.0)
+#>  RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.4.0)
 #>  Rcpp           1.0.14     2025-01-12 [1] CRAN (R 4.4.1)
 #>  RcppClock      1.1        2021-11-06 [1] CRAN (R 4.4.0)
 #>  RcppEigen      0.3.4.0.2  2024-08-24 [1] CRAN (R 4.4.1)
 #>  RcppParallel   5.1.10     2025-01-24 [1] CRAN (R 4.4.1)
+#>  reshape2       1.4.4      2020-04-09 [1] CRAN (R 4.4.0)
 #>  rlang          1.1.5      2025-01-17 [1] CRAN (R 4.4.1)
 #>  rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.4.1)
+#>  rockchalk      1.8.157    2022-08-06 [1] CRAN (R 4.4.0)
+#>  rpart          4.1.23     2023-12-05 [1] CRAN (R 4.4.1)
 #>  rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.4.1)
 #>  scales         1.3.0      2023-11-28 [1] CRAN (R 4.4.0)
+#>  sem            3.1-16     2024-08-28 [1] CRAN (R 4.4.1)
+#>  semPlot      * 1.1.6      2022-08-10 [1] CRAN (R 4.4.0)
 #>  sessioninfo    1.2.2      2021-12-06 [1] CRAN (R 4.4.0)
 #>  stringi        1.8.4      2024-05-06 [1] CRAN (R 4.4.0)
 #>  stringr        1.5.1      2023-11-14 [1] CRAN (R 4.4.0)
@@ -433,7 +502,10 @@ sessioninfo::session_info()
 #>  utf8           1.2.4      2023-10-22 [1] CRAN (R 4.4.0)
 #>  vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.4.0)
 #>  xfun           0.50       2025-01-07 [1] CRAN (R 4.4.1)
+#>  XML            3.99-0.17  2024-06-25 [1] CRAN (R 4.4.0)
+#>  xtable         1.8-4      2019-04-21 [1] CRAN (R 4.4.0)
 #>  yaml           2.3.10     2024-07-26 [1] CRAN (R 4.4.0)
+#>  zip            2.3.1      2024-01-27 [1] CRAN (R 4.4.0)
 #> 
 #>  [1] /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/library
 #> 
