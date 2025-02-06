@@ -11,7 +11,7 @@ nthr <- sum(cat)-p
 ###############
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
-if(1){
+if(0){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- TRUE
@@ -125,7 +125,7 @@ if(1){
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
 #### with linear constraints on loadings
-if(1){
+if(0){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- TRUE
@@ -240,7 +240,7 @@ if(1){
 
 #### (STDLV=TRUE, CORRFLAG=TRUE) ####
 #### free correlation matrix but all latent variances fixed ######
-if(1){
+if(0){
   set.seed(123)
   stdlv <- TRUE
   corrflag <- TRUE
@@ -358,7 +358,7 @@ if(1){
 #### (STDLV=TRUE, CORRFLAG=TRUE) ####
 #### free correlation matrix but all latent variances fixed ######
 #### some variances specified by the user ####
-if(1){
+if(0){
   set.seed(123)
   stdlv <- TRUE
   corrflag <- TRUE
@@ -472,7 +472,7 @@ if(1){
 
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### no correlation matrix but all free latent variances ######
-if(1){
+if(0){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- FALSE

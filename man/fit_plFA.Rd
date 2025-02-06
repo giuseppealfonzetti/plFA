@@ -8,7 +8,7 @@ fit_plFA(
   DATA,
   CONSTR_LIST,
   METHOD = c("ucminf", "SA"),
-  INIT_METHOD = c("SA", "custom", "standard"),
+  INIT_METHOD = c("standard", "custom", "SA"),
   NCORES = 1,
   VALDATA = NULL,
   CONTROL = list(),
