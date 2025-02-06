@@ -68,6 +68,12 @@ Jamil</h4>
 
     
     
+<div class="section level2">
+<h2 id="limited-information-gof-tests">Limited information GOF tests<a class="anchor" aria-label="anchor" href="#limited-information-gof-tests"></a>
+</h2>
+<p>The <a href="https://github.com/haziqj/lavaan.bingof" class="external-link">lavaan.bingof</a> package provides a set of LIGOF
+tests for CFA models with binary data. Models estimated using the
+<a href="https://giuseppealfonzetti.github.io/plFA/">plFA</a> package are directly compatible.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://giuseppealfonzetti.github.io/plFA/">plFA</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Loading required package: <span style="color: #0000BB;">lavaan</span></span></span>
@@ -95,9 +101,9 @@ Jamil</h4>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 990 more rows</span></span></span>
 <span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="st">"eta =~ y1 + y2 + y3 + y4 + y5"</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfa.html">cfa</a></span><span class="op">(</span><span class="va">mod</span>, <span class="va">dat</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_true</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"plFAlavaan"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">expect_true</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits</a></span><span class="op">(</span><span class="va">fit</span>, <span class="st">"plFAlavaan"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
-<span><span class="co">#&gt;  call| tinytest::expect_true(inherits(fit, "plFAlavaan"))</span></span>
+<span><span class="co">#&gt;  call| expect_true(inherits(fit, "plFAlavaan"))</span></span>
 <span></span>
 <span><span class="co"># Test statistics</span></span>
 <span><span class="fu"><a href="https://haziqj.ml/lavaan.bingof/reference/all_tests.html" class="external-link">all_tests</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
@@ -110,68 +116,35 @@ Jamil</h4>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 1.86   3.63 Pearson,MM3  0.709      15    15</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 2.30   4.18 RSS,MM3      0.707      15    15</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 1.86   3.62 Multn,MM3    0.708      15    15</span></span></code></pre></div>
-<p>Most tests look fine, except the Wald and WaldDiag – both of which
-rely on the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Ω</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\Omega_2</annotation></semantics></math>
-matrix.
-<!-- This means either the $\Omega_2$ matrix or the fitted probabilities (or both!) are off.  -->
-Let’s do some checking.</p>
-<p>Check first the probabilities and proportions.</p>
+<p>As a comparison, we can look at the output from using the
+<code><a href="../reference/cfa.html">cfa()</a></code> function in the <a href="https://lavaan.ugent.be" class="external-link">lavaan</a> package.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">lavaan.bingof</span><span class="fu">::</span><span class="fu"><a href="https://haziqj.ml/lavaan.bingof/reference/get_uni_bi_moments.html" class="external-link">get_uni_bi_moments</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>  <span class="co"># plFA</span></span>
-<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu">lavaan.bingof</span><span class="fu">::</span><span class="fu"><a href="https://haziqj.ml/lavaan.bingof/reference/get_uni_bi_moments.html" class="external-link">get_uni_bi_moments</a></span><span class="op">(</span>  <span class="co"># lavaan</span></span>
-<span>  <span class="fu">lavaan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/cfa.html" class="external-link">cfa</a></span><span class="op">(</span><span class="va">mod</span>, <span class="va">dat</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="op">)</span>  </span>
-<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tolerance <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
-<span><span class="co">#&gt;  call| tinytest::expect_equal(x, y, tolerance = 1e-04)</span></span></code></pre></div>
-<p>Check the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>H</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">H^{-1}</annotation></semantics></math>
-matrix.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">Hinv1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/computeVar.html">computeVar</a></span><span class="op">(</span><span class="va">fit</span><span class="op">@</span><span class="va">external</span><span class="op">$</span><span class="va">plFA</span>, <span class="va">fit</span><span class="op">@</span><span class="va">external</span><span class="op">$</span><span class="va">D</span><span class="op">)</span><span class="op">$</span><span class="va">invH</span></span>
-<span><span class="va">Hinv2</span> <span class="op">&lt;-</span> <span class="fu">lavaan.bingof</span><span class="fu">:::</span><span class="fu">get_sensitivity_inv_mat</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">Hinv1</span>, <span class="va">Hinv2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
-<span><span class="co">#&gt;  call| tinytest::expect_equal(Hinv1, Hinv2)</span></span>
-<span><span class="co">#&gt;  diff| Mean relative difference: 1.61476</span></span>
-<span></span>
-<span><span class="co"># lavaan:::lav_model_hessian(</span></span>
-<span><span class="co">#     lavmodel = fit@Model,</span></span>
-<span><span class="co">#     lavsamplestats = fit@SampleStats,</span></span>
-<span><span class="co">#     lavdata = fit@Data,</span></span>
-<span><span class="co">#     lavoptions = fit@Options</span></span>
-<span><span class="co"># )</span></span></code></pre></div>
-<p>So both are off. I think we should check the PML fit using lavaan
-package first.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu">plFA</span><span class="fu">::</span><span class="fu"><a href="../reference/cfa.html">cfa</a></span><span class="op">(</span><span class="va">mod</span>, <span class="va">dat</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">fit2</span> <span class="op">&lt;-</span> <span class="fu">lavaan</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lavaan/man/cfa.html" class="external-link">cfa</a></span><span class="op">(</span><span class="va">mod</span>, <span class="va">dat</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span>, estimator <span class="op">=</span> <span class="st">"PML"</span><span class="op">)</span></span>
-<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Test equality of coefficients and standard errors</span></span>
+<span><span class="fu">expect_equal</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span>  </span>
 <span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
-<span><span class="co">#&gt;  call| tinytest::expect_equal(coef(fit1), coef(fit2), tolerance = 1e-05)</span></span>
-<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">@</span><span class="va">Fit</span><span class="op">@</span><span class="va">Sigma.hat</span>, <span class="va">fit2</span><span class="op">@</span><span class="va">Fit</span><span class="op">@</span><span class="va">Sigma.hat</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
-<span><span class="co">#&gt;  call| tinytest::expect_equal(fit1@Fit@Sigma.hat, fit2@Fit@Sigma.hat, </span></span>
-<span><span class="co">#&gt;  call| tolerance = 1e-05)</span></span></code></pre></div>
-<p>Test extracted lavaan stuff:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">lavaan.bingof</span><span class="fu">:::</span><span class="fu">extract_lavaan_info</span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span></span>
-<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu">lavaan.bingof</span><span class="fu">:::</span><span class="fu">extract_lavaan_info</span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span></span>
-<span><span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, tolerance <span class="op">=</span> <span class="fl">1e-4</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  call| expect_equal(coef(fit1), coef(fit2), tolerance = 1e-05)</span></span>
+<span><span class="fu">expect_equal</span><span class="op">(</span><span class="va">fit1</span><span class="op">@</span><span class="va">Fit</span><span class="op">@</span><span class="va">se</span>, <span class="va">fit2</span><span class="op">@</span><span class="va">Fit</span><span class="op">@</span><span class="va">se</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
-<span><span class="co">#&gt;  call| tinytest::expect_equal(x, y, tolerance = 1e-04)</span></span>
-<span><span class="co">#&gt;  diff| Component "lavoptions": Component "test": 1 string mismatch</span></span>
-<span><span class="co">#&gt;  diff| Component "lavoptions": Component "optim.method": 1 string mismatch</span></span>
-<span><span class="co">#&gt;  diff| Component "lavpartable": Component "se": Mean relative difference: 0.03419516</span></span></code></pre></div>
-<p>Differences in test statistic values.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Wald_test"</span>, <span class="st">"Wald_vcovf_test"</span>, <span class="st">"Wald_diag_test"</span>, <span class="st">"Pearson_test"</span>, <span class="st">"RSS_test"</span>, <span class="st">"Multn_test"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span>.f <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="co">#&gt;  call| expect_equal(fit1@Fit@se, fit2@Fit@se, tolerance = 1e-05)</span></span>
+<span><span class="co">#&gt;  diff| Mean relative difference: 0.03419516</span></span>
+<span></span>
+<span><span class="co"># Test equality of test statistics and p-values</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Wald_test"</span>,</span>
+<span>  <span class="st">"Wald_vcovf_test"</span>,</span>
+<span>  <span class="st">"Wald_diag_test"</span>,</span>
+<span>  <span class="st">"Pearson_test"</span>,</span>
+<span>  <span class="st">"RSS_test"</span>,</span>
+<span>  <span class="st">"Multn_test"</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span>.f <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">out1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="va">out2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="fu">tinytest</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/tinytest/man/expect_equal.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="va">out1</span>, <span class="va">out2</span>, tolerance <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span>
+<span>    <span class="fu">expect_equal</span><span class="op">(</span><span class="va">out1</span>, <span class="va">out2</span>, tolerance <span class="op">=</span> <span class="fl">5e-3</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $Wald_test</span></span>
 <span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
@@ -196,7 +169,188 @@ package first.</p>
 <span><span class="co">#&gt; $Multn_test</span></span>
 <span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
 <span><span class="co">#&gt;  call| .f(.x[[i]], ...)</span></span></code></pre></div>
-  </main>
+</div>
+<div class="section level2">
+<h2 id="testing-differences">Testing differences<a class="anchor" aria-label="anchor" href="#testing-differences"></a>
+</h2>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">information_matrix</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">fit</span>, <span class="va">type</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">lavargs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    lavmodel <span class="op">=</span> <span class="va">fit</span><span class="op">@</span><span class="va">Model</span>,</span>
+<span>    lavsamplestats <span class="op">=</span> <span class="va">fit</span><span class="op">@</span><span class="va">SampleStats</span>,</span>
+<span>    lavdata <span class="op">=</span> <span class="va">fit</span><span class="op">@</span><span class="va">Data</span>,</span>
+<span>    lavoptions <span class="op">=</span> <span class="va">fit</span><span class="op">@</span><span class="va">Options</span>,</span>
+<span>    lavcache <span class="op">=</span> <span class="va">fit</span><span class="op">@</span><span class="va">Cache</span>,</span>
+<span>    inverted <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"observed"</span><span class="op">)</span> </span>
+<span>    <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">"lav_model_information_observed"</span>, <span class="va">lavargs</span>, </span>
+<span>                   envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"lavaan"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"expected"</span><span class="op">)</span></span>
+<span>    <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">"lav_model_information_expected"</span>, <span class="va">lavargs</span>, </span>
+<span>                   envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"lavaan"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span><span class="va">type</span> <span class="op">==</span> <span class="st">"first.order"</span><span class="op">)</span></span>
+<span>    <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="st">"lav_model_information_firstorder"</span>, <span class="va">lavargs</span>, </span>
+<span>                   envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ns-internal.html" class="external-link">asNamespace</a></span><span class="op">(</span><span class="st">"lavaan"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw">else</span> <span class="kw"><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></span><span class="op">(</span><span class="st">"Invalid type"</span><span class="op">)</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="sensitivity-inverted-matrix">Sensitivity (inverted) matrix<a class="anchor" aria-label="anchor" href="#sensitivity-inverted-matrix"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># From plFA</span></span>
+<span><span class="va">Hinv1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">@</span><span class="va">external</span>, <span class="fu"><a href="../reference/computeVar.html">computeVar</a></span><span class="op">(</span><span class="va">plFA</span>, <span class="va">D</span><span class="op">)</span><span class="op">$</span><span class="va">invH</span><span class="op">[</span><span class="va">idx_plFA2lav</span>, <span class="va">idx_plFA2lav</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cfa.html">cfa</a></span><span class="op">(</span><span class="va">mod</span>, <span class="va">dat</span>, std.lv <span class="op">=</span> <span class="cn">TRUE</span>, estimator.args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>computevar_numderiv <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; - Computing frequencies...</span></span>
+<span><span class="co">#&gt; - Initialised at user-supplied values.</span></span>
+<span><span class="co">#&gt; - Optimising with ucminf...</span></span>
+<span><span class="co">#&gt; Done! (0 secs)</span></span>
+<span><span class="co">#&gt; - Computing H numerically...</span></span>
+<span><span class="co">#&gt; - Estimating J...</span></span>
+<span><span class="co">#&gt; - Computing the variances...</span></span>
+<span><span class="co">#&gt; Done! (0.02 secs)</span></span>
+<span><span class="va">Hinv2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">@</span><span class="va">external</span>, <span class="fu"><a href="../reference/computeVar.html">computeVar</a></span><span class="op">(</span><span class="va">plFA</span>, <span class="va">D</span><span class="op">)</span><span class="op">$</span><span class="va">invH</span><span class="op">[</span><span class="va">idx_plFA2lav</span>, <span class="va">idx_plFA2lav</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">Hinv3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="fu">information_matrix</span><span class="op">(</span><span class="va">fit1</span>, <span class="st">"observed"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">expect_equal</span><span class="op">(</span><span class="va">Hinv1</span>, <span class="va">Hinv2</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span>  <span class="co"># ucminf vs numderiv</span></span>
+<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| expect_equal(Hinv1, Hinv2, tolerance = 1e-05)</span></span>
+<span><span class="fu">expect_equal</span><span class="op">(</span><span class="va">Hinv1</span>, <span class="va">Hinv3</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span>  <span class="co"># ucminf vs lavaan</span></span>
+<span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| expect_equal(Hinv1, Hinv3, tolerance = 1e-05)</span></span>
+<span><span class="co">#&gt;  diff| Mean relative difference: 0.1720939</span></span>
+<span><span class="fu">expect_equal</span><span class="op">(</span><span class="va">Hinv2</span>, <span class="va">Hinv3</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span>  <span class="co"># numderiv vs lavaan</span></span>
+<span><span class="co">#&gt; ----- FAILED[data]: &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| expect_equal(Hinv2, Hinv3, tolerance = 1e-05)</span></span>
+<span><span class="co">#&gt;  diff| Mean relative difference: 0.1720939</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="variability-matrix">Variability matrix<a class="anchor" aria-label="anchor" href="#variability-matrix"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># From plFA</span></span>
+<span><span class="va">J1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/with.html" class="external-link">with</a></span><span class="op">(</span><span class="va">fit1</span><span class="op">@</span><span class="va">external</span>, <span class="fu"><a href="../reference/computeVar.html">computeVar</a></span><span class="op">(</span><span class="va">plFA</span>, <span class="va">D</span><span class="op">)</span><span class="op">$</span><span class="va">J</span><span class="op">[</span><span class="va">idx_plFA2lav</span>, <span class="va">idx_plFA2lav</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">J2</span> <span class="op">&lt;-</span> <span class="fu">information_matrix</span><span class="op">(</span><span class="va">fit1</span>, <span class="st">"first.order"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">expect_equal</span><span class="op">(</span><span class="va">J1</span>, <span class="va">J2</span>, tolerance <span class="op">=</span> <span class="fl">1e-5</span><span class="op">)</span>  <span class="co"># ucminf vs numderiv</span></span>
+<span><span class="co">#&gt; ----- PASSED      : &lt;--&gt;</span></span>
+<span><span class="co">#&gt;  call| expect_equal(J1, J2, tolerance = 1e-05)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
+</h2>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sessioninfo</span><span class="fu">::</span><span class="fu"><a href="https://sessioninfo.r-lib.org/reference/session_info.html" class="external-link">session_info</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;">─ Session info ───────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt;  <span style="color: #555555; font-style: italic;">setting </span> <span style="color: #555555; font-style: italic;">value</span></span></span>
+<span><span class="co">#&gt;  version  R version 4.4.2 (2024-10-31)</span></span>
+<span><span class="co">#&gt;  os       Ubuntu 24.04.1 LTS</span></span>
+<span><span class="co">#&gt;  system   x86_64, linux-gnu</span></span>
+<span><span class="co">#&gt;  ui       X11</span></span>
+<span><span class="co">#&gt;  language en</span></span>
+<span><span class="co">#&gt;  collate  C.UTF-8</span></span>
+<span><span class="co">#&gt;  ctype    C.UTF-8</span></span>
+<span><span class="co">#&gt;  tz       UTC</span></span>
+<span><span class="co">#&gt;  date     2025-02-06</span></span>
+<span><span class="co">#&gt;  pandoc   3.1.11 @ /opt/hostedtoolcache/pandoc/3.1.11/x64/ (via rmarkdown)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;">─ Packages ───────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt;  <span style="color: #555555; font-style: italic;">package      </span> <span style="color: #555555; font-style: italic;">*</span> <span style="color: #555555; font-style: italic;">version   </span> <span style="color: #555555; font-style: italic;">date (UTC)</span> <span style="color: #555555; font-style: italic;">lib</span> <span style="color: #555555; font-style: italic;">source</span></span></span>
+<span><span class="co">#&gt;  bslib           0.9.0      <span style="color: #555555;">2025-01-30</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  cachem          1.1.0      <span style="color: #555555;">2024-05-16</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  cli             3.6.3      <span style="color: #555555;">2024-06-21</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  codetools       0.2-20     <span style="color: #555555;">2024-03-31</span> <span style="color: #555555;">[3]</span> <span style="color: #555555;">CRAN (R 4.4.2)</span></span></span>
+<span><span class="co">#&gt;  colorspace      2.1-1      <span style="color: #555555;">2024-07-26</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  desc            1.4.3      <span style="color: #555555;">2023-12-10</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  digest          0.6.37     <span style="color: #555555;">2024-08-19</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  doSNOW          1.0.20     <span style="color: #555555;">2022-02-04</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  dplyr         * 1.1.4      <span style="color: #555555;">2023-11-17</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  evaluate        1.0.3      <span style="color: #555555;">2025-01-10</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  fastmap         1.2.0      <span style="color: #555555;">2024-05-15</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  forcats       * 1.0.0      <span style="color: #555555;">2023-01-29</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  foreach         1.5.2      <span style="color: #555555;">2022-02-02</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  fs              1.6.5      <span style="color: #555555;">2024-10-30</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  gbutils         0.5        <span style="color: #555555;">2022-05-27</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  generics        0.1.3      <span style="color: #555555;">2022-07-05</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  ggplot2       * 3.5.1      <span style="color: #555555;">2024-04-23</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  glue            1.8.0      <span style="color: #555555;">2024-09-30</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  gtable          0.3.6      <span style="color: #555555;">2024-10-25</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  gtools          3.9.5      <span style="color: #555555;">2023-11-20</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  hms             1.1.3      <span style="color: #555555;">2023-03-21</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  htmltools       0.5.8.1    <span style="color: #555555;">2024-04-04</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  iterators       1.0.14     <span style="color: #555555;">2022-02-05</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  jquerylib       0.1.4      <span style="color: #555555;">2021-04-26</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  jsonlite        1.8.9      <span style="color: #555555;">2024-09-20</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  kableExtra      1.4.0      <span style="color: #555555;">2024-01-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  knitr           1.49       <span style="color: #555555;">2024-11-08</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  lattice         0.22-6     <span style="color: #555555;">2024-03-20</span> <span style="color: #555555;">[3]</span> <span style="color: #555555;">CRAN (R 4.4.2)</span></span></span>
+<span><span class="co">#&gt;  lavaan        * 0.6-19     <span style="color: #555555;">2024-09-26</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  lavaan.bingof * <span style="color: #BB00BB; font-weight: bold;">0.1.2.9000</span> <span style="color: #555555;">2025-02-04</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">Github (haziqj/lavaan.bingof@0efe234)</span></span></span>
+<span><span class="co">#&gt;  lifecycle       1.0.4      <span style="color: #555555;">2023-11-07</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  lubridate     * 1.9.4      <span style="color: #555555;">2024-12-08</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  magrittr        2.0.3      <span style="color: #555555;">2022-03-30</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  MASS            7.3-61     <span style="color: #555555;">2024-06-13</span> <span style="color: #555555;">[3]</span> <span style="color: #555555;">CRAN (R 4.4.2)</span></span></span>
+<span><span class="co">#&gt;  Matrix          1.7-1      <span style="color: #555555;">2024-10-18</span> <span style="color: #555555;">[3]</span> <span style="color: #555555;">CRAN (R 4.4.2)</span></span></span>
+<span><span class="co">#&gt;  mcompanion      0.6        <span style="color: #555555;">2023-12-03</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  mnormt          2.1.1      <span style="color: #555555;">2022-09-26</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  munsell         0.5.1      <span style="color: #555555;">2024-04-01</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  mvnfast         0.2.8      <span style="color: #555555;">2023-02-23</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  numDeriv        <span style="color: #BB00BB; font-weight: bold;">2016.8-1.1</span> <span style="color: #555555;">2019-06-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  pbivnorm        0.6.0      <span style="color: #555555;">2015-01-23</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  pillar          1.10.1     <span style="color: #555555;">2025-01-07</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  pkgconfig       2.0.3      <span style="color: #555555;">2019-09-22</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  pkgdown         2.1.1      <span style="color: #555555;">2024-09-17</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">any (@2.1.1)</span></span></span>
+<span><span class="co">#&gt;  plFA          * 0.1.0      <span style="color: #555555;">2025-02-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">local</span></span></span>
+<span><span class="co">#&gt;  purrr         * 1.0.2      <span style="color: #555555;">2023-08-10</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  quadprog        1.5-8      <span style="color: #555555;">2019-11-20</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  R6              2.5.1      <span style="color: #555555;">2021-08-19</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  ragg            1.3.3      <span style="color: #555555;">2024-09-11</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  rbibutils       2.3        <span style="color: #555555;">2024-10-04</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  Rcpp            1.0.14     <span style="color: #555555;">2025-01-12</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  RcppClock       1.1        <span style="color: #555555;">2021-11-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  RcppEigen       0.3.4.0.2  <span style="color: #555555;">2024-08-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  RcppParallel    5.1.10     <span style="color: #555555;">2025-01-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  Rdpack          2.6.2      <span style="color: #555555;">2024-11-15</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  readr         * 2.1.5      <span style="color: #555555;">2024-01-10</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  rlang           1.1.5      <span style="color: #555555;">2025-01-17</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  rmarkdown       2.29       <span style="color: #555555;">2024-11-04</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  rstudioapi      0.17.1     <span style="color: #555555;">2024-10-22</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  sass            0.4.9      <span style="color: #555555;">2024-03-15</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  scales          1.3.0      <span style="color: #555555;">2023-11-28</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  sessioninfo     1.2.2      <span style="color: #555555;">2021-12-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">any (@1.2.2)</span></span></span>
+<span><span class="co">#&gt;  snow            0.4-4      <span style="color: #555555;">2021-10-27</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  stringi         1.8.4      <span style="color: #555555;">2024-05-06</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  stringr       * 1.5.1      <span style="color: #555555;">2023-11-14</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  svglite         2.1.3      <span style="color: #555555;">2023-12-08</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  systemfonts     1.2.1      <span style="color: #555555;">2025-01-20</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  textshaping     1.0.0      <span style="color: #555555;">2025-01-20</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  tibble        * 3.2.1      <span style="color: #555555;">2023-03-20</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  tidyr         * 1.3.1      <span style="color: #555555;">2024-01-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  tidyselect      1.2.1      <span style="color: #555555;">2024-03-11</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  tidyverse     * 2.0.0      <span style="color: #555555;">2023-02-22</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  timechange      0.3.0      <span style="color: #555555;">2024-01-18</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  tinytest      * 1.4.1      <span style="color: #555555;">2023-02-22</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  tzdb            0.4.0      <span style="color: #555555;">2023-05-12</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  ucminf          1.2.2      <span style="color: #555555;">2024-06-24</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  utf8            1.2.4      <span style="color: #555555;">2023-10-22</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  vctrs           0.6.5      <span style="color: #555555;">2023-12-01</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  viridisLite     0.4.2      <span style="color: #555555;">2023-05-02</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  withr           3.0.2      <span style="color: #555555;">2024-10-28</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  xfun            0.50       <span style="color: #555555;">2025-01-07</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  xml2            1.3.6      <span style="color: #555555;">2023-12-04</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt;  yaml            2.3.10     <span style="color: #555555;">2024-07-26</span> <span style="color: #555555;">[1]</span> <span style="color: #BB00BB; font-weight: bold;">RSPM</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #555555;"> [1] /home/runner/work/_temp/Library</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;"> [2] /opt/R/4.4.2/lib/R/site-library</span></span></span>
+<span><span class="co">#&gt; <span style="color: #555555;"> [3] /opt/R/4.4.2/lib/R/library</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB; font-weight: bold;">──────────────────────────────────────────────────────────────────────────────</span></span></span></code></pre></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
