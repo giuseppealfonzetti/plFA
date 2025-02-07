@@ -383,7 +383,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@vcov$vcov <- vcov
 
   # Change test slot
-  Options <- fit@Options
+  Options <- fit0@Options
   Options$optim.method <- "nlminb"  # hack to get no warnings from lavaan (ucminf not recognised.)
   fxval <- fx
   attr(fx, "fx.pml") <- fxval
