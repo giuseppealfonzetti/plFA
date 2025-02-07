@@ -395,16 +395,26 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
 
   fit0@test <- lavaan:::lav_model_test(
     lavoptions     = Options,
-    lavmodel       = fit@Model,
-    lavsamplestats = fit@SampleStats,
-    lavdata        = fit@Data,
-    lavpartable    = fit@ParTable,
-    lavcache       = fit@Cache,
-    lavimplied     = fit@implied,
-    lavh1          = fit@h1,
+    lavmodel       = fit0@Model,
+    lavsamplestats = fit0@SampleStats,
+    lavdata        = fit0@Data,
+    lavpartable    = fit0@ParTable,
+    lavcache       = fit0@Cache,
+    lavimplied     = fit0@implied,
+    lavh1          = fit0@h1,
     # x              = x,
     # VCOV           = VCOV,
-    lavloglik      = fit@loglik
+    lavloglik      = fit0@loglik
+  )
+
+  # Change baseline slot
+  fit0@baseline <- lavaan:::lav_lavaan_step15_baseline(
+    lavoptions = fit0@Options,
+    lavsamplestats = fit0@SampleStats,
+    lavdata = fit0@Data,
+    lavcache = fit0@Cache,
+    lavh1 = fit0@h1,
+    lavpartable = fit0@ParTable
   )
 
   # Include the entire output of fit_sem
