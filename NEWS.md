@@ -1,3 +1,7 @@
+# plFA (development version)
+
+* Add GOF tests.
+
 # plFA 0.1.0
 
 * This version stable enough for use, talk at Psychoco 2025 (Ghent).
