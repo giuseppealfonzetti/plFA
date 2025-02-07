@@ -123,8 +123,10 @@ cfa <- function(
         cli::cli_abort("Only 'robust.huber.white' is currently supported.")
       }
     }
-    lavargs$test <- "mean.var.adjusted"
     lavargs$se <- "robust.huber.white"
+    if (!("test" %in% names(lavargs))) {
+      lavargs$test <- "mean.var.adjusted"
+    }
     fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
   } else{
     # In case user selects "DWLS" or "WLSMV", revert to lavaan::cfa()
