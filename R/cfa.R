@@ -123,6 +123,7 @@ cfa <- function(
         cli::cli_abort("Only 'robust.huber.white' is currently supported.")
       }
     }
+    lavargs$test <- "mean.var.adjusted"
     lavargs$se <- "robust.huber.white"
     fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
   } else{
@@ -363,7 +364,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@optim$x <- x
   # fit0@optim$dx <- 0
   fit0@optim$npar <- length(x)
-  fit0@optim$fx <- fit0@Fit@fx
+  fit0@optim$fx <- fx <- fit0@Fit@fx
   fit0@optim$fx.group <- fit0@Fit@fx.group
   fit0@optim$iterations <- fit0@Fit@iterations
   fit0@optim$converged <- fit0@Fit@converged
@@ -379,12 +380,32 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@loglik$BIC <- get_BIC(NLL = fit0@loglik$loglik, INVH = vars$invH, J = vars$J, N = n)
 
   # Change vcov slot
-  # fit0@vcov$se <- "robust.sem"
-  # fit0@vcov$information <- "expected"
   fit0@vcov$vcov <- vcov
 
-  # fit0@test <- fit_lav@test
-  # fit0@baseline <- fit_lav@baseline
+  # Change test slot
+  Options <- fit@Options
+  Options$optim.method <- "nlminb"  # hack to get no warnings from lavaan (ucminf not recognised.)
+  fxval <- fx
+  attr(fx, "fx.pml") <- fxval
+  attr(fx, "fx.group") <- fxval
+  attr(x, "fx") <- fx
+  VCOV <- vcov
+  attr(VCOV, "B0.group")[[1]] <- vars$J[idx_plFA2lav, idx_plFA2lav]
+  attr(VCOV, "E.inv") <- vars$invH[idx_plFA2lav, idx_plFA2lav]
+
+  fit0@test <- lavaan:::lav_model_test(
+    lavoptions     = Options,
+    lavmodel       = fit@Model,
+    lavsamplestats = fit@SampleStats,
+    lavdata        = fit@Data,
+    lavpartable    = fit@ParTable,
+    lavcache       = fit@Cache,
+    lavimplied     = fit@implied,
+    lavh1          = fit@h1,
+    # x              = x,
+    # VCOV           = VCOV,
+    lavloglik      = fit@loglik
+  )
 
   # Include the entire output of fit_sem
   fit0@external <- list(plFA = fit1, vars = vars, D = D, idx_plFA2lav = idx_plFA2lav)

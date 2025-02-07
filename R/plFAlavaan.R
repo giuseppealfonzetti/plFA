@@ -25,16 +25,18 @@ print_stuff <- function(what, res) {
   cat(x)
 }
 
-setMethod("show", "plFAlavaan", function(object) {
-  print_before(object)
-  print_stuff("Total time", paste0(round(object@timing$total, 2), " s"))
-  cat("\n")
-  print_stuff(" - Data reduction", paste0(round(object@external$plFA@freqTime, 2), " s"))
-  cat("\n")
-  print_stuff(" - Optimization", paste0(round(object@external$plFA@RTime, 2), " s"))
-  cat("\n")
-  print_stuff(" - Computing variance", paste0(round(object@timing$vcov, 2), " s"))
-})
+# setMethod("show", "plFAlavaan", function(object) {
+#   print_before(object)
+#   print_stuff("Total time", paste0(round(object@timing$total, 2), " s"))
+#   cat("\n")
+#   print_stuff(" - Data reduction", paste0(round(object@external$plFA@freqTime, 2), " s"))
+#   cat("\n")
+#   print_stuff(" - Optimization", paste0(round(object@external$plFA@RTime, 2), " s"))
+#   cat("\n")
+#   print_stuff(" - Computing variance", paste0(round(object@timing$vcov, 2), " s"))
+# })
+
+setMethod("show", "plFAlavaan", print_before)
 
 setMethod("summary", "plFAlavaan", print_before)
 
