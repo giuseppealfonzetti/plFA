@@ -125,7 +125,7 @@ cfa <- function(
     }
     lavargs$se <- "robust.huber.white"
     if (!("test" %in% names(lavargs))) {
-      lavargs$test <- "mean.var.adjusted"
+      lavargs$test <- "none"
     }
     fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
   } else{
