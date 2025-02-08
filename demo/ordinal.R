@@ -6,6 +6,17 @@ mod <- "
   ext =~ E1 + E2 + E3 + E4 + E5  # Extraversion
   agr =~ A1 + A2 + A3 + A4 + A5  # Agreeableness
   neu =~ N1 + N2 + N3 + N4 + N5  # Neuroticism
+
+  # opn ~~ 0*con
+  # opn ~~ 0*ext
+  # opn ~~ 0*agr
+  # opn ~~ 0*neu
+  # con ~~ 0*ext
+  # con ~~ 0*agr
+  # con ~~ 0*neu
+  # ext ~~ 0*agr
+  # ext ~~ 0*neu
+  # agr ~~ 0*neu
 "
 fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "none", verbose = TRUE,
            estimator.args = list(computevar_numderiv = TRUE))

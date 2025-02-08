@@ -280,6 +280,9 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     }
 
     Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
+    end_time <- Sys.time()
+    totaltime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+    if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
   }else{
     if(is.null(INVHAPPRX)){
       if (isTRUE(VERBOSE)) message('- Estimating H...')
@@ -315,7 +318,9 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     NCORR       = NCORR,
     NVAR        = NVAR
   )$est_J
-
+  end_time <- Sys.time()
+  totaltime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+  if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
 
   invH <- INVHAPPRX
   if(is.null(INVHAPPRX)){
