@@ -356,9 +356,11 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   if (fit1@method == "ucminf") {
     fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
     fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
+    fit0@Fit@fx <- fit1@numFit$value
   } else if (fit1@method == "SA") {
     fit0@Fit@iterations <- as.integer(fit1@stoFit@last_iter)
     fit0@Fit@converged <- fit1@stoFit@convergence == 1L  # FIXME: Check!!
+    fit0@Fit@fx <- fit1@stoFit$value
   }
   fit0@Fit@Sigma.hat[[1]] <- Sigmay  # implied variance-covariance matrix for group 1!!
 
