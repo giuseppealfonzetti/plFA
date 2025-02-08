@@ -9,3 +9,23 @@ mod <- "
 "
 fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "none", verbose = TRUE)
 summary(fit)
+
+# tictoc::tic()
+# Hinv <- lavaan:::lav_model_information_observed(
+#   lavmodel =fit@Model,
+#   lavsamplestats = fit@SampleStats,
+#   lavdata = fit@Data,
+#   lavoptions = fit@Options,
+#   lavcache = fit@Cache,
+#   inverted = TRUE
+# )
+# tictoc::toc()
+# tictoc::tic()
+# J <- lavaan:::lav_model_information_firstorder(
+#   lavmodel =fit@Model,
+#   lavsamplestats = fit@SampleStats,
+#   lavdata = fit@Data,
+#   lavoptions = fit@Options,
+#   lavcache = fit@Cache
+# )
+# tictoc::toc()
