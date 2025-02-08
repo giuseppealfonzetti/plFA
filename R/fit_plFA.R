@@ -135,6 +135,22 @@ fit_plFA <- function(
   # Check Initialisation
   tmp@init <- check_init(INIT, tmp@freq, dims, constr_list, INIT_METHOD, VERBOSE, CPP_ARGS = CPP_CONTROL_INIT)
 
+  diag_inv_H <- rep(1,length(tmp@init))
+  if(INIT_METHOD=="plSA"){
+    diag_inv_H <- 1/DH(C_VEC = cat,
+                       A = constr_list$CONSTRMAT,
+                       CONSTRLOGSD= constr_list$CONSTRLOGSD,
+                       LLC = constr_list$LLL,
+                       THETA = theta,
+                       FREQ = f,
+                       N = n,
+                       CORRFLAG = corrflag,
+                       NTHR=nthr,
+                       NLOAD=nload,
+                       NCORR=ncorr,
+                       NVAR=nvar)
+  }
+
 
 
 
@@ -241,6 +257,7 @@ fit_plFA <- function(
                        CONSTRLOGSD = constr_list$CONSTRLOGSD,
                        LLC         = constr_list$LLC,
                        THETA_INIT  = tmp@init,
+                       DIH         = diag_inv_H,
                        NTHR        = dims$nthr,
                        NLOAD       = dims$nload,
                        NCORR       = dims$ncorr,

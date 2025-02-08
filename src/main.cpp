@@ -112,6 +112,7 @@ Rcpp::List cpp_plSA(
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
     const std::vector<std::vector<std::vector<double>>> LLC,
     Eigen::Map<Eigen::VectorXd> THETA_INIT,
+    Eigen::Map<Eigen::VectorXd> DIH,
     const int NTHR,
     const int NLOAD,
     const int NCORR,
@@ -318,23 +319,27 @@ Rcpp::List cpp_plSA(
       //   PARAMETERS UPDATE  //
       //////////////////////////
       if(t % CLOCK_WINDOW == 0) clock.tick("Update");
-      switch(SCHEDULE){
-      case 0:
-        stepsize *= pow(t+1, -STEP3);
-        break;
-      case 1:
-        stepsize *= STEP1 * pow(1 + STEP2*stepsize*(t+1), -STEP3);
-        break;
+      bool update = true;
+      while(update){
+        switch(SCHEDULE){
+        case 0:
+          stepsize *= pow(t+1, -STEP3);
+          break;
+        case 1:
+          stepsize *= STEP1 * pow(1 + STEP2*stepsize*(t+1), -STEP3);
+          break;
+        }
+
+
+        // iter_gradient.segment(0, NTHR) /=10;
+        iter_gradient.segment(NTHR, NLOAD) *= 5;
+        if(NCORR>0) iter_gradient.segment(NTHR+NLOAD, NCORR) *= 100;
+        if(NVAR>0)  iter_gradient.segment(NTHR+NLOAD+NCORR, NVAR) *= 5;
+        // iter_gradient =iter_gradient.array()*DIH.array();
+
+        theta -= stepsize * iter_gradient;
+        if(iter_gradient.allFinite()){update = false;}else{stepsize/=2;}
       }
-
-
-      // iter_gradient.segment(0, NTHR) /=10;
-      iter_gradient.segment(NTHR, NLOAD) *= 5;
-      if(NCORR>0) iter_gradient.segment(NTHR+NLOAD, NCORR) *= 100;
-      if(NVAR>0)  iter_gradient.segment(NTHR+NLOAD+NCORR, NVAR) *= 5;
-
-
-      theta -= stepsize * iter_gradient;
       if(t % CLOCK_WINDOW == 0) clock.tock("Update");
 
       ////////////////////////////////////////////////
