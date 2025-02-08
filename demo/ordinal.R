@@ -7,7 +7,8 @@ mod <- "
   agr =~ A1 + A2 + A3 + A4 + A5  # Agreeableness
   neu =~ N1 + N2 + N3 + N4 + N5  # Neuroticism
 "
-fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "none", verbose = TRUE)
+fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "none", verbose = TRUE,
+           estimator.args = list(computevar_numderiv = TRUE))
 summary(fit)
 
 # tictoc::tic()

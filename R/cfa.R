@@ -397,7 +397,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   attr(VCOV, "B0.group")[[1]] <- vars$J[idx_plFA2lav, idx_plFA2lav]
   attr(VCOV, "E.inv") <- vars$invH[idx_plFA2lav, idx_plFA2lav]
 
-  fit0@test <- lavaan:::lav_model_test(
+  fit0@test <- lavaan___lav_model_test(
     lavoptions     = Options,
     lavmodel       = fit0@Model,
     lavsamplestats = fit0@SampleStats,
@@ -412,7 +412,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   )
 
   # Change baseline slot
-  fit0@baseline <- lavaan:::lav_lavaan_step15_baseline(
+  fit0@baseline <- lavaan___lav_lavaan_step15_baseline(
     lavoptions = fit0@Options,
     lavsamplestats = fit0@SampleStats,
     lavdata = fit0@Data,
@@ -427,3 +427,8 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0
 }
 
+# Export lavaan functions
+lavaan___lav_lavaan_step15_baseline <-
+  utils::getFromNamespace("lav_lavaan_step15_baseline", "lavaan")
+lavaan___lav_model_test <-
+  utils::getFromNamespace("lav_model_test", "lavaan")
