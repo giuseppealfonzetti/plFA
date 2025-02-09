@@ -318,7 +318,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
 
   invH <- INVHAPPRX
-  if(is.null(INVHAPPRX)){
+  if(NUMDERIV | is.null(INVHAPPRX)){
     if (isTRUE(VERBOSE)) message('- Inverting H...')
     if(!(det(Hhat)>0)) stop('H not invertible.')
     invH <- solve(Hhat)
