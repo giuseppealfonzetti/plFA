@@ -124,6 +124,9 @@ cfa <- function(
       }
     }
     lavargs$se <- "robust.huber.white"
+    if (!("test" %in% names(lavargs))) {
+      lavargs$test <- "none"
+    }
     fit0 <- do.call(get("cfa", envir = asNamespace("lavaan")), lavargs)
   } else{
     # In case user selects "DWLS" or "WLSMV", revert to lavaan::cfa()
@@ -353,9 +356,11 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   if (fit1@method == "ucminf") {
     fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
     fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
+    fit0@Fit@fx <- fit1@numFit$value
   } else if (fit1@method == "SA") {
     fit0@Fit@iterations <- as.integer(fit1@stoFit@last_iter)
     fit0@Fit@converged <- fit1@stoFit@convergence == 1L  # FIXME: Check!!
+    fit0@Fit@fx <- fit1@stoFit$value
   }
   fit0@Fit@Sigma.hat[[1]] <- Sigmay  # implied variance-covariance matrix for group 1!!
 
@@ -363,7 +368,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@optim$x <- x
   # fit0@optim$dx <- 0
   fit0@optim$npar <- length(x)
-  fit0@optim$fx <- fit0@Fit@fx
+  fit0@optim$fx <- fx <- fit0@Fit@fx
   fit0@optim$fx.group <- fit0@Fit@fx.group
   fit0@optim$iterations <- fit0@Fit@iterations
   fit0@optim$converged <- fit0@Fit@converged
@@ -379,12 +384,42 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@loglik$BIC <- get_BIC(NLL = fit0@loglik$loglik, INVH = vars$invH, J = vars$J, N = n)
 
   # Change vcov slot
-  # fit0@vcov$se <- "robust.sem"
-  # fit0@vcov$information <- "expected"
   fit0@vcov$vcov <- vcov
 
-  # fit0@test <- fit_lav@test
-  # fit0@baseline <- fit_lav@baseline
+  # Change test slot
+  Options <- fit0@Options
+  Options$optim.method <- "nlminb"  # hack to get no warnings from lavaan (ucminf not recognised.)
+  fxval <- fx
+  attr(fx, "fx.pml") <- fxval
+  attr(fx, "fx.group") <- fxval
+  attr(x, "fx") <- fx
+  VCOV <- vcov
+  attr(VCOV, "B0.group")[[1]] <- vars$J[idx_plFA2lav, idx_plFA2lav]
+  attr(VCOV, "E.inv") <- vars$invH[idx_plFA2lav, idx_plFA2lav]
+
+  fit0@test <- lavaan___lav_model_test(
+    lavoptions     = Options,
+    lavmodel       = fit0@Model,
+    lavsamplestats = fit0@SampleStats,
+    lavdata        = fit0@Data,
+    lavpartable    = fit0@ParTable,
+    lavcache       = fit0@Cache,
+    lavimplied     = fit0@implied,
+    lavh1          = fit0@h1,
+    # x              = x,
+    # VCOV           = VCOV,
+    lavloglik      = fit0@loglik
+  )
+
+  # Change baseline slot
+  fit0@baseline <- lavaan___lav_lavaan_step15_baseline(
+    lavoptions = fit0@Options,
+    lavsamplestats = fit0@SampleStats,
+    lavdata = fit0@Data,
+    lavcache = fit0@Cache,
+    lavh1 = fit0@h1,
+    lavpartable = fit0@ParTable
+  )
 
   # Include the entire output of fit_sem
   fit0@external <- list(plFA = fit1, vars = vars, D = D, idx_plFA2lav = idx_plFA2lav)
@@ -392,3 +427,8 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0
 }
 
+# Export lavaan functions
+lavaan___lav_lavaan_step15_baseline <-
+  utils::getFromNamespace("lav_lavaan_step15_baseline", "lavaan")
+lavaan___lav_model_test <-
+  utils::getFromNamespace("lav_model_test", "lavaan")
