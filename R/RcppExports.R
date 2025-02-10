@@ -93,8 +93,8 @@ cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, L
     .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }
 
-cpp_plSA <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, NTHR, NLOAD, NCORR, NVAR, SAMPLER, PAIRS_PER_ITERATION, SCHEDULE, STEP0, STEP1, STEP2, STEP3, BURN, MAXT, TOL_WINDOW, TOL_NLL, CHECK_TOL, CHECK_WINDOW, PATH_WINDOW, CLOCK_WINDOW, SEED, VERBOSE) {
-    .Call(`_plFA_cpp_plSA`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, NTHR, NLOAD, NCORR, NVAR, SAMPLER, PAIRS_PER_ITERATION, SCHEDULE, STEP0, STEP1, STEP2, STEP3, BURN, MAXT, TOL_WINDOW, TOL_NLL, CHECK_TOL, CHECK_WINDOW, PATH_WINDOW, CLOCK_WINDOW, SEED, VERBOSE)
+cpp_plSA2 <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER = FALSE) {
+    .Call(`_plFA_cpp_plSA2`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER)
 }
 
 #' Estimate of H
@@ -140,5 +140,28 @@ estimate_H <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTH
 #'
 estimate_J <- function(Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
     .Call(`_plFA_estimate_J`, Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+}
+
+#' Estimate Diagonal of H
+#'
+#' @description
+#' Compute a sample estimate of the expected negative Hessian by taking
+#' advantage of the second Bartlett's identity at the single pair level
+#'
+#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
+#' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param THETA Parameter vector
+#' @param FREQ output from [pairs_freq()]
+#' @param N sample size
+#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param NTHR Number of thresholds parameters.
+#' @param NLOAD Number of free loadings parameters
+#' @param NCORR Number of free latent correlations parameters.
+#' @param NVAR Number of free latent variance parameters.
+#'
+cpp_DH <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_plFA_cpp_DH`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 

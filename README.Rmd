@@ -71,7 +71,7 @@ The call to the `cfa()` function is made as usual:
 
 ```{r}
 # Fit the model (note, this cfa() function is from the plFA package)
-fit <- cfa(model = mod, data = bfi, std.lv = TRUE)
+fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "mean.var.adjusted")
 summary(fit)
 ```
 

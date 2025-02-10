@@ -36,7 +36,7 @@ library(plFA)
 #> This is lavaan 0.6-19
 #> lavaan is FREE software! Please report any bugs.
 #> 
-#> ── Conflicts ───────────────────────────────────────────────────── plFA 0.1.0 ──
+#> ── Conflicts ──────────────────────────────────────────────── plFA 0.1.0.9002 ──
 #> ✖ plFA::cfa() masks lavaan::cfa()
 ```
 
@@ -87,9 +87,9 @@ Users of `{lavaan}` will be familiar with this syntax. The call to the
 
 ``` r
 # Fit the model (note, this cfa() function is from the plFA package)
-fit <- cfa(model = mod, data = bfi, std.lv = TRUE)
+fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "mean.var.adjusted")
 summary(fit)
-#> plFA 0.1.0 
+#> plFA 0.1.0.9002 
 #>   ⨉
 #> lavaan 0.6-19 ended normally after 98 iterations
 #> 
@@ -99,6 +99,13 @@ summary(fit)
 #> 
 #>   Number of observations                          2236
 #> 
+#> Model Test User Model:
+#>                                               Standard      Scaled
+#>   Test Statistic                              4584.031    7205.822
+#>   Degrees of freedom                               265     333.065
+#>   P-value (Unknown)                                 NA       0.000
+#>   Scaling correction factor                                  0.636
+#>     mean+var adjusted correction (PML)                            
 #> 
 #> Parameter Estimates:
 #> 
@@ -410,7 +417,7 @@ sessioninfo::session_info()
 #>  collate  en_US.UTF-8
 #>  ctype    en_US.UTF-8
 #>  tz       Asia/Brunei
-#>  date     2025-02-06
+#>  date     2025-02-08
 #>  pandoc   3.2 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64/ (via rmarkdown)
 #> 
 #> ─ Packages ───────────────────────────────────────────────────────────────────
@@ -472,7 +479,7 @@ sessioninfo::session_info()
 #>  pbivnorm       0.6.0      2015-01-23 [1] CRAN (R 4.4.0)
 #>  pillar         1.10.1     2025-01-07 [1] CRAN (R 4.4.1)
 #>  pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.4.0)
-#>  plFA         * 0.1.0      2025-02-06 [1] local
+#>  plFA         * 0.1.0.9002 2025-02-08 [1] local
 #>  plyr           1.8.9      2023-10-02 [1] CRAN (R 4.4.0)
 #>  png            0.1-8      2022-11-29 [1] CRAN (R 4.4.0)
 #>  psych          2.4.6.26   2024-06-27 [1] CRAN (R 4.4.0)

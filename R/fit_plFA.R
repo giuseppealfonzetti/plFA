@@ -82,13 +82,14 @@ fit_plFA <- function(
   dat <- check_data(DATA)
   constr_list <- check_cnstr(CONSTR_LIST)
   METHOD <- match.arg(METHOD)
-  if (.Platform$OS.type == "windows" & METHOD=="SA"){
-    warning("METHOD='SA' not available on Windows yet. METHOD set to 'ucminf'.")
-    METHOD <- "ucminf"
-  }
+  # if (.Platform$OS.type == "windows" & METHOD=="SA"){
+  #   warning("METHOD='SA' not available on Windows yet. METHOD set to 'ucminf'.")
+  #   METHOD <- "ucminf"
+  # }
 
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
+  if(METHOD=="SA" && dims$p<20) warning("METHOD='SA' not recommended with less than 20 items.")
   INIT_METHOD <- check_init_method(dims, INIT_METHOD, INIT)
 
   tmp <- new('PlFaFit',
@@ -134,6 +135,22 @@ fit_plFA <- function(
 
   # Check Initialisation
   tmp@init <- check_init(INIT, tmp@freq, dims, constr_list, INIT_METHOD, VERBOSE, CPP_ARGS = CPP_CONTROL_INIT)
+
+  diag_inv_H <- rep(1,length(tmp@init))
+  # if(INIT_METHOD=="plSA"){
+  #   diag_inv_H <- 1/DH(C_VEC = cat,
+  #                      A = constr_list$CONSTRMAT,
+  #                      CONSTRLOGSD= constr_list$CONSTRLOGSD,
+  #                      LLC        = constr_list$LLL,
+  #                      THETA      = tmp@init,
+  #                      FREQ       = tmp@freq,
+  #                      N          = dims$n,
+  #                      CORRFLAG   = constr_list$CORRFLAG,
+  #                      NTHR       = dims$nthr,
+  #                      NLOAD      = dims$nload,
+  #                      NCORR      = dims$ncorr,
+  #                      NVAR       = dims$nvar,)
+  # }
 
 
 
@@ -241,6 +258,7 @@ fit_plFA <- function(
                        CONSTRLOGSD = constr_list$CONSTRLOGSD,
                        LLC         = constr_list$LLC,
                        THETA_INIT  = tmp@init,
+                       DIH         = diag_inv_H,
                        NTHR        = dims$nthr,
                        NLOAD       = dims$nload,
                        NCORR       = dims$ncorr,
@@ -248,25 +266,34 @@ fit_plFA <- function(
     ), sa_args)
     sa_args$VERBOSE <- VERBOSE
 
-    opt <- do.call(cpp_plSA, sa_args)
+    opt <- do.call(cpp_plSA2, sa_args)
     end_time <- Sys.time()
     tmp@RTime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
 
-    if(!opt$convergence_burn) warning(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_NLL*10, ". Stopped at ", sa_args$BURN, " iterations. Try increasing BURN or STEP0."))
-    if(opt$proj_after_burn)   warning("Projections performed after the burn-in. Trajectories might be unstable.")
-    if(opt$convergence==0)    warning(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_NLL, ". Stopped at ", sa_args$MAXT, " iterations. Try increasing MAXT or STEP0.."))
-    if(opt$convergence==-1)   warning(paste0("Divergent trajectories. Decrease STEP0."))
-    if(opt$neg_pdiff)         warning("Possible divergent trajectories detected. Try decreasing STEP0.")
+    converge <- new("Convergence")
+    converge@convergence_full <- opt$convergence_full
+    converge@convergence_burn <- opt$convergence_burn
+    converge@proj_after_burn  <- opt$proj_after_burn
+    converge@finite_gr        <- opt$finite_gr
+    converge@neg_pdiff        <- opt$neg_pdiff
 
 
+    if(!opt$convergence_burn)    warning(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_BURN, ". Stopped at ", sa_args$BURN, " iterations. Try increasing BURNE or STEP0."))
+    if(opt$proj_after_burn)      warning("Projections performed after the burn-in. Trajectories might be unstable. Check trajectories visually and evaluate decreasing STEP0.")
+    if(opt$convergence_full==0)  warning(paste0("Algorithm ended before reaching tolerance level ", sa_args$TOL_END, ". Stopped at ", sa_args$MAXE, " iterations. Try increasing MAXE or STEP0."))
+    if(opt$convergence_full==-1) warning(paste0("Stopped because of divergent trajectories. Decrease STEP0."))
+    if(!opt$finite_gr)           warning(paste0("The algorithm automatically dealt with divergent trajectories. Check trajectories visually and evaluate decreasing STEP0."))
+    if(opt$neg_pdiff)            warning("Possible divergent trajectories detected monitoring the full negative pairwise likelihood. Check trajectories visually and evaluate decreasing STEP0.")
+
+
+    stoFit@convergence  <- converge
     stoFit@path$iters   <- opt$path_iters
     stoFit@path$theta   <- opt$path_theta
     stoFit@path$avtheta <- opt$path_avtheta
     stoFit@path$nll     <- opt$path_nll
     stoFit@nll          <- opt$nll
     stoFit@last_iter    <- opt$last_iter
-    stoFit@convergence  <- opt$convergence
-    stoFit@cppTime      <- summary(clock, units = 's')
+    stoFit@burnt        <- opt$burnt
     tmp@stoFit          <- stoFit
     tmp@theta           <- opt$avtheta
 

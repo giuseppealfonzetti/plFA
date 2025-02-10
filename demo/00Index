@@ -1,2 +1,3 @@
-binary    Fitting LSAT data using PML estimation
-ordinal   Fitting bfi data using PML estimation		
+binary      Fitting LSAT data using PML estimation
+ordinal     Fitting bfi data using PML estimation
+multigroup  Multigroup cfa
