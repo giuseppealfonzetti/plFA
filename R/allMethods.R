@@ -195,6 +195,9 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
                         VERBOSE = FALSE){
 
   start_time <- Sys.time()
+
+
+  # Get jacobian of reparameterisation
   Rwr_getPar <- function(x){
     getPar(OBJ         = x,
            OPTION      = "transformed",
@@ -208,6 +211,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
   }
   trJacob <- numDeriv::jacobian(Rwr_getPar, x=THETA)
 
+  # Compute H if needed
   opt_noise <- NA
   Hhat <- NA
   if(NUMDERIV){
@@ -230,7 +234,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
         GRFLAG     = 1,
         SILENTFLAG = 1
       )
-      mod$iter_ngradient
+      mod$iter_ngradient/N
     }
 
     Hhat <- numDeriv::jacobian(Rwr_ngr, THETA)
@@ -277,14 +281,14 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
   if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
 
   invH <- INVHAPPRX
-  if(is.null(INVHAPPRX)){
+  if(NUMDERIV | is.null(INVHAPPRX)){
     if (isTRUE(VERBOSE)) message('- Inverting H...')
     if(!(det(Hhat)>0)) stop('H not invertible.')
     invH <- solve(Hhat)
   }
 
 
-  vcov <- invH %*% Jhat %*% invH
+  vcov <- trJacob %*% invH %*% Jhat %*% invH %*% t(trJacob)
 
   if (isTRUE(VERBOSE)) message('- Computing the variances...')
   if(METHOD =='ucminf'){
@@ -304,7 +308,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
     list(
       trJacob = trJacob,
       H = Hhat,
-      invH = invH,
+      invH = trJacob%*%invH,
       J = Jhat,
       vcov = vcov,
       asymptotic_variance = asy_var,
