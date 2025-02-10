@@ -231,9 +231,9 @@ check_init <- function(INIT, FREQ, DIMS, CONSTR_LIST, INIT_METHOD=c("SA", "custo
 check_init_method <- function(DIMS, INIT_METHOD = c("SA", "custom", "standard"), INIT =NULL){
   INIT_METHOD <- match.arg(INIT_METHOD)
   if(INIT_METHOD == "custom") INIT_METHOD <- "standard"
-  if (.Platform$OS.type == "windows" & INIT_METHOD=="SA"){
-    INIT_METHOD <- "standard"
-  }
+  # if (.Platform$OS.type == "windows" & INIT_METHOD=="SA"){
+  #   INIT_METHOD <- "standard"
+  # }
 
   if(INIT_METHOD=="SA"){
     if(DIMS$p<15)INIT_METHOD <- "standard"
