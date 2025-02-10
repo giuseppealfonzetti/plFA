@@ -196,7 +196,7 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   start_time <- Sys.time()
 
-
+  if (isTRUE(VERBOSE)) message('- Computing Delta...')
   # Get jacobian of reparameterisation
   Rwr_getPar <- function(x){
     getPar(OBJ         = x,
@@ -210,6 +210,9 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
            NVAR        = NVAR)
   }
   trJacob <- numDeriv::jacobian(Rwr_getPar, x=THETA)
+  end_time <- Sys.time()
+  totaltime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+  if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
 
   # Compute H if needed
   opt_noise <- NA
