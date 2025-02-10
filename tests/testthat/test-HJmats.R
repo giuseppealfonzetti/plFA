@@ -13,10 +13,11 @@ expect_equal(coef(fit1a), coef(fit2), tolerance = 1e-5)
 expect_equal(fit1a@optim$fx, fit2@optim$fx)
 # Not the same. I know in lavaan the pl function is divided by sample size for
 # numerical reasons. But still very different
+# G: I guess we differ only for some constant terms (non-parameter dependent). So it does not affect optimisation
 
 # Compare Hinv matrix
 Hinv1a <- with(fit1a@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
-Hinv1b <- with(fit1b@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+Hinv1b <- with(fit1b@external, computeVar(plFA, D, NUMDERIV = TRUE)$invH[idx_plFA2lav, idx_plFA2lav])
 Hinv2 <- lavaan:::lav_model_information_observed(
   lavmodel =fit2@Model,
   lavsamplestats = fit2@SampleStats,
