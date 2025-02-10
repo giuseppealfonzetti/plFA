@@ -318,9 +318,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// DH
-Eigen::VectorXd DH(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
-RcppExport SEXP _plFA_DH(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
+// cpp_DH
+Eigen::VectorXd cpp_DH(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
+RcppExport SEXP _plFA_cpp_DH(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -336,7 +336,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
     Rcpp::traits::input_parameter< const int >::type NCORR(NCORRSEXP);
     Rcpp::traits::input_parameter< const int >::type NVAR(NVARSEXP);
-    rcpp_result_gen = Rcpp::wrap(DH(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR));
+    rcpp_result_gen = Rcpp::wrap(cpp_DH(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -359,7 +359,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_cpp_plSA2", (DL_FUNC) &_plFA_cpp_plSA2, 28},
     {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 12},
     {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 11},
-    {"_plFA_DH", (DL_FUNC) &_plFA_DH, 12},
+    {"_plFA_cpp_DH", (DL_FUNC) &_plFA_cpp_DH, 12},
     {NULL, NULL, 0}
 };
 

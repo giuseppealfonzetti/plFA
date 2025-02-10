@@ -161,7 +161,7 @@ estimate_J <- function(Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLO
 #' @param NCORR Number of free latent correlations parameters.
 #' @param NVAR Number of free latent variance parameters.
 #'
-DH <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_plFA_DH`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+cpp_DH <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_plFA_cpp_DH`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 

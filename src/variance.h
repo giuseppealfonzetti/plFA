@@ -324,7 +324,7 @@ Rcpp::List estimate_J(
 //' @param NVAR Number of free latent variance parameters.
 //'
 // [[Rcpp::export]]
-Eigen::VectorXd DH(
+Eigen::VectorXd cpp_DH(
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> A,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
