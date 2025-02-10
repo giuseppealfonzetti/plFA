@@ -38,7 +38,10 @@ Suggests:
     sessioninfo,
     testthat (>= 3.0.0),
     tidyverse,
-    tinytest
+    tinytest,
+    dplyr,
+    tidyr,
+    ggplot2
 LinkingTo: 
     Rcpp,
     RcppClock,
