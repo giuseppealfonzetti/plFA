@@ -13,13 +13,20 @@ setClass('Dimensions', slots = c(n     = 'numeric',
                                  nvar  = 'numeric',
                                  npar  = 'numeric'))
 
+#' List of convergence diagnostics
+setClass('Convergence', slots = c(convergence_full  = 'numeric',
+                                  convergence_burn  = 'logical',
+                                  proj_after_burn   = 'logical',
+                                  finite_gr         = 'logical',
+                                  neg_pdiff         = 'logical'))
+
 #' Quantities specific for stochastic estimation
 setClass('StoFit', slots = c( path         = 'list',
                               nll          = "numeric",
                               control      = 'list',
-                              last_iter     = 'numeric',
-                              convergence  = 'numeric',
-                              cppTime      = 'ANY'))
+                              last_iter    = 'numeric',
+                              burnt        = 'numeric',
+                              convergence  = 'Convergence'))
 
 
 # Object returned by fit_plFA

@@ -30,22 +30,9 @@ init_transformed_latsd <- function(DIMS, CONSTR_LIST){
   rep(0, sum(is.na(CONSTR_LIST$CONSTRLOGSD)))
 }
 
-init_par_with_plSA <- function(DIMS, CONSTR_LIST, CPP_ARGS=NULL){
-  lambda0_init <- init_thresholds(DIMS, CONSTR_LIST)
-  lambda_init  <- init_loadings(DIMS, CONSTR_LIST)
-  transformed_rhos_init  <- init_transformed_latcorr(DIMS, CONSTR_LIST)
-  transformed_latsd_init <- init_transformed_latsd(DIMS, CONSTR_LIST)
-  start_par <- c(lambda0_init, lambda_init, transformed_rhos_init, transformed_latsd_init)
-  start_par <- cpp_sa_proj(THETA=start_par,
-                          CONSTRMAT=CONSTR_LIST$CONSTRMAT,
-                          CONSTRLOGSD=CONSTR_LIST$CONSTRLOGSD,
-                          LLC = CONSTR_LIST$LLC,
-                          C_VEC=DIMS$cat,
-                          CORRFLAG=CONSTR_LIST$CORRFLAG,
-                          NTHR=DIMS$nthr,
-                          NLOAD=DIMS$nload,
-                          NCORR=DIMS$ncorr,
-                          NVAR=DIMS$nvar)
+init_par_with_plSA <- function(DIMS, CONSTR_LIST, CPP_ARGS=NULL, INIT){
+
+  start_par <- INIT
 
   cpp_args <- c(list(N           = DIMS$n,
                      C_VEC       = DIMS$cat,
@@ -53,13 +40,14 @@ init_par_with_plSA <- function(DIMS, CONSTR_LIST, CPP_ARGS=NULL){
                      CONSTRLOGSD = CONSTR_LIST$CONSTRLOGSD,
                      LLC         = CONSTR_LIST$LLC,
                      THETA_INIT  = start_par,
+                     DIH         = rep(1, length(start_par)),
                      NTHR        = DIMS$nthr,
                      NLOAD       = DIMS$nload,
                      NCORR       = DIMS$ncorr,
                      NVAR        = DIMS$nvar
   ), CPP_ARGS)
 
-  sto_init <- do.call(cpp_plSA, cpp_args)
+  sto_init <- do.call(cpp_plSA2, cpp_args)
 
 
   return(sto_init$avtheta)

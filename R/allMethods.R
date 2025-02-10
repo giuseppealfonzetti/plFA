@@ -39,51 +39,6 @@ setMethod('show', 'PlFaFit', function(object){
   }
 })
 
-
-#' Extract parameters trajectory along the optimisation
-#'
-#' @param OBJ Object of class StoFit
-#' @param LAB Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.
-#' @param OPTION Parameterisation option.
-#'
-#' @export
-setGeneric('getThetaPath', function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed') standardGeneric('getThetaPath'))
-
-#' Extract parameters trajectory along the optimisation
-#'
-#' @param OBJ Object of class StoFit
-#' @param LAB Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.
-#' @param OPTION Parameterisation option.
-setMethod('getThetaPath', 'PlFaFit', function(OBJ, LAB, OPTION) extract_theta_path(OBJ, LAB, OPTION))
-
-#' Extract parameters trajectory along the optimisation
-#'
-#' @param OBJ Object of class FitPlFa
-#' @param LAB Can take values \code{pathTheta} for raw trajectories or \code{pathAvTheta} for averaged ones. Set by default at \code{pathAvTheta}.
-#' @param OPTION Parameterisation option.
-extract_theta_path <- function(OBJ, LAB = 'pathAvTheta', OPTION = 'transformed'){
-  # if(!(LAB%in%c('pathTheta', 'pathAvTheta'))) stop('The extraction of this path is not implemented.')
-  # if(!(OPTION%in%c('raw', 'transformed'))) stop('OPTION choice not implemented.')
-  #
-  # # out <- list()
-  # iters <- OBJ@stoFit@trajSubset
-  # path  <- slot(OBJ@stoFit, LAB)
-  #
-  # out <- dplyr::tibble(iter = iters)
-  # parList <- split(t(path), rep(1:nrow(path), each = ncol(path)))
-  # newParList <- lapply(parList, function(x) extract_par(THETA= x,
-  #                                           OPTION = OPTION,
-  #                                           C = sum(OBJ@dims@cat),
-  #                                           P = OBJ@dims@p,
-  #                                           Q = OBJ@dims@q,
-  #                                           CONSTRMAT = OBJ@cnstr@loadings,
-  #                                           CORRFLAG = OBJ@cnstr@corrflag))
-  #
-  # out$par <- newParList
-  return(NULL)
-}
-
-
 #' Extract parameters
 #'
 #' @param OBJ Object of class StoFit, PlFaFit. Also usable on raw theta vector to extract \code{'transformed'} and \code{'list'}.
@@ -234,7 +189,6 @@ setMethod('computeVar', 'PlFaFit',
           }}
 )
 
-#setMethod('computeVar', 'vector', function(OBJ, DATA, ...) compute_var(OBJ, DATA, ...))
 compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
                         CONSTRMAT, CONSTRLOGSD, LLC, NTHR, NLOAD, NCORR, NVAR,
                         FREQ, DATA, METHOD, NUMDERIV = F, INVHAPPRX=NULL,
@@ -368,3 +322,45 @@ get_AIC <- function(NLL, INVH, J){
 get_BIC <- function(NLL, INVH, J, N){
   return(2*NLL+sum(diag(J%*%INVH))*log(N))
 }
+
+
+#' @importFrom rlang .data
+setGeneric('plotTraj', function(OBJ) standardGeneric('plotTraj'))
+setMethod('plotTraj', 'PlFaFit', function(OBJ){
+
+  if(OBJ@method=="ucminf"){
+    warning('Trajectories not available for numerical fit.')
+    return(NULL)
+  }
+
+  if (!requireNamespace(c("dplyr", "tidyr", "purrr", "ggplot2"), quietly = TRUE)) {
+    warning('{dplyr}, {tidyr}, {purrr}, {ggplot2} must be installed to plot trajectories.\n
+            The trajectories list will be returned.')
+    return(list(iters=OBJ@stoFit@path$iters, theta=OBJ@stoFit@path$avtheta))
+  }
+
+  dplyr::tibble(iter=OBJ@stoFit@path$iters, theta=OBJ@stoFit@path$avtheta) |>
+    dplyr::mutate(theta=purrr::map(.data$theta, ~{dplyr::tibble( par=extract_par(
+      THETA=.x, OPTION = c('transformed'),
+      CONSTRMAT = OBJ@cnstr@loadings,
+      CONSTRLOGSD=OBJ@cnstr@loglatsd,
+      LLC=OBJ@cnstr@llc,
+      NTHR=OBJ@dims@nthr,
+      NLOAD=OBJ@dims@nload,
+      NCORR=OBJ@dims@ncorr,
+      NVAR=OBJ@dims@nvar),
+      id=1:length(.x),
+      type=c(rep("thresholds", OBJ@dims@nthr),
+             rep("loadings", OBJ@dims@nload),
+             rep("latent correlations", OBJ@dims@ncorr),
+             rep("latent variances", OBJ@dims@nvar)))})) |>
+    tidyr::unnest("theta") |>
+    ggplot2::ggplot(ggplot2::aes(x=.data$iter, y = .data$par, group = .data$id))+
+    ggplot2::facet_wrap(~.data$type) +
+    ggplot2::geom_vline(xintercept = OBJ@stoFit@burnt, linetype="dashed", col="lightgrey")+
+    ggplot2::geom_line() +
+    ggplot2::labs(x="Iterations", y="Estimates")+
+    ggplot2::theme_bw()
+
+})
+
