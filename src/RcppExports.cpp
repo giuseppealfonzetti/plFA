@@ -277,6 +277,44 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_plSA2
+Rcpp::List cpp_plSA2(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA_INIT, Eigen::Map<Eigen::VectorXd> DIH, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int PAIRS_PER_ITERATION, const double STEP0, const double STEP1, const double STEP2, const double STEP3, const int BURNE, const int MAXE, const int EPOCHS_PER_CHECK, const int MAX_TOL_COUNTER, const double TOL_BURN, const double TOL_END, const int CHECK_TOL, const int SEED, const bool VERBOSE, bool VERBOSE_ITER);
+RcppExport SEXP _plFA_cpp_plSA2(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETA_INITSEXP, SEXP DIHSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP STEP0SEXP, SEXP STEP1SEXP, SEXP STEP2SEXP, SEXP STEP3SEXP, SEXP BURNESEXP, SEXP MAXESEXP, SEXP EPOCHS_PER_CHECKSEXP, SEXP MAX_TOL_COUNTERSEXP, SEXP TOL_BURNSEXP, SEXP TOL_ENDSEXP, SEXP CHECK_TOLSEXP, SEXP SEEDSEXP, SEXP VERBOSESEXP, SEXP VERBOSE_ITERSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type VALFREQ(VALFREQSEXP);
+    Rcpp::traits::input_parameter< const int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type CONSTRLOGSD(CONSTRLOGSDSEXP);
+    Rcpp::traits::input_parameter< const std::vector<std::vector<std::vector<double>>> >::type LLC(LLCSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA_INIT(THETA_INITSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type DIH(DIHSEXP);
+    Rcpp::traits::input_parameter< const int >::type NTHR(NTHRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
+    Rcpp::traits::input_parameter< const int >::type NCORR(NCORRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NVAR(NVARSEXP);
+    Rcpp::traits::input_parameter< const int >::type PAIRS_PER_ITERATION(PAIRS_PER_ITERATIONSEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP0(STEP0SEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP1(STEP1SEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP2(STEP2SEXP);
+    Rcpp::traits::input_parameter< const double >::type STEP3(STEP3SEXP);
+    Rcpp::traits::input_parameter< const int >::type BURNE(BURNESEXP);
+    Rcpp::traits::input_parameter< const int >::type MAXE(MAXESEXP);
+    Rcpp::traits::input_parameter< const int >::type EPOCHS_PER_CHECK(EPOCHS_PER_CHECKSEXP);
+    Rcpp::traits::input_parameter< const int >::type MAX_TOL_COUNTER(MAX_TOL_COUNTERSEXP);
+    Rcpp::traits::input_parameter< const double >::type TOL_BURN(TOL_BURNSEXP);
+    Rcpp::traits::input_parameter< const double >::type TOL_END(TOL_ENDSEXP);
+    Rcpp::traits::input_parameter< const int >::type CHECK_TOL(CHECK_TOLSEXP);
+    Rcpp::traits::input_parameter< const int >::type SEED(SEEDSEXP);
+    Rcpp::traits::input_parameter< const bool >::type VERBOSE(VERBOSESEXP);
+    Rcpp::traits::input_parameter< bool >::type VERBOSE_ITER(VERBOSE_ITERSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_plSA2(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER));
+    return rcpp_result_gen;
+END_RCPP
+}
 // estimate_H
 Rcpp::List estimate_H(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
 RcppExport SEXP _plFA_estimate_H(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
@@ -359,6 +397,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
     {"_plFA_cpp_multiThread_completePairwise", (DL_FUNC) &_plFA_cpp_multiThread_completePairwise, 14},
     {"_plFA_cpp_plSA", (DL_FUNC) &_plFA_cpp_plSA, 30},
+    {"_plFA_cpp_plSA2", (DL_FUNC) &_plFA_cpp_plSA2, 28},
     {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 12},
     {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 11},
     {"_plFA_DH", (DL_FUNC) &_plFA_DH, 12},
