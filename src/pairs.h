@@ -39,13 +39,6 @@ namespace pairs{
     const int p = A.rows();
     const int q = A.cols();
 
-    // // rearrange parameters
-    // Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
-    // Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
-    // Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
-    // Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-    // Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
-
     // Identifies quantities related to pair (k,l)
     const int ck          = C_VEC(K);
     const int cl          = C_VEC(L);
@@ -53,12 +46,6 @@ namespace pairs{
     const Eigen::VectorXd lambdal  = LAM.row(L);
     const double rho_kl            = lambdak.transpose() * SIGMAU * lambdal;
 
-    // Rcpp::Rcout<<"LAM:\n"<<Lam<<"\n";
-    //
-    // Rcpp::Rcout<<"lambdak:"<<lambdak.transpose()<<"\n";
-    // Rcpp::Rcout<<"lambdal:"<<lambdal.transpose()<<"\n";
-    //
-    // Rcpp::Rcout<<"rho_kl:"<<rho_kl<<"\n";
     // Initialize pairs table
     Eigen::MatrixXd pairs_tab     = FREQ;
     pairs_tab.conservativeResize(FREQ.rows() + 1, Eigen::NoChange_t() );
@@ -376,13 +363,12 @@ namespace pairs{
 
       // computation of log-likelihood, gradient
       // rearrange parameters
-      const int p = constrmat.rows();
       const int q = constrmat.cols();
-      Eigen::MatrixXd Lam             = params::loadings::theta2mat(theta, constrmat, llc, nthr, nload);
-      Eigen::MatrixXd Ru              = params::latvar::theta2cmat(theta, nthr, nload, ncorr, nvar, q);
-      Eigen::MatrixXd Du              = params::latvar::theta2dmat(theta, constrsd, nthr, nload, ncorr, nvar, q);
-      Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-      Eigen::VectorXd tau             = params::thresholds::theta2vec(theta, nthr);
+      const Eigen::MatrixXd Lam             = params::loadings::theta2mat(theta, constrmat, llc, nthr, nload);
+      const Eigen::MatrixXd Ru              = params::latvar::theta2cmat(theta, nthr, nload, ncorr, nvar, q);
+      const Eigen::MatrixXd Du              = params::latvar::theta2dmat(theta, constrsd, nthr, nload, ncorr, nvar, q);
+      const Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+      const Eigen::VectorXd tau             = params::thresholds::theta2vec(theta, nthr);
       pair_contribution_extended(constrmat, constrsd, llc, c_vec, theta,
                                  Lam, Ru, Du, Sigma_u, tau,
                                  corrFLAG, nthr, nload, ncorr, nvar, k, l, pairs_table, silentFLAG, gradFLAG, pair_ll, pair_gradient);
