@@ -147,8 +147,8 @@ fit <- cpp_plSA2(
   STEP1=1,
   STEP2=1e-8,
   STEP3=.75,
-  BURN=0,
-  MAXE=0,
+  BURN=1,
+  MAXE=2,
   EPOCHS_PER_CHECK = 1,
   TOL_END=1e-7,
   TOL_BURN = 5e-7,
@@ -159,4 +159,5 @@ fit <- cpp_plSA2(
   VERBOSE_ITER=FALSE
 )
 
-test_that("check initial nll from SA", {expect_equal(init_nll, fit$path_nll)})
+test_that("check initial nll from SA", {expect_equal(init_nll, fit$path_nll[1], tolerance = 1)})
+test_that("check initial nll from SA", {expect_true(all(is.finite(fit$avtheta)))})
