@@ -89,6 +89,31 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
 #' @param SILENTFLAG optional for verbose output
 #'
+cpp_multiThread_completePairwise2 <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
+    .Call(`_plFA_cpp_multiThread_completePairwise2`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
+}
+
+#' Full pairwise iteration
+#'
+#' @description
+#' Evaluate negative log pairwise likelihood or gradient of the complete pool of pairs.
+#' Used by external optimisers. Multithreading options via `RcppParallel`.
+#'
+#' @param N Number of observations
+#' @param C_VEC Vector containing the number of categories for each item
+#' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
+#' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
+#' @param THETA Parameter vector
+#' @param FREQ Frequency table
+#' @param CORRFLAG TRUE to estimate latent correlations. 0 for orthogonal latent factors.
+#' @param NTHR Number of thresholds parameters.
+#' @param NLOAD Number of free loadings parameters
+#' @param NCORR Number of free latent correlations parameters.
+#' @param NVAR Number of free latent variance parameters.
+#' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
+#' @param SILENTFLAG optional for verbose output
+#'
 cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
     .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }

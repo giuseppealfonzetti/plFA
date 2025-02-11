@@ -287,13 +287,13 @@ check_plSA_args <- function(FREQ, VALFREQ=NULL, DIMS, CONSTR_LIST, LIST=NULL, SE
   if(is.null(LIST$BURNE) & (SETTING=="init")) LIST$BURNE <- 3
   if(is.null(LIST$BURNE) & (SETTING=="main")) LIST$BURNE <- 20
   stopifnot(is.numeric(LIST$BURNE))
-  stopifnot(LIST$BURNE>0)
+  stopifnot(LIST$BURNE>=0)
   out$BURNE <- as.integer(LIST$BURNE)
 
   if(is.null(LIST$MAXE) & SETTING=="init") LIST$MAXE <- 5
   if(is.null(LIST$MAXE) & SETTING=="main") LIST$MAXE <- 30
   stopifnot(is.numeric(LIST$MAXE))
-  stopifnot(LIST$MAXE>0)
+  stopifnot(LIST$MAXE>=0)
   out$MAXE <- as.integer(LIST$MAXE)
 
   if(is.null(LIST$MAX_TOL_COUNTER)) LIST$MAX_TOL_COUNTER <- 1

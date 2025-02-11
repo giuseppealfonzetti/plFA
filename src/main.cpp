@@ -13,6 +13,7 @@
 #include "pairs.h"
 #include "optimisationUtils.h"
 #include "variance.h"
+#include "fullPairwise.h"
 #include "exportedFuns.h"
 
 //' Full pairwise iteration
@@ -37,7 +38,7 @@
 //' @param SILENTFLAG optional for verbose output
 //'
 // [[Rcpp::export]]
-Rcpp::List cpp_multiThread_completePairwise(
+Rcpp::List cpp_multiThread_completePairwise2(
     const int N,
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
@@ -97,7 +98,67 @@ Rcpp::List cpp_multiThread_completePairwise(
   return(output);
 }
 
+//' Full pairwise iteration
+//'
+//' @description
+//' Evaluate negative log pairwise likelihood or gradient of the complete pool of pairs.
+//' Used by external optimisers. Multithreading options via `RcppParallel`.
+//'
+//' @param N Number of observations
+//' @param C_VEC Vector containing the number of categories for each item
+//' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
+//' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
+//' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
+//' @param THETA Parameter vector
+//' @param FREQ Frequency table
+//' @param CORRFLAG TRUE to estimate latent correlations. 0 for orthogonal latent factors.
+//' @param NTHR Number of thresholds parameters.
+//' @param NLOAD Number of free loadings parameters
+//' @param NCORR Number of free latent correlations parameters.
+//' @param NVAR Number of free latent variance parameters.
+//' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
+//' @param SILENTFLAG optional for verbose output
+//'
+// [[Rcpp::export]]
+Rcpp::List cpp_multiThread_completePairwise(
+    const int N,
+    Eigen::Map<Eigen::VectorXd> C_VEC,
+    Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+    Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const std::vector<std::vector<std::vector<double>>> LLC,
+    Eigen::Map<Eigen::VectorXd> THETA,
+    Eigen::Map<Eigen::MatrixXd> FREQ,
+    const int CORRFLAG,
+    const int NTHR,
+    const int NLOAD,
+    const int NCORR,
+    const int NVAR,
+    const int GRFLAG = 0,
+    const int SILENTFLAG = 1
+){
 
+
+
+  // output list
+  Rcpp::List output = fullPairwise::multiThreadContribution(
+    N,
+    C_VEC,
+    CONSTRMAT,
+    CONSTRLOGSD,
+    LLC,
+    THETA,
+    FREQ,
+    CORRFLAG,
+    NTHR,
+    NLOAD,
+    NCORR,
+    NVAR,
+    GRFLAG,
+    SILENTFLAG
+  );
+
+  return(output);
+}
 
 
 
@@ -480,7 +541,7 @@ Rcpp::List cpp_plSA2(
   Eigen::VectorXd thetapdiff = Eigen::VectorXd::Zero(d);
 
 
-  double          nll   = std::numeric_limits<double>::infinity();
+  // double          nll   = std::numeric_limits<double>::infinity();
   std::vector<Eigen::VectorXd> path_theta;
   std::vector<Eigen::VectorXd> path_avtheta;
   std::vector<Eigen::VectorXd> path_thetapdiff;
@@ -494,11 +555,28 @@ Rcpp::List cpp_plSA2(
   // COMPUTE START NLL  //
   ///////////////////////
   int maxtpe = pairs/PAIRS_PER_ITERATION;
-  pairs::SubsetWorker fullpool_worker(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, VALFREQ, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
-                                      1, 0, theta, full_pool);
-  RcppParallel::parallelReduce(0, pairs, fullpool_worker);
-  nll = 0.0;
-  nll = -fullpool_worker.subset_ll/n;
+  // pairs::SubsetWorker fullpool_worker(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, VALFREQ, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
+  //                                     1, 0, theta, full_pool);
+  // RcppParallel::parallelReduce(0, pairs, fullpool_worker);
+  // nll = 0.0;
+  // nll = -fullpool_worker.subset_ll/n;
+  double nll = fullPairwise::multiThreadContribution(
+    N,
+    C_VEC,
+    CONSTRMAT,
+    CONSTRLOGSD,
+    LLC,
+    theta,
+    FREQ,
+    corrflag,
+    NTHR,
+    NLOAD,
+    NCORR,
+    NVAR,
+    0,
+    1
+  )["iter_nll"];
+  nll/=N;
   if(VERBOSE) Rcpp::Rcout << "Initial full npll: "<< nll << " | iterations per epoch:"<<maxtpe << "\n";
 
 

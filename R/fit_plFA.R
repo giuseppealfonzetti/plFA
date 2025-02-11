@@ -89,7 +89,7 @@ fit_plFA <- function(
 
   # Identify model dimensions
   dims <- check_dims(dat, constr_list)
-  if(METHOD=="SA" && dims$p<20) warning("METHOD='SA' not recommended with less than 20 items.")
+  if(METHOD=="SA" && dims$p<20) message("METHOD='SA' not recommended with less than 20 items.")
   INIT_METHOD <- check_init_method(dims, INIT_METHOD, INIT)
 
   tmp <- new('PlFaFit',
@@ -280,7 +280,7 @@ fit_plFA <- function(
 
     if(VERBOSE & !opt$convergence_burn)    message(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_BURN, ". Stopped at ", sa_args$BURNE, " epochs Try increasing BURNE or STEP0."))
     if(VERBOSE & opt$proj_after_burn)      message("Projections performed after the burn-in. Trajectories might be unstable. Check trajectories visually and evaluate decreasing STEP0.")
-    if(VERBOSE & opt$convergence_full==0)  message(paste0("Algorithm ended before reaching tolerance level ", sa_args$TOL_END, ". Stopped at ", sa_args$MAXE, " epochs Try increasing MAXE or STEP0."))
+    if(VERBOSE & opt$convergence_full==0)  message(paste0("Algorithm ended before reaching tolerance level ", sa_args$TOL_END, ". Stopped at ", sa_args$MAXE, ". epochs Try increasing MAXE or STEP0."))
     if(VERBOSE & opt$convergence_full==-1) message(paste0("Stopped because of divergent trajectories. Decrease STEP0."))
     if(VERBOSE & !opt$finite_gr)           message(paste0("The algorithm automatically dealt with divergent trajectories. Check trajectories visually and evaluate decreasing STEP0."))
     if(VERBOSE & opt$neg_pdiff)            message("Possible divergent trajectories detected monitoring the full negative pairwise likelihood. Check trajectories visually and evaluate decreasing STEP0.")

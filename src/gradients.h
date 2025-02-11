@@ -10,16 +10,16 @@ namespace grads{
       const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> TAU,
       const double RHO_KL,
-      const unsigned int K,
-      const unsigned int L,
-      const unsigned int CK,
-      const unsigned int CL,
-      const unsigned int I1,
-      const unsigned int I2,
-      unsigned int &IDX
+      const int K,
+      const int L,
+      const int CK,
+      const int CL,
+      const int I1,
+      const int I2,
+      int &IDX
   ){
     int SILENTFLAG=1;
-    for(unsigned int s = 0; s < TAU.size(); s++){
+    for(int s = 0; s < TAU.size(); s++){
       double grs = 0; // temporary location for gradient related to s-th element of tau
       if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ gradient("<< s<< ")\n";
 
@@ -28,24 +28,24 @@ namespace grads{
         // [CASE 1]: threshold related to item k
 
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item k:\n";
-        const unsigned int sk = s - (C_VEC.segment(0, K).sum()) + (K);
+        const int sk = s - (C_VEC.segment(0, K).sum()) + (K);
 
         // i3: starting index from i2 for cat sk and sk+1
-        const unsigned int i3 = sk * CL;
-        const unsigned int i3suc = (sk+1) * CL;
+        const int i3 = sk * CL;
+        const int i3suc = (sk+1) * CL;
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ sk: " << sk << ". Summing over categories item l: ";
 
         // iterate over categories of item l
-        for(unsigned int sl = 0; sl < CL; sl ++){
+        for(int sl = 0; sl < CL; sl ++){
           if(SILENTFLAG == 0)Rcpp::Rcout << " ... cat" << sl ;
 
           // identify pairs_tab column for (sk,sl) and (sk+1, sl)
-          const unsigned int r = I1 + I2 + i3 + sl;
-          const unsigned int rsuc = I1 + I2 + i3suc + sl;
+          const int r = I1 + I2 + i3 + sl;
+          const int rsuc = I1 + I2 + i3suc + sl;
 
           // read frequences
-          const unsigned int n_sksl = PAIRS_TAB(4, r);
-          const unsigned int n_sksucsl = PAIRS_TAB(4, rsuc);
+          const int n_sksl = PAIRS_TAB(4, r);
+          const int n_sksucsl = PAIRS_TAB(4, rsuc);
 
           // read probabilities
           const double pi_sksl = PAIRS_TAB(5, r);
@@ -68,23 +68,23 @@ namespace grads{
         // [CASE 2]: threshold related to item l
 
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_ tau item l\n";
-        const unsigned int sl = s - (C_VEC.segment(0, L).sum()) + (L);
+        const int sl = s - (C_VEC.segment(0, L).sum()) + (L);
 
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |    |_  sl: " << sl << ". Summing over categories item k: ";
 
         // iterate over categories item k
-        for(unsigned int sk = 0; sk < CK; sk ++){
+        for(int sk = 0; sk < CK; sk ++){
 
           // i3: starting index from i2 for cat sk
-          const unsigned int i3 = sk * CL;
+          const int i3 = sk * CL;
 
           // identify pairs_tab column for (sk,sl) and (sk, sl + 1)
-          const unsigned int r = I1 + I2 + i3 + sl;
-          const unsigned int rsuc = I1 + I2 + i3 + sl + 1;
+          const int r = I1 + I2 + i3 + sl;
+          const int rsuc = I1 + I2 + i3 + sl + 1;
 
           // read frequences
-          const unsigned int n_sksl = PAIRS_TAB(4, r);
-          const unsigned int n_skslsuc = PAIRS_TAB(4, rsuc);
+          const int n_sksl = PAIRS_TAB(4, r);
+          const int n_skslsuc = PAIRS_TAB(4, rsuc);
 
           // read probabilities
           const double pi_sksl = PAIRS_TAB(5, r);
@@ -124,26 +124,26 @@ namespace grads{
       const Eigen::Ref<const Eigen::VectorXd> C_VEC,
       const Eigen::Ref<const Eigen::VectorXd> TAU,
       const double RHO_KL,
-      const unsigned int K,
-      const unsigned int L,
-      const unsigned int CK,
-      const unsigned int CL,
-      const unsigned int I1,
-      const unsigned int I2
+      const int K,
+      const int L,
+      const int CK,
+      const int CL,
+      const int I1,
+      const int I2
   ){
     double out = 0;
     int SILENTFLAG=1;
 
-    for(unsigned int sk = 0; sk < CK; sk ++){
-      for(unsigned int sl = 0; sl < CL; sl ++){
+    for(int sk = 0; sk < CK; sk ++){
+      for(int sl = 0; sl < CL; sl ++){
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ sk: "<< sk << ", sl: " << sl << ": \n";
 
         // identify pairs_tab column for (sk,sl)
-        const unsigned int i3 = sk * CL;
-        const unsigned int r = I1 + I2 + i3 + sl;
+        const int i3 = sk * CL;
+        const int r = I1 + I2 + i3 + sl;
 
         // read freq
-        const unsigned int n_sksl = PAIRS_TAB(4, r);
+        const int n_sksl = PAIRS_TAB(4, r);
 
         // read prob
         const double pi_sksl = PAIRS_TAB(5, r);
@@ -179,17 +179,17 @@ namespace grads{
       const Eigen::Ref<const Eigen::VectorXd> LAMBDAK,
       const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
       const double PRHO_URV,
-      const unsigned int P,
-      const unsigned int Q,
-      const unsigned int K,
-      const unsigned int L,
-      unsigned int &IDX
+      const int P,
+      const int Q,
+      const int K,
+      const int L,
+      int &IDX
   ){
     int SILENTFLAG=1;
 
     Eigen::MatrixXd dict=Eigen::MatrixXd::Zero(P, Q);
-    for(unsigned int j = 0; j < P; j++){
-      for(unsigned int v = 0; v < Q; v++){
+    for(int j = 0; j < P; j++){
+      for(int v = 0; v < Q; v++){
         if(SILENTFLAG == 0)Rcpp::Rcout << "  |_ visiting lambda_"<< j << v <<":\n";
 
         // elicit three cases: 1. free loading item k, 2. free loading l, 3. other
@@ -270,8 +270,8 @@ namespace grads{
 
   Eigen::MatrixXd S(const Eigen::Ref<const Eigen::MatrixXd> A,
                     const Eigen::Ref<const Eigen::VectorXd> TRANSFORMED_RHOS,
-                    const unsigned int Q,
-                    const unsigned int IDX
+                    const int Q,
+                    const int IDX
   ){
 
     // inverse of Fisher's transformation
@@ -281,9 +281,9 @@ namespace grads{
     // place tanh_entries in upper triangular matrix
     // with unit diagonal
     Eigen::MatrixXd Z(Q,Q); Z.setIdentity();
-    unsigned int iterator = 0; unsigned int i,j;
-    for(unsigned int col = 1; col < Q; col ++){
-      for(unsigned int row = 0; row < col; row++){
+    int iterator = 0; int i,j;
+    for(int col = 1; col < Q; col ++){
+      for(int row = 0; row < col; row++){
         if(iterator==IDX){i = row; j = col;}
         Z(row, col) = tanh_entries(iterator);
         iterator ++;
@@ -299,7 +299,7 @@ namespace grads{
         else if ((row > 0) && (row == col)) {
           if(Z(row-1,col)==0){
             double prod = 1;
-            for(unsigned int row1 = 0; row1 < row; row1++){
+            for(int row1 = 0; row1 < row; row1++){
               prod *= pow(1-pow(Z(row1, col), 2),.5);
             }
             U(row, col) = prod;
@@ -375,9 +375,9 @@ namespace grads{
       const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
       const Eigen::Ref<const Eigen::VectorXd> TRANSFORMED_RHOS,
       const double PRHO_URV,
-      const unsigned int Q,
-      const unsigned int NCORR,
-      unsigned int &IDX
+      const int Q,
+      const int NCORR,
+      int &IDX
   ){
     for(int thro_idx = 0; thro_idx < NCORR; thro_idx ++){
       const Eigen::MatrixXd dSigma = grads::S(A, TRANSFORMED_RHOS, Q, thro_idx);
@@ -400,17 +400,17 @@ namespace grads{
       const Eigen::Ref<const Eigen::VectorXd> LAMBDAK,
       const Eigen::Ref<const Eigen::VectorXd> LAMBDAL,
       const double RHO_KL,
-      const unsigned int D,
-      const unsigned int P,
-      const unsigned int Q,
-      const unsigned int K,
-      const unsigned int L,
-      const unsigned int CK,
-      const unsigned int CL,
-      const unsigned int SK,
-      const unsigned int SL,
-      const unsigned int I1,
-      const unsigned int I2,
+      const int D,
+      const int P,
+      const int Q,
+      const int K,
+      const int L,
+      const int CK,
+      const int CL,
+      const int SK,
+      const int SL,
+      const int I1,
+      const int I2,
       const int CORRFLAG,
       const int NTHR,
       const int NLOAD,
@@ -442,19 +442,19 @@ namespace grads{
 
 
     // iterator over parameter vector
-    unsigned int idx = 0;
+    int idx = 0;
 
     ////////////////////////////////////////////////
     // gradient pi_sksl wrt to thresholds
     ///////////////////////////////////////////////
 
     // loop: iterate over elements of thresholds vector
-    for(unsigned int s = 0; s < C_VEC.sum()-P; s++){
+    for(int s = 0; s < C_VEC.sum()-P; s++){
 
       // Elicit three cases: 1. threshold related to item k, 2. threshold related to item l, 3. threshold non relevant to items couple (k,l)
       if(s >= (C_VEC.segment(0, K).sum()) - (K) && s < C_VEC.segment(0, K + 1).sum() - (K + 1)){
         // [CASE 1]: threshold related to item k
-        unsigned int sk_a = s - (C_VEC.segment(0, K).sum()) + (K);
+        int sk_a = s - (C_VEC.segment(0, K).sum()) + (K);
         //Rcpp::Rcout << "  |    |_ tau item k. sk_a:"<< sk_a <<"\n";
         if(sk_a == SK){
           double tmp1 = R::dnorm(t_sk, 0, 1, 0);
@@ -472,7 +472,7 @@ namespace grads{
 
       }else if(s >= (C_VEC.segment(0, L).sum())-(L) && s<C_VEC.segment(0, L + 1).sum()-(L + 1)){
         // [CASE 2]: threshold related to item l
-        unsigned int sl_a = s - (C_VEC.segment(0, L).sum()) + (L);
+        int sl_a = s - (C_VEC.segment(0, L).sum()) + (L);
         //Rcpp::Rcout << "  |    |_ tau item l. sl_a:"<< sl_a<<"\n";
         if(sl_a == SL){
           double tmp1 = R::dnorm(t_sl, 0, 1, 0);
@@ -500,8 +500,8 @@ namespace grads{
     //////////////////////////////////////
 
     // double loop: iterate over elements of loadings matrix
-    // for(unsigned int j = 0; j < P; j++){
-    //   for(unsigned int v = 0; v < Q; v++){
+    // for(int j = 0; j < P; j++){
+    //   for(int v = 0; v < Q; v++){
     //
     //     // elicit three cases: 1. free loading item k, 2. free loading l, 3. other
     //     if(j == K){
@@ -533,7 +533,7 @@ namespace grads{
     if(CORRFLAG == 1){
       Eigen::VectorXd transformed_rhos = params::latvar::theta2vec(THETA, NTHR, NLOAD, NCORR, NVAR).segment(0, NCORR);
 
-      for(unsigned int thro_idx = 0; thro_idx < NCORR; thro_idx ++){
+      for(int thro_idx = 0; thro_idx < NCORR; thro_idx ++){
 
         Eigen::MatrixXd dR = grads::S(A, transformed_rhos, Q, thro_idx);
         // Rcpp::Rcout << "dsigma wrt corr idx " << thro_idx << ":\n"<< dSigma << "\n";
