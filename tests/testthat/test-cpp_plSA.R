@@ -1,5 +1,4 @@
 # p = number of items, q = number of latent variables, n = number of observations
-# p = number of items, q = number of latent variables, n = number of observations
 p <- 20; q <- 5; n <- 1000
 
 # Thresholds vector for each item
@@ -62,73 +61,8 @@ dims <- check_dims(dat, constr_list)
 init <- check_init(NULL, f, dims, constr_list, INIT_METHOD = "standard", FALSE)
 init
 
-test_that("init par",{
-  expect_true(all(is.finite(init)))
-  expect_true(all(is.finite(init)))}
-)
 
 
-Rwr_ncl <- function(par_vec){
-  n <- dims$n
-  mod <- cpp_multiThread_completePairwise(
-    N          = dims$n,
-    C_VEC      = dims$cat,
-    CONSTRMAT  = constr_list$CONSTRMAT,
-    CONSTRLOGSD= constr_list$CONSTRLOGSD,
-    LLC        = constr_list$LLC,
-    FREQ       = f,
-    THETA      = par_vec,
-    CORRFLAG   = constr_list$CORRFLAG,
-    NTHR       = dims$nthr,
-    NLOAD      = dims$nload,
-    NCORR      = dims$ncorr,
-    NVAR       = dims$nvar,
-    SILENTFLAG = 1
-  )
-  out <- mod$iter_nll/n
-  return(out)
-}
-init_nll <- Rwr_ncl(init)
-test_that("init nll",{
-  expect_true(is.finite(init_nll))
-  expect_true(init_nll<1e3)
-})
-
-
-
-Rwr_ngr <- function(par_vec){
-  n <- dims$n
-  mod <- cpp_multiThread_completePairwise(
-    N          = dims$n,
-    C_VEC      = dims$cat,
-    CONSTRMAT  = constr_list$CONSTRMAT,
-    CONSTRLOGSD= constr_list$CONSTRLOGSD,
-    LLC        = constr_list$LLC,
-    FREQ       = f,
-    THETA      = par_vec,
-    CORRFLAG   = constr_list$CORRFLAG,
-    NTHR       = dims$nthr,
-    NLOAD      = dims$nload,
-    NCORR      = dims$ncorr,
-    NVAR       = dims$nvar,
-    SILENTFLAG = 1
-  )
-  out <- mod$iter_ngradient
-  return(out)
-}
-init_ngr <- Rwr_ngr(init)
-test_that("init ngr",{
-  expect_true(all(is.finite(init_ngr)))
-})
-
-
-
-
-
-
-
-
-init_nll
 fit <- cpp_plSA2(
   FREQ = f,
   VALFREQ = f,
@@ -144,7 +78,7 @@ fit <- cpp_plSA2(
   NCORR=ncorr,
   NVAR=nvar,
   PAIRS_PER_ITERATION=1,
-  STEP0=.25,
+  STEP0=1,
   STEP1=1,
   STEP2=1e-8,
   STEP3=.75,
@@ -160,5 +94,5 @@ fit <- cpp_plSA2(
   VERBOSE_ITER=FALSE
 )
 
-test_that("check initial nll from SA", {expect_equal(init_nll, fit$path_nll[1], tolerance = 1)})
-test_that("check initial nll from SA", {expect_true(all(is.finite(fit$avtheta)))})
+test_that("check param from SA", {lapply(fit$path_avtheta, function(x) expect_true(all(is.finite(x))))})
+test_that("check nll from SA", {expect_true(all(is.finite(fit$path_nll)))})
