@@ -56,6 +56,27 @@ pair_ngr <- function(PAR, K, L, OPTION=0){
   return(out)
 }
 
+full_ngr <- function(par_vec){
+  n <- dims$n
+  mod <- cpp_multiThread_completePairwise(
+    N          = dims$n,
+    C_VEC      = dims$cat,
+    CONSTRMAT  = constr_list$CONSTRMAT,
+    CONSTRLOGSD= constr_list$CONSTRLOGSD,
+    LLC        = constr_list$LLC,
+    FREQ       = f,
+    THETA      = par_vec,
+    CORRFLAG   = constr_list$CORRFLAG,
+    NTHR       = dims$nthr,
+    NLOAD      = dims$nload,
+    NCORR      = dims$ncorr,
+    NVAR       = dims$nvar,
+    GRFLAG     = 1,
+    SILENTFLAG = 1
+  )
+  out <- mod$iter_ngr/dims$n
+  return(out)
+}
 
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
@@ -120,17 +141,27 @@ if(1){
   constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv, LLC=llc))
   dims <- check_dims(dat, constr_list)
 
+  tot_gr <- rep(0, dims$d)
   for (k in 2:p) {
     for (l in 1:(k-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
+      tot_gr <- tot_gr+pair_ngr(PAR=theta, K=k-1, L=l-1)
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
     }
   }
+
+  test_that("check total gradient", {
+    expect_equal(
+      tot_gr,
+      full_ngr(theta)
+    )
+  })
+
 }
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
@@ -198,17 +229,26 @@ if(1){
   constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv, LLC=llc))
   dims <- check_dims(dat, constr_list)
 
+  tot_gr <- rep(0, dims$d)
   for (k in 2:p) {
     for (l in 1:(k-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
+      tot_gr <- tot_gr+pair_ngr(PAR=theta, K=k-1, L=l-1)
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
     }
   }
+
+  test_that("check total gradient", {
+    expect_equal(
+      tot_gr,
+      full_ngr(theta)
+    )
+  })
 }
 
 #### (STDLV=TRUE, CORRFLAG=TRUE) ####
@@ -274,11 +314,13 @@ if(1){
   constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv, LLC=llc))
   dims <- check_dims(dat, constr_list)
 
+  tot_gr <- rep(0, dims$d)
   for (k in 2:p) {
     for (l in 1:(k-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
+      tot_gr <- tot_gr+pair_ngr(PAR=theta, K=k-1, L=l-1)
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
@@ -286,10 +328,12 @@ if(1){
     }
   }
 
-  # microbenchmark::microbenchmark(
-  #   special=pair_ngr(PAR=theta, K=k, L=l, OPTION = 0),
-  #   pi=pair_ngr(PAR=theta, K=k, L=l, OPTION=1)
-  # )
+  test_that("check total gradient", {
+    expect_equal(
+      tot_gr,
+      full_ngr(theta)
+    )
+  })
 }
 
 ### (STDLV=TRUE, CORRFLAG=TRUE) ####
@@ -356,17 +400,26 @@ if(1){
   constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv, LLC=llc))
   dims <- check_dims(dat, constr_list)
 
+  tot_gr <- rep(0, dims$d)
   for (k in 2:p) {
     for (l in 1:(k-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
+      tot_gr <- tot_gr+pair_ngr(PAR=theta, K=k-1, L=l-1)
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
     }
   }
+
+  test_that("check total gradient", {
+    expect_equal(
+      tot_gr,
+      full_ngr(theta)
+    )
+  })
 }
 
 #### (STDLV=FALSE, CORRFLAG=FALSE) ####
@@ -432,17 +485,26 @@ if(1){
   constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv, LLC=llc))
   dims <- check_dims(dat, constr_list)
 
+  tot_gr <- rep(0, dims$d)
   for (k in 2:p) {
     for (l in 1:(k-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
+      tot_gr <- tot_gr+pair_ngr(PAR=theta, K=k-1, L=l-1)
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
     }
   }
+
+  test_that("check total gradient", {
+    expect_equal(
+      tot_gr,
+      full_ngr(theta)
+    )
+  })
 }
 
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
@@ -509,17 +571,26 @@ if(1){
   constr_list <- check_cnstr(list(CONSTRMAT=A, CORRFLAG=corrflag, CONSTRVAR=exp(constr_lsd)^2, STDLV=stdlv, LLC=llc))
   dims <- check_dims(dat, constr_list)
 
+  tot_gr <- rep(0, dims$d)
   for (k in 2:p) {
     for (l in 1:(k-1)) {
       test_that(paste0("check gradient pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
+      tot_gr <- tot_gr+pair_ngr(PAR=theta, K=k-1, L=l-1)
 
       test_that(paste0("check gradient (pi version) pair (", l, ",", k, "):") ,{
         expect_equal(pair_ngr(PAR=theta, K=k-1, L=l-1, OPTION=1), numDeriv::grad(func=pair_nll, x=theta, K=k-1,L=l-1), tolerance = 1e-4)
       })
     }
   }
+
+  test_that("check total gradient", {
+    expect_equal(
+      tot_gr,
+      full_ngr(theta)
+    )
+  })
 }
 
 

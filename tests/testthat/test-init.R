@@ -160,5 +160,5 @@ fit <- cpp_plSA2(
   VERBOSE_ITER=FALSE
 )
 
-test_that("check initial nll from SA", {expect_equal(init_nll, fit$path_nll[1], tolerance = 1)})
+test_that("check initial nll from SA", {expect_equal(init_nll, fit$path_nll[1])})
 test_that("check initial nll from SA", {expect_true(all(is.finite(fit$avtheta)))})

@@ -38,7 +38,7 @@
 //'
 // [[Rcpp::export]]
 Rcpp::List cpp_multiThread_completePairwise(
-    const unsigned int N,
+    const int N,
     Eigen::Map<Eigen::VectorXd> C_VEC,
     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
     Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
@@ -55,16 +55,16 @@ Rcpp::List cpp_multiThread_completePairwise(
 ){
 
   Rcpp::checkUserInterrupt();
-  const unsigned int d = THETA.size();
-  const unsigned int p = CONSTRMAT.rows();                                             // number of items
-  unsigned int R = p*(p-1)/2;                                            // number of pairs of items
+  const int d = THETA.size();
+  const int p = CONSTRMAT.rows();                                             // number of items
+  int R = p*(p-1)/2;                                            // number of pairs of items
 
   // Copy frequencies, and build pair dictionary
   Eigen::MatrixXd pairs_table = FREQ;
   Eigen::MatrixXd items_pairs(2,R);
-  unsigned int r = 0;
-  for(unsigned int k = 1; k < p; k ++){
-    for(unsigned int l = 0; l < k; l++){
+  int r = 0;
+  for(int k = 1; k < p; k ++){
+    for(int l = 0; l < k; l++){
       items_pairs(0, r) = k;
       items_pairs(1, r) = l;
       r++;
@@ -164,9 +164,9 @@ Rcpp::List cpp_multiThread_completePairwise(
 //     // Read frequencies, and initialise items_pairs
 //     // Eigen::MatrixXd pairs_table = FREQ;
 //     Eigen::MatrixXd items_pairs(2,pairs);
-//     unsigned int idx = 0;
-//     for(unsigned int k = 1; k < p; k++){
-//       for(unsigned int l = 0; l < k; l ++){
+//     int idx = 0;
+//     for(int k = 1; k < p; k++){
+//       for(int l = 0; l < k; l ++){
 //         items_pairs(0, idx) = k;
 //         items_pairs(1, idx) = l;
 //         idx++;
@@ -461,9 +461,9 @@ Rcpp::List cpp_plSA2(
   // Read frequencies, and initialise items_pairs
   // Eigen::MatrixXd pairs_table = FREQ;
   Eigen::MatrixXd items_pairs(2,pairs);
-  unsigned int idx = 0;
-  for(unsigned int k = 1; k < p; k++){
-    for(unsigned int l = 0; l < k; l++){
+  int idx = 0;
+  for(int k = 1; k < p; k++){
+    for(int l = 0; l < k; l++){
       items_pairs(0, idx) = k;
       items_pairs(1, idx) = l;
       idx++;
@@ -567,8 +567,8 @@ Rcpp::List cpp_plSA2(
       // GRADIENT COMPUTATION  //
       ///////////////////////////
       std::vector<int> iter_chosen_pairs;
-      for(unsigned int draw = 0; draw < PAIRS_PER_ITERATION; draw++){
-        unsigned int pair_index = full_pool.at(idx_1pair+draw);
+      for(int draw = 0; draw < PAIRS_PER_ITERATION; draw++){
+        int pair_index = full_pool.at(idx_1pair+draw);
         iter_chosen_pairs.push_back(pair_index);
       }
       idx_1pair += PAIRS_PER_ITERATION;
