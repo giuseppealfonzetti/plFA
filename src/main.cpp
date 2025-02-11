@@ -493,11 +493,11 @@ Rcpp::List cpp_plSA2(
   ///////////////////////
   // COMPUTE START NLL  //
   ///////////////////////
-  double prev_nll = nll;
   int maxtpe = pairs/PAIRS_PER_ITERATION;
   pairs::SubsetWorker fullpool_worker(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, VALFREQ, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
                                       1, 0, theta, full_pool);
   RcppParallel::parallelReduce(0, pairs, fullpool_worker);
+  nll = 0.0;
   nll = -fullpool_worker.subset_ll/n;
   if(VERBOSE) Rcpp::Rcout << "Initial full npll: "<< nll << " | iterations per epoch:"<<maxtpe << "\n";
 
