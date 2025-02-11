@@ -278,9 +278,9 @@ fit_plFA <- function(
     converge@neg_pdiff        <- opt$neg_pdiff
 
 
-    if(!opt$convergence_burn)    warning(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_BURN, ". Stopped at ", sa_args$BURN, " iterations. Try increasing BURNE or STEP0."))
+    if(!opt$convergence_burn)    warning(paste0("Burn-in period did not reach tolerance level ", sa_args$TOL_BURN, ". Stopped at ", sa_args$BURNE, " epochs Try increasing BURNE or STEP0."))
     if(opt$proj_after_burn)      warning("Projections performed after the burn-in. Trajectories might be unstable. Check trajectories visually and evaluate decreasing STEP0.")
-    if(opt$convergence_full==0)  warning(paste0("Algorithm ended before reaching tolerance level ", sa_args$TOL_END, ". Stopped at ", sa_args$MAXE, " iterations. Try increasing MAXE or STEP0."))
+    if(opt$convergence_full==0)  warning(paste0("Algorithm ended before reaching tolerance level ", sa_args$TOL_END, ". Stopped at ", sa_args$MAXE, " epochs Try increasing MAXE or STEP0."))
     if(opt$convergence_full==-1) warning(paste0("Stopped because of divergent trajectories. Decrease STEP0."))
     if(!opt$finite_gr)           warning(paste0("The algorithm automatically dealt with divergent trajectories. Check trajectories visually and evaluate decreasing STEP0."))
     if(opt$neg_pdiff)            warning("Possible divergent trajectories detected monitoring the full negative pairwise likelihood. Check trajectories visually and evaluate decreasing STEP0.")

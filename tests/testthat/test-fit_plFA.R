@@ -1,5 +1,5 @@
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 16; q <- 4; n <- 1000
+p <- 30; q <- 4; n <- 1000
 
 # Thresholds vector for each item
 thr <- c(-1.5, 0, 1.5)
@@ -11,7 +11,7 @@ nthr <- sum(cat)-p
 ###############
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
-if(0){
+if(1){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- TRUE
@@ -69,6 +69,7 @@ if(0){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
+    INIT_METHOD="SA",
     METHOD = 'ucminf')
 
   numFit
@@ -125,7 +126,7 @@ if(0){
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
 #### with linear constraints on loadings
-if(0){
+if(1){
   set.seed(123)
   stdlv <- FALSE
   corrflag <- TRUE
@@ -184,6 +185,7 @@ if(0){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
+    INIT_METHOD="SA",
     METHOD = 'ucminf')
 
   numFit
@@ -298,7 +300,8 @@ if(0){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
-    METHOD = 'ucminf')
+    INIT_METHOD='ucminf',
+    METHOD = 'SA')
 
   numFit
 
