@@ -119,3 +119,44 @@ init_ngr <- Rwr_ngr(init)
 test_that("init ngr",{
   expect_true(all(is.finite(init_ngr)))
 })
+
+
+
+
+
+
+
+
+init_nll
+fit <- cpp_plSA2(
+  FREQ = f,
+  VALFREQ = f,
+  N = n,
+  C_VEC = cat,
+  CONSTRMAT=constr_list$CONSTRMAT,
+  CONSTRLOGSD=constr_list$CONSTRLOGSD,
+  LLC = constr_list$LLC,
+  THETA_INIT = init,
+  DIH = rep(1, length(init)),
+  NTHR = nthr,
+  NLOAD=nload,
+  NCORR=ncorr,
+  NVAR=nvar,
+  PAIRS_PER_ITERATION=1,
+  STEP0=.25,
+  STEP1=1,
+  STEP2=1e-8,
+  STEP3=.75,
+  BURN=0,
+  MAXE=0,
+  EPOCHS_PER_CHECK = 1,
+  TOL_END=1e-7,
+  TOL_BURN = 5e-7,
+  CHECK_TOL=TRUE,
+  MAX_TOL_COUNTER = 1,
+  SEED=123,
+  VERBOSE=TRUE,
+  VERBOSE_ITER=FALSE
+)
+
+test_that("check initial nll from SA", {expect_equal(init_nll, fit$path_nll)})
