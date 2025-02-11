@@ -1,5 +1,7 @@
+Sys.setenv("R_TESTS" = "")
+
 # p = number of items, q = number of latent variables, n = number of observations
-p <- 30; q <- 4; n <- 1000
+p <- 30; q <- 5; n <- 1000
 
 # Thresholds vector for each item
 thr <- c(-1.5, 0, 1.5)
@@ -69,8 +71,9 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
-    INIT_METHOD="SA",
-    METHOD = 'ucminf')
+    INIT_METHOD="standard",
+    METHOD = 'SA',
+    VERBOSE = TRUE)
 
   numFit
 
@@ -185,8 +188,8 @@ if(1){
   numFit <- fit_plFA(
     DATA = dat,
     CONSTR_LIST = constr_list,
-    INIT_METHOD="SA",
-    METHOD = 'ucminf')
+    INIT_METHOD="standard",
+    METHOD = 'SA')
 
   numFit
 
