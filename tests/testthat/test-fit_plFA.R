@@ -8,9 +8,9 @@ thr <- c(-1.5, 0, 1.5)
 cat <- rep(length(thr)+1, p)
 nthr <- sum(cat)-p
 
-################
-## Check init ##
-################
+###########################
+## Check METHOD="SA" init #
+###########################
 #### (STDLV=FALSE, CORRFLAG=TRUE) ####
 #### free correlation matrix and latent variances ######
 if(1){
