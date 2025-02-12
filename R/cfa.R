@@ -111,6 +111,10 @@ cfa <- function(
   lavargs$estimator <- estimator
   lavargs$do.fit <- FALSE
 
+  # Cheeky way to see if vars is passed, then no need to recompute it
+  vars <- lavargs$vars
+  lavargs$vars <- NULL  # empty it!
+
   if (estimator == "PML") {
     if ("information" %in% names(lavargs)) {
       if (lavargs$information != "observed") {
@@ -119,11 +123,13 @@ cfa <- function(
     }
     lavargs$information <- "observed"
     if ("se" %in% names(lavargs)) {
-      if (lavargs$se != "robust.huber.white") {
-        cli::cli_abort("Only 'robust.huber.white' is currently supported.")
+      if (!(lavargs$se %in% c("robust.huber.white", "none"))) {
+        cli::cli_alert_info("Only 'robust.huber.white' is currently supported.")
+        lavargs$se <- "robust.huber.white"
       }
+    } else {
+      lavargs$se <- "robust.huber.white"
     }
-    lavargs$se <- "robust.huber.white"
     if (!("test" %in% names(lavargs))) {
       lavargs$test <- "none"
     }
@@ -253,14 +259,18 @@ cfa <- function(
     VERBOSE = verbose
   )
 
-  # Compute standard errors
-  vars <- computeVar(
-    OBJ = fit1,
-    DATA = D,
-    NUMDERIV = computevar_numderiv,
-    OPTION = "transformed",
-    VERBOSE = verbose
-  )
+  # Compute standard errors ----------------------------------------------------
+  if (is.null(vars)) {
+    if (lavargs$se != "none") {
+      vars <- computeVar(
+        OBJ = fit1,
+        DATA = D,
+        NUMDERIV = computevar_numderiv,
+        OPTION = "transformed",
+        VERBOSE = verbose
+      )
+    }
+  }
 
   out <- create_lav_from_fitplFA(fit0, fit1, vars, D, idx_plFA2lav)
   new("plFAlavaan", out)
@@ -293,9 +303,14 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   x <- c(lambda, tau, psi)
   # x <- fit1@theta[idx_plFA2lav]
 
-  SE <- sqrt(vars$asymptotic_variance / n)[idx_plFA2lav]
-  vcov <- vars$vcov / n
-  vcov <- vcov[idx_plFA2lav, idx_plFA2lav]
+  if (is.null(vars)) {
+    SE <- NULL
+    vcov <- NULL
+  } else {
+    SE <- sqrt(vars$asymptotic_variance / n)[idx_plFA2lav]
+    vcov <- vars$vcov / n
+    vcov <- vcov[idx_plFA2lav, idx_plFA2lav]
+  }
 
   # Change Model and implied slots ---------------------------------------------
   fit0@Model <- lavaan::lav_model_set_parameters(fit0@Model, x)
@@ -311,7 +326,7 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   pt <- lavaan::partable(fit0)
   pt$est[pt$free > 0] <- x
   pt$se <- 0
-  pt$se[pt$free > 0] <- SE
+  if (length(SE) > 0) pt$se[pt$free > 0] <- SE
   pt$start[pt$free > 0] <- fit1@init[idx_plFA2lav]
 
   # Put the diag theta values in the pt
@@ -364,10 +379,12 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
     fit0@loglik$loglik <- fit1@stoFit@nll
   }
   fit0@loglik$estimator <- "ML"  # FIXME: to turn off warning for now
-  fit0@loglik$AIC <- get_AIC(NLL = fit0@loglik$loglik, INVH = vars$invH,
-                             J = vars$J)
-  fit0@loglik$BIC <- get_BIC(NLL = fit0@loglik$loglik, INVH = vars$invH,
-                             J = vars$J, N = n)
+  if (!is.null(vars)) {
+    fit0@loglik$AIC <- get_AIC(NLL = fit0@loglik$loglik, INVH = vars$invH,
+                               J = vars$J)
+    fit0@loglik$BIC <- get_BIC(NLL = fit0@loglik$loglik, INVH = vars$invH,
+                               J = vars$J, N = n)
+  }
 
   # Change vcov slot -----------------------------------------------------------
   fit0@vcov$vcov <- vcov

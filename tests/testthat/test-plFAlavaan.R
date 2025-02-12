@@ -105,7 +105,8 @@ test_that("Method = 'SA' works", {
     O =~ O1 + O2 + O3 + O4 + O5
   "
 
-  fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"))
+  fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"),
+             se = "none")
 
   expect_s4_class(fit, "lavaan")
   expect_s4_class(fit, "plFAlavaan")

@@ -62,3 +62,35 @@ setMethod("BIC", "plFAlavaan", function(object, ...) {
 setMethod("plotTraj", "plFAlavaan", function(OBJ) {
   plotTraj(OBJ@external$plFA)
 })
+
+setMethod(
+  f = "update",
+  signature = signature(object = "plFAlavaan"),
+  definition = function(object, ..., evaluate = TRUE) {
+    # 1. Extract the original call from the object
+    cl <- object@call
+
+    # 2. Update the call with new arguments provided in '...'
+    extra_args <- list(...)
+    if (length(extra_args) > 0) {
+      for(arg in names(extra_args)) {
+        cl[[arg]] <- extra_args[[arg]]
+      }
+    }
+    if (!("se" %in% names(extra_args))) {
+      # If vars already computed, use it! Saves time
+      cat("Skipping computation of vars!")
+      extra_args$vars <- object@external$vars
+    }
+
+    # 3. Replace the function name in the call from lavaan::lavaan to plFA::cfa
+    cl[[1]] <- quote(plFA::cfa)
+
+    # 4. Evaluate the updated call (if requested) or return the call for inspection
+    if (evaluate) {
+      return(eval(cl, parent.frame()))
+    } else {
+      return(cl)
+    }
+  }
+)
