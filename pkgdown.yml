@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   datagen: datagen.html
   ligof: ligof.html
-last_built: 2025-02-12T08:22Z
+last_built: 2025-02-12T15:34Z
 urls:
-  reference: https://giuseppealfonzetti.github.io/plFA/reference
-  article: https://giuseppealfonzetti.github.io/plFA/articles
+  reference: https://giuseppealfonzetti.github.io/lavaan.pl/reference
+  article: https://giuseppealfonzetti.github.io/lavaan.pl/articles
