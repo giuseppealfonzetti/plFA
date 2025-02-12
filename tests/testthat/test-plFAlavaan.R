@@ -104,11 +104,8 @@ test_that("Method = 'SA' works", {
     N =~ N1 + N2 + N3 + N4 + N5
     O =~ O1 + O2 + O3 + O4 + O5
   "
-  skip()
-  # skip_if(.Platform$OS.type == "windows")
-  expect_warning({
-    fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"))
-  })
+
+  fit <- cfa(mod, bfi, std.lv = TRUE, estimator.args = list(method = "SA"))
 
   expect_s4_class(fit, "lavaan")
   expect_s4_class(fit, "plFAlavaan")

@@ -268,7 +268,7 @@ cfa <- function(
 
 create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
 
-  # Get coefficients and standard errors
+  # Get coefficients and standard errors ---------------------------------------
   FREE <- lavaan::inspect(fit0, what = "free")
   n <- fit0@Data@nobs[[1]]  # FIXME: Group 1 only
 
@@ -297,27 +297,15 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   vcov <- vars$vcov / n
   vcov <- vcov[idx_plFA2lav, idx_plFA2lav]
 
-  # Change version slot
-  # fit0@version <- as.character(packageVersion("plFA"))
-
-  # Change timing slot
-  fit0@timing$optim <- fit0@timing$optim + fit1@RTime
-  fit0@timing$vcov <- vars$RTime
-  fit0@timing$total <- sum(unlist(fit0@timing))
-
-  # Change Model and implied slots
+  # Change Model and implied slots ---------------------------------------------
   fit0@Model <- lavaan::lav_model_set_parameters(fit0@Model, x)
   fit0@implied <- lavaan::lav_model_implied(fit0@Model)
+
+  # Change ParTable slot -------------------------------------------------------
 
   # Find Theta matrix (residuals) and Sigmay (implied covariance matrix)
   thetadiag <- diag(fit0@Model@GLIST$theta)
   Sigmay <- fit0@implied$cov[[1]]  # FIXME: Group 1 only
-
-  # Lambda <- fit0@Model@GLIST$lambda
-  # Psi    <- fit0@Model@GLIST$psi
-  # LPLT <- Lambda %*% Psi %*% t(Lambda)
-  # thetadiag <- as.numeric(1 - diag(LPLT))
-  # Sigmay <- LPLT + diag(thetadiag)
 
   # Change ParTable and pta slots
   pt <- lavaan::partable(fit0)
@@ -339,15 +327,11 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@ParTable <- as.list(pt)
   fit0@pta$names <- names(pt)
 
-  # Change Options slot
-  # fit0@Options$estimator <- "PML"
+  # Change Options slot --------------------------------------------------------
   fit0@Options$optim.method <- fit1@method
-  # fit0@Options$estimator.args <- list()
-  # fit0@Options$test <- "standard"
-  # fit0@Options$se <- "robust.huber.white"  # this is the sandwich
   fit0@Options$do.fit <- TRUE
 
-  # Change Fit slot (depends whether it is numFit or stoFit)
+  # Change Fit slot (depends whether it is numFit or stoFit) -------------------
   fit0@Fit@x <- x
   fit0@Fit@TH[[1]] <- tau  # FIXME: Group 1
   fit0@Fit@est <- pt$est
@@ -355,48 +339,51 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@Fit@start <- pt$start
   if (fit1@method == "ucminf") {
     fit0@Fit@iterations <- as.integer(fit1@numFit$info["neval"])
-    # fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
+    fit0@Fit@converged <- fit1@numFit$convergence == 1L  # FIXME: Check!!
     fit0@Fit@fx <- fit1@numFit$value
   } else if (fit1@method == "SA") {
     fit0@Fit@iterations <- as.integer(fit1@stoFit@last_iter)
-    # fit0@Fit@converged <- fit1@stoFit@convergence == 1L  # FIXME: Check!!
+    fit0@Fit@converged <- fit1@stoFit@convergence@convergence_full == 1L  # FIXME: Check!!
     fit0@Fit@fx <- fit1@stoFit@nll
   }
   fit0@Fit@Sigma.hat[[1]] <- Sigmay  # implied variance-covariance matrix for group 1!!
 
-  # Change optim slot
+  # Change optim slot ----------------------------------------------------------
   fit0@optim$x <- x
-  # fit0@optim$dx <- 0
+  fit0@optim$dx <- 0
   fit0@optim$npar <- length(x)
   fit0@optim$fx <- fx <- fit0@Fit@fx
   fit0@optim$fx.group <- fit0@Fit@fx.group
   fit0@optim$iterations <- fit0@Fit@iterations
   fit0@optim$converged <- fit0@Fit@converged
 
-  # Change loglik slot
+  # Change loglik slot ---------------------------------------------------------
   if (fit1@method == "ucminf") {
     fit0@loglik$loglik <- fit1@numFit$value
   } else if (fit1@method == "SA") {
     fit0@loglik$loglik <- fit1@stoFit@nll
   }
   fit0@loglik$estimator <- "ML"  # FIXME: to turn off warning for now
-  fit0@loglik$AIC <- get_AIC(NLL = fit0@loglik$loglik, INVH = vars$invH, J = vars$J)
-  fit0@loglik$BIC <- get_BIC(NLL = fit0@loglik$loglik, INVH = vars$invH, J = vars$J, N = n)
+  fit0@loglik$AIC <- get_AIC(NLL = fit0@loglik$loglik, INVH = vars$invH,
+                             J = vars$J)
+  fit0@loglik$BIC <- get_BIC(NLL = fit0@loglik$loglik, INVH = vars$invH,
+                             J = vars$J, N = n)
 
-  # Change vcov slot
+  # Change vcov slot -----------------------------------------------------------
   fit0@vcov$vcov <- vcov
 
-  # Change test slot
+  # Change test slot -----------------------------------------------------------
   Options <- fit0@Options
   Options$optim.method <- "nlminb"  # hack to get no warnings from lavaan (ucminf not recognised.)
-  fxval <- fx
-  attr(fx, "fx.pml") <- fxval
-  attr(fx, "fx.group") <- fxval
-  attr(x, "fx") <- fx
-  VCOV <- vcov
-  attr(VCOV, "B0.group")[[1]] <- vars$J[idx_plFA2lav, idx_plFA2lav]
-  attr(VCOV, "E.inv") <- vars$invH[idx_plFA2lav, idx_plFA2lav]
+  # fxval <- fx
+  # attr(fx, "fx.pml") <- fxval
+  # attr(fx, "fx.group") <- fxval
+  # attr(x, "fx") <- fx
+  # VCOV <- vcov
+  # attr(VCOV, "B0.group")[[1]] <- vars$J[idx_plFA2lav, idx_plFA2lav]
+  # attr(VCOV, "E.inv") <- vars$invH[idx_plFA2lav, idx_plFA2lav]
 
+  start_time <- Sys.time()
   fit0@test <- lavaan___lav_model_test(
     lavoptions     = Options,
     lavmodel       = fit0@Model,
@@ -406,12 +393,14 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
     lavcache       = fit0@Cache,
     lavimplied     = fit0@implied,
     lavh1          = fit0@h1,
-    # x              = x,
+    # x              = x,  # by not including these, lavaan will recompute it
     # VCOV           = VCOV,
     lavloglik      = fit0@loglik
   )
+  end_time <- Sys.time()
+  timing_test <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
 
-  # Change baseline slot
+  # Change baseline slot -------------------------------------------------------
   fit0@baseline <- lavaan___lav_lavaan_step15_baseline(
     lavoptions = fit0@Options,
     lavsamplestats = fit0@SampleStats,
@@ -421,9 +410,21 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
     lavpartable = fit0@ParTable
   )
 
-  # Include the entire output of fit_sem
-  fit0@external <- list(plFA = fit1, vars = vars, D = D, idx_plFA2lav = idx_plFA2lav)
+  # Change timing slot ---------------------------------------------------------
+  fit0@timing$optim <- fit0@timing$optim + fit1@RTime
+  fit0@timing$vcov <- vars$RTime
+  fit0@timing$test <- timing_test
+  fit0@timing$total <- sum(unlist(fit0@timing))
 
+  # Include the entire output of plFA fit --------------------------------------
+  fit0@external <- list(
+    plFA = fit1,
+    vars = vars,
+    D = D,
+    idx_plFA2lav = idx_plFA2lav
+  )
+
+  # Output ---------------------------------------------------------------------
   fit0
 }
 
