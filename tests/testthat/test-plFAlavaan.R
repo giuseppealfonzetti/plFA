@@ -171,16 +171,41 @@ test_that("Hinv is the same", {
 
   # From plFA
   mod <- "eta1 =~ y1 + y2 + y3 + y4 + y5"
-  n <- nrow(LSAT)
-  fit1 <- cfa(mod, LSAT, std.lv = TRUE)
-  Hinv1 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
-  fit1 <- cfa(mod, LSAT, std.lv = TRUE, estimator.args = list(computevar_numderiv = TRUE))
-  Hinv2 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
-  Hinv3 <- solve(information_matrix(fit1, "observed"))
-  expect_equal(Hinv1, Hinv2, tolerance = 1e-5)  # ucminf vs numderiv
-  # expect_equal(Hinv1, Hinv3, tolerance = 1)  # ucminf vs lavaan
+
+  # Getting Hinv from ucminf for free
+  fit <- cfa(mod, LSAT, std.lv = TRUE)
+  Hinv1 <- with(fit@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+
+  # Getting Hinv via numDeriv
+  fit <- cfa(mod, LSAT, std.lv = TRUE,
+             estimator.args = list(computevar_numderiv = TRUE))
+  Hinv2 <- with(fit@external, vars$invH[idx_plFA2lav, idx_plFA2lav])
+
+  # Gtting Hinv from lavaan, which also uses numDeriv
+  Hinv3 <- solve(information_matrix(fit, "observed"))
+
+  expect_false(isTRUE(all.equal(Hinv1, Hinv2, tolerance = 1e-5)))  # ucminf vs numDeriv
+  expect_equal(Hinv2, Hinv3, tolerance = 1e-5)  # ucminf vs lavaan
 
 })
+
+test_that("Jmat is the same", {
+  mod <- "eta1 =~ y1 + y2 + y3 + y4 + y5"
+  fit1 <- cfa(mod, LSAT, std.lv = TRUE)
+  fit2 <- lavaan::cfa(mod, LSAT, std.lv = TRUE, estimator = "PML")
+
+  # Getting Hinv from ucminf for free
+  J1 <- with(fit1@external, computeVar(plFA, D)$J[idx_plFA2lav, idx_plFA2lav])
+  J2 <- lavaan:::lav_model_information_firstorder(
+    lavmodel =fit2@Model,
+    lavsamplestats = fit2@SampleStats,
+    lavdata = fit2@Data,
+    lavoptions = fit2@Options,
+    lavcache = fit2@Cache
+  )
+  expect_equal(J1, J2, tolerance = 1e-5)
+})
+
 
 
 
