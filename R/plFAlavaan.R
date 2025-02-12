@@ -58,3 +58,7 @@ setMethod("AIC", "plFAlavaan", function(object, ...) {
 setMethod("BIC", "plFAlavaan", function(object, ...) {
   object@loglik$BIC
 })
+
+setMethod("plotTraj", "plFAlavaan", function(OBJ) {
+  plotTraj(OBJ@external$plFA)
+})
