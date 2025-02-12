@@ -26,10 +26,8 @@ setMethod('show', 'PlFaFit', function(object){
   }else{
     cat(
       "- Stochastic estimate\n\n",
-      "    Sampling scheme:", object@method, "\n",
       "    Pairs per iteration:", object@stoFit@control$PAIRS_PER_ITERATION, " out of ", object@dims@pairs, "\n",
       "    Iterations:", object@stoFit@last_iter, "\n",
-      "    Convergence:", object@stoFit@convergence, "\n",
       "    Total time:", round(object@RTime, 2), "s (Data reduction:", round(object@freqTime,2), "s)\n",
       "    Cores used:", object@cores, "\n",
 

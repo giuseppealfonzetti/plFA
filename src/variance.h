@@ -355,7 +355,6 @@ Eigen::VectorXd cpp_DH(
   Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
   Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
 
-  double ll = 0;
   Eigen::VectorXd gradient = Eigen::VectorXd::Zero(d);
   Eigen::VectorXd diagH = Eigen::VectorXd::Zero(d);
 

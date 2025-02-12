@@ -28,53 +28,40 @@ namespace pairs{
       const int NLOAD,
       const int NCORR,
       const int NVAR,
-      const unsigned int K,
-      const unsigned int L,
-      const Eigen::MatrixXd &PAIRS_TABLE,
-      const unsigned int SILENTFLAG,
-      const unsigned int GRADFLAG,
+      const int K,
+      const int L,
+      const Eigen::Ref<const Eigen::MatrixXd> FREQ,
+      const int SILENTFLAG,
+      const int GRADFLAG,
       double &LL,
       Eigen::VectorXd &GRADIENT
   ){
-    const unsigned int p = A.rows();
-    const unsigned int q = A.cols();
-
-    // // rearrange parameters
-    // Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
-    // Eigen::MatrixXd Ru              = params::latvar::theta2cmat(THETA, NTHR, NLOAD, NCORR, NVAR, q);
-    // Eigen::MatrixXd Du              = params::latvar::theta2dmat(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, q);
-    // Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-    // Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
+    const int p = A.rows();
+    const int q = A.cols();
 
     // Identifies quantities related to pair (k,l)
-    const unsigned int ck          = C_VEC(K);
-    const unsigned int cl          = C_VEC(L);
+    const int ck          = C_VEC(K);
+    const int cl          = C_VEC(L);
     const Eigen::VectorXd lambdak  = LAM.row(K);
     const Eigen::VectorXd lambdal  = LAM.row(L);
     const double rho_kl            = lambdak.transpose() * SIGMAU * lambdal;
 
-    // Rcpp::Rcout<<"LAM:\n"<<Lam<<"\n";
-    //
-    // Rcpp::Rcout<<"lambdak:"<<lambdak.transpose()<<"\n";
-    // Rcpp::Rcout<<"lambdal:"<<lambdal.transpose()<<"\n";
-    //
-    // Rcpp::Rcout<<"rho_kl:"<<rho_kl<<"\n";
     // Initialize pairs table
-    Eigen::MatrixXd pairs_tab     = PAIRS_TABLE;
-    pairs_tab.conservativeResize(PAIRS_TABLE.rows() + 1, Eigen::NoChange_t() );
+    Eigen::MatrixXd pairs_tab     = FREQ;
+    pairs_tab.conservativeResize(FREQ.rows() + 1, Eigen::NoChange_t() );
 
     // identify column index in freq table
     // i1: starting index item k
-    unsigned int i1 = 0;
+    int i1 = 0;
     if(K > 1){
-      for(unsigned int u = 1; u < K; u++){
-        const unsigned int cu = C_VEC(u);
+      for(int u = 1; u < K; u++){
+        const int cu = C_VEC(u);
         i1 += cu * C_VEC.segment(0,u).sum();
       }
     }
 
     // i2 starting index from i1 for item l
-    unsigned int i2 = 0;
+    int i2 = 0;
     if(L > 0){
       i2 = C_VEC.segment(0,L).sum() * C_VEC(K);
     }
@@ -82,18 +69,18 @@ namespace pairs{
     ////////////////////////////
     /* LIKELIHOOD COMPUTATION */
     ////////////////////////////
-    for(unsigned int sk = 0; sk < ck; sk ++){
+    for(int sk = 0; sk < ck; sk ++){
 
       // i3: starting index from i2 for cat sk
-      const unsigned int i3 = sk * cl;
+      const int i3 = sk * cl;
 
-      for(unsigned int sl = 0; sl < cl; sl ++){
+      for(int sl = 0; sl < cl; sl ++){
 
         // final column index for pairs_tab. Print to check
-        const unsigned int r = i1 + i2 + i3 + sl;
+        const int r = i1 + i2 + i3 + sl;
 
         // read frequency
-        const unsigned int n_sksl = PAIRS_TABLE(4, r);
+        const int n_sksl = FREQ(4, r);
 
         // identify thresholds
         const Eigen::VectorXd pi_thresholds = params::extract_thresholds(TAU, C_VEC, K, L, sk, sl);
@@ -113,7 +100,7 @@ namespace pairs{
 
     if(GRADFLAG == 1){
 
-      unsigned int iter = 0;
+      int iter = 0;
 
       /////////////////////////////////////////////////////
       // (k,l)-pair likelihood derivative wrt thresholds //
@@ -179,17 +166,17 @@ namespace pairs{
       const int NLOAD,
       const int NCORR,
       const int NVAR,
-      const unsigned int K,
-      const unsigned int L,
+      const int K,
+      const int L,
       const Eigen::MatrixXd &PAIRS_TABLE,
-      const unsigned int SILENTFLAG,
-      const unsigned int GRADFLAG,
+      const int SILENTFLAG,
+      const int GRADFLAG,
       double &LL,
       Eigen::VectorXd &GRADIENT
   ){
-    const unsigned int p = A.rows();
-    const unsigned int q = A.cols();
-    const unsigned int d = NTHR+NLOAD+NCORR+NVAR;
+    const int p = A.rows();
+    const int q = A.cols();
+    const int d = NTHR+NLOAD+NCORR+NVAR;
 
     // // rearrange parameters
     // Eigen::MatrixXd Lam             = params::loadings::theta2mat(THETA, A, LLC, NTHR, NLOAD);
@@ -199,8 +186,8 @@ namespace pairs{
     // Eigen::VectorXd tau             = params::thresholds::theta2vec(THETA, NTHR);
 
     // Identifies quantities related to pair (k,l)
-    const unsigned int ck          = C_VEC(K);
-    const unsigned int cl          = C_VEC(L);
+    const int ck          = C_VEC(K);
+    const int cl          = C_VEC(L);
     const Eigen::VectorXd lambdak  = LAM.row(K);
     const Eigen::VectorXd lambdal  = LAM.row(L);
     const double rho_kl            = lambdak.transpose() * SIGMAU * lambdal;
@@ -211,16 +198,16 @@ namespace pairs{
 
     // identify column index in freq table
     // i1: starting index item k
-    unsigned int i1 = 0;
+    int i1 = 0;
     if(K > 1){
-      for(unsigned int u = 1; u < K; u++){
-        const unsigned int cu = C_VEC(u);
+      for(int u = 1; u < K; u++){
+        const int cu = C_VEC(u);
         i1 += cu * C_VEC.segment(0,u).sum();
       }
     }
 
     // i2 starting index from i1 for item l
-    unsigned int i2 = 0;
+    int i2 = 0;
     if(L > 0){
       i2 = C_VEC.segment(0,L).sum() * C_VEC(K);
     }
@@ -229,18 +216,18 @@ namespace pairs{
     ////////////////////////////
     /* LIKELIHOOD AND GRADIENT COMPUTATION */
     ////////////////////////////
-    for(unsigned int sk = 0; sk < ck; sk ++){
+    for(int sk = 0; sk < ck; sk ++){
 
       // i3: starting index from i2 for cat sk
-      const unsigned int i3 = sk * cl;
+      const int i3 = sk * cl;
 
-      for(unsigned int sl = 0; sl < cl; sl ++){
+      for(int sl = 0; sl < cl; sl ++){
 
         // final column index for pairs_tab. Print to check
-        const unsigned int r = i1 + i2 + i3 + sl;
+        const int r = i1 + i2 + i3 + sl;
 
         // read frequency
-        const unsigned int n_sksl = PAIRS_TABLE(4, r);
+        const int n_sksl = PAIRS_TABLE(4, r);
 
         // identify thresholds
         const Eigen::VectorXd pi_thresholds = params::extract_thresholds(TAU, C_VEC, K, L, sk, sl);
@@ -296,19 +283,19 @@ namespace pairs{
   struct SubsetWorker : public RcppParallel::Worker{
     // Declaration parameters:
     //// Global:
-    const Eigen::Map<Eigen::MatrixXd> constrmat;
-    const Eigen::Map<Eigen::VectorXd> constrsd;
+    const Eigen::Ref<const Eigen::MatrixXd> constrmat;
+    const Eigen::Ref<const Eigen::VectorXd> constrsd;
     const std::vector<std::vector<std::vector<double>>> llc;
-    const Eigen::Map<Eigen::VectorXd> c_vec;
-    const Eigen::MatrixXd &pairs_table;
-    const Eigen::MatrixXd &items_pairs;
-    const unsigned int corrFLAG;
+    const Eigen::Ref<const Eigen::VectorXd> c_vec;
+    const Eigen::Ref<const Eigen::MatrixXd> pairs_table;
+    const Eigen::Ref<const Eigen::MatrixXd> items_pairs;
+    const int corrFLAG;
     const int nthr;
     const int nload;
     const int ncorr;
     const int nvar;
-    const unsigned int silentFLAG;
-    const unsigned int gradFLAG;
+    const int silentFLAG;
+    const int gradFLAG;
 
     //// Iteration:
     const Eigen::VectorXd &theta;
@@ -320,19 +307,19 @@ namespace pairs{
 
     // Constructor 1:
     SubsetWorker(
-      const Eigen::Map<Eigen::MatrixXd> CONSTRMAT_,
-      const Eigen::Map<Eigen::VectorXd> CONSTRSD_,
+      const Eigen::Ref<const Eigen::MatrixXd> CONSTRMAT_,
+      const Eigen::Ref<const Eigen::VectorXd> CONSTRSD_,
       const std::vector<std::vector<std::vector<double>>> LLC_,
-      const Eigen::Map<Eigen::VectorXd> C_VEC_,
-      const Eigen::MatrixXd &PAIRS_TABLE_,
-      const Eigen::MatrixXd &ITEMS_PAIRS_,
-      const unsigned int CORRFLAG_,
+      const Eigen::Ref<const Eigen::VectorXd> C_VEC_,
+      const Eigen::Ref<const Eigen::MatrixXd> PAIRS_TABLE_,
+      const Eigen::Ref<const Eigen::MatrixXd> ITEMS_PAIRS_,
+      const int CORRFLAG_,
       const int NTHR_,
       const int NLOAD_,
       const int NCORR_,
       const int NVAR_,
-      const unsigned int SILENTFLAG_,
-      const unsigned int GRADFLAG_,
+      const int SILENTFLAG_,
+      const int GRADFLAG_,
       const Eigen::VectorXd &THETA_,
       const std::vector<int> &INDEX_VECTOR_
     ):
@@ -359,16 +346,16 @@ namespace pairs{
   void SubsetWorker::operator()(std::size_t BEGIN, std::size_t END){
     // Run along the pairs identified by indexes in index_vector
     // computing their contribution to nll, gradient and eventually Hessian.
-    unsigned int d = theta.size();
+    int d = theta.size();
     //subset_gradient.resize(d); subset_gradient.setZero();
-    for (unsigned int h = BEGIN; h < END; h++){
+    for (int h = BEGIN; h < END; h++){
 
       // identify corresponding column in pairs_table
-      unsigned int col = index_vector[h];
+      const int col = index_vector[h];
 
       // identify the pair
-      unsigned int k = items_pairs(0, col);
-      unsigned int l = items_pairs(1, col);
+      const int k = items_pairs(0, col);
+      const int l = items_pairs(1, col);
 
       // initialize empty pair-output
       double pair_ll = 0;
@@ -376,13 +363,12 @@ namespace pairs{
 
       // computation of log-likelihood, gradient
       // rearrange parameters
-      const unsigned int p = constrmat.rows();
-      const unsigned int q = constrmat.cols();
-      Eigen::MatrixXd Lam             = params::loadings::theta2mat(theta, constrmat, llc, nthr, nload);
-      Eigen::MatrixXd Ru              = params::latvar::theta2cmat(theta, nthr, nload, ncorr, nvar, q);
-      Eigen::MatrixXd Du              = params::latvar::theta2dmat(theta, constrsd, nthr, nload, ncorr, nvar, q);
-      Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
-      Eigen::VectorXd tau             = params::thresholds::theta2vec(theta, nthr);
+      const int q = constrmat.cols();
+      const Eigen::MatrixXd Lam             = params::loadings::theta2mat(theta, constrmat, llc, nthr, nload);
+      const Eigen::MatrixXd Ru              = params::latvar::theta2cmat(theta, nthr, nload, ncorr, nvar, q);
+      const Eigen::MatrixXd Du              = params::latvar::theta2dmat(theta, constrsd, nthr, nload, ncorr, nvar, q);
+      const Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
+      const Eigen::VectorXd tau             = params::thresholds::theta2vec(theta, nthr);
       pair_contribution_extended(constrmat, constrsd, llc, c_vec, theta,
                                  Lam, Ru, Du, Sigma_u, tau,
                                  corrFLAG, nthr, nload, ncorr, nvar, k, l, pairs_table, silentFLAG, gradFLAG, pair_ll, pair_gradient);
@@ -397,7 +383,7 @@ namespace pairs{
 
   void SubsetWorker::join(const SubsetWorker &RHS){
     subset_ll += RHS.subset_ll;
-    for(unsigned i = 0; i < subset_gradient.size(); i++){
+    for(int i = 0; i < subset_gradient.size(); i++){
       subset_gradient(i) += RHS.subset_gradient(i);
 
     }
