@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(plFA)
+library(lavaan.pl)
 ```
 
 Example taken from test files. Need to edit.
@@ -37,7 +37,7 @@ set.seed(123)
   # Simple loading matrix constraints
   A <- build_constrMat(P = p, Q = q, STRUCT = 'simple')
   llc <- NULL
-  A <- plFA:::check_cnstr_loadings(A, stdlv, LLC=llc)
+  A <- lavaan.pl:::check_cnstr_loadings(A, stdlv, LLC=llc)
   # Draw some random loadings according to constraints
   Load <- gen_loadings(CONSTRMAT = A, STDLV = stdlv, LLC=llc)
   nload <- sum(is.na(A))
@@ -45,12 +45,12 @@ set.seed(123)
   # Generate random latent correlation matrix
   tcorrvec <- rep(0, q*(q-1)/2); if(corrflag) tcorrvec <- rnorm(q*(q-1)/2)
   ncorr <- if(corrflag)q*(q-1)/2 else 0
-  R <- plFA:::cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
+  R <- lavaan.pl:::cpp_latvar_vec2cmat(VEC=tcorrvec, NCORR=ncorr, Q=q)
 
 
   # Generate random latent variances
   constr_var <- rep(NA, q)
-  constr_lsd <- plFA:::check_cnstr_latvar(constr_var, q, stdlv)
+  constr_lsd <- lavaan.pl:::check_cnstr_latvar(constr_var, q, stdlv)
   nvar  <- sum(is.na(constr_lsd))
   tsdvec <- constr_lsd
   tsdvec[is.na(constr_lsd)] <- rnorm(sum(is.na(constr_lsd)), -.25, .1)

@@ -2,51 +2,51 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 cpp_compute_pair_ext <- function(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION = 0L) {
-    .Call(`_plFA_cpp_compute_pair_ext`, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
+    .Call(`_lavaan_pl_cpp_compute_pair_ext`, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, K, L, PAIRS_TABLE, SILENTFLAG, GRADFLAG, OPTION)
 }
 
 cpp_loadings_theta2vec <- function(THETA, NTHR, NLOAD) {
-    .Call(`_plFA_cpp_loadings_theta2vec`, THETA, NTHR, NLOAD)
+    .Call(`_lavaan_pl_cpp_loadings_theta2vec`, THETA, NTHR, NLOAD)
 }
 
 cpp_loadings_theta2mat <- function(THETA, CONSTRMAT, LLC, NTHR, NLOAD) {
-    .Call(`_plFA_cpp_loadings_theta2mat`, THETA, CONSTRMAT, LLC, NTHR, NLOAD)
+    .Call(`_lavaan_pl_cpp_loadings_theta2mat`, THETA, CONSTRMAT, LLC, NTHR, NLOAD)
 }
 
 cpp_loadings_mat2vec <- function(LOADINGS, CONSTRMAT, NLOAD) {
-    .Call(`_plFA_cpp_loadings_mat2vec`, LOADINGS, CONSTRMAT, NLOAD)
+    .Call(`_lavaan_pl_cpp_loadings_mat2vec`, LOADINGS, CONSTRMAT, NLOAD)
 }
 
 cpp_latvar_vec2cmat <- function(VEC, NCORR, Q) {
-    .Call(`_plFA_cpp_latvar_vec2cmat`, VEC, NCORR, Q)
+    .Call(`_lavaan_pl_cpp_latvar_vec2cmat`, VEC, NCORR, Q)
 }
 
 cpp_latvar_vec2dmat <- function(VEC, CONSTRLOGSD, NCORR, NVAR, Q) {
-    .Call(`_plFA_cpp_latvar_vec2dmat`, VEC, CONSTRLOGSD, NCORR, NVAR, Q)
+    .Call(`_lavaan_pl_cpp_latvar_vec2dmat`, VEC, CONSTRLOGSD, NCORR, NVAR, Q)
 }
 
 cpp_latvar_theta2cmat <- function(THETA, NTHR, NLOAD, NCORR, NVAR, Q) {
-    .Call(`_plFA_cpp_latvar_theta2cmat`, THETA, NTHR, NLOAD, NCORR, NVAR, Q)
+    .Call(`_lavaan_pl_cpp_latvar_theta2cmat`, THETA, NTHR, NLOAD, NCORR, NVAR, Q)
 }
 
 cpp_latvar_theta2dmat <- function(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q) {
-    .Call(`_plFA_cpp_latvar_theta2dmat`, THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q)
+    .Call(`_lavaan_pl_cpp_latvar_theta2dmat`, THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q)
 }
 
 cpp_latvar_theta2mat <- function(THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q) {
-    .Call(`_plFA_cpp_latvar_theta2mat`, THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q)
+    .Call(`_lavaan_pl_cpp_latvar_theta2mat`, THETA, CONSTRLOGSD, NTHR, NLOAD, NCORR, NVAR, Q)
 }
 
 cpp_latvar_mat2vec <- function(S, CONSTRLOGSD, NCORR, NVAR) {
-    .Call(`_plFA_cpp_latvar_mat2vec`, S, CONSTRLOGSD, NCORR, NVAR)
+    .Call(`_lavaan_pl_cpp_latvar_mat2vec`, S, CONSTRLOGSD, NCORR, NVAR)
 }
 
 cpp_latvar_mat2cmat <- function(S) {
-    .Call(`_plFA_cpp_latvar_mat2cmat`, S)
+    .Call(`_lavaan_pl_cpp_latvar_mat2cmat`, S)
 }
 
 cpp_sa_proj <- function(THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_plFA_cpp_sa_proj`, THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+    .Call(`_lavaan_pl_cpp_sa_proj`, THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
 #' Compute pairwise frequencies
@@ -65,7 +65,7 @@ cpp_sa_proj <- function(THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTH
 #'
 #' @export
 pairs_freq <- function(Y, C_VEC) {
-    .Call(`_plFA_pairs_freq`, Y, C_VEC)
+    .Call(`_lavaan_pl_pairs_freq`, Y, C_VEC)
 }
 
 #' Full pairwise iteration
@@ -90,7 +90,7 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param SILENTFLAG optional for verbose output
 #'
 cpp_multiThread_completePairwise2 <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
-    .Call(`_plFA_cpp_multiThread_completePairwise2`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
+    .Call(`_lavaan_pl_cpp_multiThread_completePairwise2`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }
 
 #' Full pairwise iteration
@@ -115,11 +115,11 @@ cpp_multiThread_completePairwise2 <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, 
 #' @param SILENTFLAG optional for verbose output
 #'
 cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
-    .Call(`_plFA_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
+    .Call(`_lavaan_pl_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }
 
 cpp_plSA2 <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER = FALSE) {
-    .Call(`_plFA_cpp_plSA2`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER)
+    .Call(`_lavaan_pl_cpp_plSA2`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER)
 }
 
 #' Estimate of H
@@ -142,7 +142,7 @@ cpp_plSA2 <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THET
 #' @param NVAR Number of free latent variance parameters.
 #'
 estimate_H <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_plFA_estimate_H`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+    .Call(`_lavaan_pl_estimate_H`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
 #' Estimate of J
@@ -164,7 +164,7 @@ estimate_H <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTH
 #' @param NVAR Number of free latent variance parameters.
 #'
 estimate_J <- function(Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_plFA_estimate_J`, Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+    .Call(`_lavaan_pl_estimate_J`, Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
 #' Estimate Diagonal of H
@@ -187,6 +187,6 @@ estimate_J <- function(Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLO
 #' @param NVAR Number of free latent variance parameters.
 #'
 cpp_DH <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_plFA_cpp_DH`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+    .Call(`_lavaan_pl_cpp_DH`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 

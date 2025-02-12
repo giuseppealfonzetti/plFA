@@ -22,10 +22,10 @@ library(tinytest)
 ## Limited information GOF tests
 
 The `{lavaan.bingof}` package provides a set of LIGOF tests for CFA models with binary data.
-Models estimated using the `{plFA}` package are directly compatible.
+Models estimated using the `{lavaan.pl}` package are directly compatible.
 
 ```{r setup}
-library(plFA)
+library(lavaan.pl)
 library(lavaan.bingof)
 ```
 
@@ -42,7 +42,7 @@ all_tests(fit)
 As a comparison, we can look at the output from using the `cfa()` function in the `{lavaan}` package.
 
 ```{r}
-fit1 <- plFA::cfa(mod, dat, std.lv = TRUE)
+fit1 <- lavaan.pl::cfa(mod, dat, std.lv = TRUE)
 fit2 <- lavaan::cfa(mod, dat, std.lv = TRUE, estimator = "PML")
 
 # Test equality of coefficients and standard errors
@@ -99,10 +99,10 @@ information_matrix <- function(fit, type) {
 
 
 ```{r}
-# From plFA
-Hinv1 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+# From lavaan.pl
+Hinv1 <- with(fit1@external, computeVar(lavaan.pl, D)$invH[idx_plFA2lav, idx_plFA2lav])
 fit1 <- cfa(mod, dat, std.lv = TRUE, estimator.args = list(computevar_numderiv = TRUE), verbose = TRUE)
-Hinv2 <- with(fit1@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+Hinv2 <- with(fit1@external, computeVar(lavaan.pl, D)$invH[idx_plFA2lav, idx_plFA2lav])
 Hinv3 <- solve(information_matrix(fit1, "observed"))
 
 expect_equal(Hinv1, Hinv2, tolerance = 1e-5)  # ucminf vs numderiv
@@ -113,8 +113,8 @@ expect_equal(Hinv2, Hinv3, tolerance = 1e-5)  # numderiv vs lavaan
 ### Variability matrix
 
 ```{r}
-# From plFA
-J1 <- with(fit1@external, computeVar(plFA, D)$J[idx_plFA2lav, idx_plFA2lav])
+# From lavaan.pl
+J1 <- with(fit1@external, computeVar(lavaan.pl, D)$J[idx_plFA2lav, idx_plFA2lav])
 J2 <- information_matrix(fit1, "first.order")
 
 expect_equal(J1, J2, tolerance = 1e-5)  # ucminf vs numderiv

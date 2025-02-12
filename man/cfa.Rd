@@ -64,7 +64,7 @@ Therefore, all methods available for \code{lavaan} objects are expected to be
 compatible with \code{plFAlavaan} objects.
 }
 \description{
-Fit a Confirmatory Factor Analysis (CFA) model using the \code{plFA()} engine
+Fit a Confirmatory Factor Analysis (CFA) model using the \code{lavaan.pl()} engine
 using the \code{\link{lavaan}} framework. By default, a quasi-Newton BFGS optimiser
 from the \code{\link{ucminf}} package is used. For large data sets, the stochastic
 approximation algorithm can be used.

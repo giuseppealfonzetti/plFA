@@ -1,6 +1,6 @@
 #' Fit Confirmatory Factor Analysis Models
 #'
-#' Fit a Confirmatory Factor Analysis (CFA) model using the `plFA()` engine
+#' Fit a Confirmatory Factor Analysis (CFA) model using the `lavaan.pl()` engine
 #' using the [`lavaan`] framework. By default, a quasi-Newton BFGS optimiser
 #' from the [`ucminf`] package is used. For large data sets, the stochastic
 #' approximation algorithm can be used.
@@ -149,7 +149,7 @@ cfa <- function(
     cli::cli_abort("Multigroup analysis is not currently supported.")
   }
 
-  # Fit plFA -------------------------------------------------------------------
+  # Fit lavaan.pl -------------------------------------------------------------------
   D <- fit0@Data@X[[1]] - 1
 
   # Build the p x q loading constraints matrix
@@ -211,8 +211,8 @@ cfa <- function(
     LLC = llc
   )
 
-  # Starting values are always computed (for lav<->plFA indices). Note: the
-  # values in plFA are always in the order of thresholds, loadings, latent
+  # Starting values are always computed (for lav<->lavaan.pl indices). Note: the
+  # values in lavaan.pl are always in the order of thresholds, loadings, latent
   # correlations, then latent variances.
   startlist <- lavaan::inspect(fit0, what = "start", add.class = FALSE)
   lambda <- startlist$lambda[FREE$lambda > 0]
@@ -244,7 +244,7 @@ cfa <- function(
     init <- init[idx_lav2plFA]
   }
 
-  # Send to plFA
+  # Send to lavaan.pl
   fit1 <- fit_plFA(
     DATA = D,
     CONSTR_LIST = constr_list,
@@ -433,9 +433,9 @@ create_lav_from_fitplFA <- function(fit0, fit1, vars, D, idx_plFA2lav) {
   fit0@timing$test <- timing_test
   fit0@timing$total <- sum(unlist(fit0@timing))
 
-  # Include the entire output of plFA fit --------------------------------------
+  # Include the entire output of lavaan.pl fit --------------------------------------
   fit0@external <- list(
-    plFA = fit1,
+    lavaan.pl = fit1,
     vars = vars,
     D = D,
     idx_plFA2lav = idx_plFA2lav

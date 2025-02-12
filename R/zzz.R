@@ -11,10 +11,10 @@
   conflict_msg <- paste0(
     cli::rule(
       left = cli::style_bold("Conflicts"),
-      right = paste("plFA", utils::packageVersion("plFA"))
+      right = paste("lavaan.pl", utils::packageVersion("lavaan.pl"))
     ),
     "\n",
-    bullets_mask("plFA", "lavaan", "cfa")
+    bullets_mask("lavaan.pl", "lavaan", "cfa")
   )
   rlang::inform(conflict_msg, class = "packageStartupMessage")
 }

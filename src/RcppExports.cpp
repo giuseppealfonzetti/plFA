@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // cpp_compute_pair_ext
 Rcpp::List cpp_compute_pair_ext(Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::VectorXd THETA, const int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const unsigned int K, const unsigned int L, Eigen::MatrixXd PAIRS_TABLE, const unsigned int SILENTFLAG, const unsigned int GRADFLAG, const int OPTION);
-RcppExport SEXP _plFA_cpp_compute_pair_ext(SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP C_VECSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP KSEXP, SEXP LSEXP, SEXP PAIRS_TABLESEXP, SEXP SILENTFLAGSEXP, SEXP GRADFLAGSEXP, SEXP OPTIONSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_compute_pair_ext(SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP C_VECSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP KSEXP, SEXP LSEXP, SEXP PAIRS_TABLESEXP, SEXP SILENTFLAGSEXP, SEXP GRADFLAGSEXP, SEXP OPTIONSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -39,7 +39,7 @@ END_RCPP
 }
 // cpp_loadings_theta2vec
 Eigen::VectorXd cpp_loadings_theta2vec(Eigen::Map<Eigen::VectorXd> THETA, const int NTHR, const int NLOAD);
-RcppExport SEXP _plFA_cpp_loadings_theta2vec(SEXP THETASEXP, SEXP NTHRSEXP, SEXP NLOADSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_loadings_theta2vec(SEXP THETASEXP, SEXP NTHRSEXP, SEXP NLOADSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -52,7 +52,7 @@ END_RCPP
 }
 // cpp_loadings_theta2mat
 Eigen::MatrixXd cpp_loadings_theta2mat(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, const std::vector<std::vector<std::vector<double>>> LLC, const int NTHR, const int NLOAD);
-RcppExport SEXP _plFA_cpp_loadings_theta2mat(SEXP THETASEXP, SEXP CONSTRMATSEXP, SEXP LLCSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_loadings_theta2mat(SEXP THETASEXP, SEXP CONSTRMATSEXP, SEXP LLCSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -67,7 +67,7 @@ END_RCPP
 }
 // cpp_loadings_mat2vec
 Eigen::MatrixXd cpp_loadings_mat2vec(Eigen::Map<Eigen::MatrixXd> LOADINGS, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, const int NLOAD);
-RcppExport SEXP _plFA_cpp_loadings_mat2vec(SEXP LOADINGSSEXP, SEXP CONSTRMATSEXP, SEXP NLOADSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_loadings_mat2vec(SEXP LOADINGSSEXP, SEXP CONSTRMATSEXP, SEXP NLOADSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -80,7 +80,7 @@ END_RCPP
 }
 // cpp_latvar_vec2cmat
 Eigen::MatrixXd cpp_latvar_vec2cmat(Eigen::Map<Eigen::VectorXd> VEC, const int NCORR, const int Q);
-RcppExport SEXP _plFA_cpp_latvar_vec2cmat(SEXP VECSEXP, SEXP NCORRSEXP, SEXP QSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_latvar_vec2cmat(SEXP VECSEXP, SEXP NCORRSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -93,7 +93,7 @@ END_RCPP
 }
 // cpp_latvar_vec2dmat
 Eigen::MatrixXd cpp_latvar_vec2dmat(Eigen::Map<Eigen::VectorXd> VEC, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const int NCORR, const int NVAR, const int Q);
-RcppExport SEXP _plFA_cpp_latvar_vec2dmat(SEXP VECSEXP, SEXP CONSTRLOGSDSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_latvar_vec2dmat(SEXP VECSEXP, SEXP CONSTRLOGSDSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -108,7 +108,7 @@ END_RCPP
 }
 // cpp_latvar_theta2cmat
 Eigen::MatrixXd cpp_latvar_theta2cmat(Eigen::Map<Eigen::VectorXd> THETA, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int Q);
-RcppExport SEXP _plFA_cpp_latvar_theta2cmat(SEXP THETASEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_latvar_theta2cmat(SEXP THETASEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -124,7 +124,7 @@ END_RCPP
 }
 // cpp_latvar_theta2dmat
 Eigen::MatrixXd cpp_latvar_theta2dmat(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int Q);
-RcppExport SEXP _plFA_cpp_latvar_theta2dmat(SEXP THETASEXP, SEXP CONSTRLOGSDSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_latvar_theta2dmat(SEXP THETASEXP, SEXP CONSTRLOGSDSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -141,7 +141,7 @@ END_RCPP
 }
 // cpp_latvar_theta2mat
 Eigen::MatrixXd cpp_latvar_theta2mat(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int Q);
-RcppExport SEXP _plFA_cpp_latvar_theta2mat(SEXP THETASEXP, SEXP CONSTRLOGSDSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_latvar_theta2mat(SEXP THETASEXP, SEXP CONSTRLOGSDSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -158,7 +158,7 @@ END_RCPP
 }
 // cpp_latvar_mat2vec
 Eigen::VectorXd cpp_latvar_mat2vec(Eigen::Map<Eigen::MatrixXd> S, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const int NCORR, const int NVAR);
-RcppExport SEXP _plFA_cpp_latvar_mat2vec(SEXP SSEXP, SEXP CONSTRLOGSDSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_latvar_mat2vec(SEXP SSEXP, SEXP CONSTRLOGSDSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -172,7 +172,7 @@ END_RCPP
 }
 // cpp_latvar_mat2cmat
 Eigen::MatrixXd cpp_latvar_mat2cmat(Eigen::Map<Eigen::MatrixXd> S);
-RcppExport SEXP _plFA_cpp_latvar_mat2cmat(SEXP SSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_latvar_mat2cmat(SEXP SSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -183,7 +183,7 @@ END_RCPP
 }
 // cpp_sa_proj
 Eigen::VectorXd cpp_sa_proj(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> C_VEC, const int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
-RcppExport SEXP _plFA_cpp_sa_proj(SEXP THETASEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP C_VECSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_sa_proj(SEXP THETASEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP C_VECSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -203,7 +203,7 @@ END_RCPP
 }
 // pairs_freq
 Eigen::MatrixXd pairs_freq(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC);
-RcppExport SEXP _plFA_pairs_freq(SEXP YSEXP, SEXP C_VECSEXP) {
+RcppExport SEXP _lavaan_pl_pairs_freq(SEXP YSEXP, SEXP C_VECSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -215,7 +215,7 @@ END_RCPP
 }
 // cpp_multiThread_completePairwise2
 Rcpp::List cpp_multiThread_completePairwise2(const int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, const int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int GRFLAG, const int SILENTFLAG);
-RcppExport SEXP _plFA_cpp_multiThread_completePairwise2(SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_multiThread_completePairwise2(SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -239,7 +239,7 @@ END_RCPP
 }
 // cpp_multiThread_completePairwise
 Rcpp::List cpp_multiThread_completePairwise(const int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, const int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int GRFLAG, const int SILENTFLAG);
-RcppExport SEXP _plFA_cpp_multiThread_completePairwise(SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_multiThread_completePairwise(SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP GRFLAGSEXP, SEXP SILENTFLAGSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -263,7 +263,7 @@ END_RCPP
 }
 // cpp_plSA2
 Rcpp::List cpp_plSA2(Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> VALFREQ, const int N, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA_INIT, Eigen::Map<Eigen::VectorXd> DIH, const int NTHR, const int NLOAD, const int NCORR, const int NVAR, const int PAIRS_PER_ITERATION, const double STEP0, const double STEP1, const double STEP2, const double STEP3, const int BURNE, const int MAXE, const int EPOCHS_PER_CHECK, const int MAX_TOL_COUNTER, const double TOL_BURN, const double TOL_END, const int CHECK_TOL, const int SEED, const bool VERBOSE, bool VERBOSE_ITER);
-RcppExport SEXP _plFA_cpp_plSA2(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETA_INITSEXP, SEXP DIHSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP STEP0SEXP, SEXP STEP1SEXP, SEXP STEP2SEXP, SEXP STEP3SEXP, SEXP BURNESEXP, SEXP MAXESEXP, SEXP EPOCHS_PER_CHECKSEXP, SEXP MAX_TOL_COUNTERSEXP, SEXP TOL_BURNSEXP, SEXP TOL_ENDSEXP, SEXP CHECK_TOLSEXP, SEXP SEEDSEXP, SEXP VERBOSESEXP, SEXP VERBOSE_ITERSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_plSA2(SEXP FREQSEXP, SEXP VALFREQSEXP, SEXP NSEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETA_INITSEXP, SEXP DIHSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP, SEXP PAIRS_PER_ITERATIONSEXP, SEXP STEP0SEXP, SEXP STEP1SEXP, SEXP STEP2SEXP, SEXP STEP3SEXP, SEXP BURNESEXP, SEXP MAXESEXP, SEXP EPOCHS_PER_CHECKSEXP, SEXP MAX_TOL_COUNTERSEXP, SEXP TOL_BURNSEXP, SEXP TOL_ENDSEXP, SEXP CHECK_TOLSEXP, SEXP SEEDSEXP, SEXP VERBOSESEXP, SEXP VERBOSE_ITERSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -301,7 +301,7 @@ END_RCPP
 }
 // estimate_H
 Rcpp::List estimate_H(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
-RcppExport SEXP _plFA_estimate_H(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
+RcppExport SEXP _lavaan_pl_estimate_H(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -323,7 +323,7 @@ END_RCPP
 }
 // estimate_J
 Rcpp::List estimate_J(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::VectorXd& THETA, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
-RcppExport SEXP _plFA_estimate_J(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
+RcppExport SEXP _lavaan_pl_estimate_J(SEXP YSEXP, SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -344,7 +344,7 @@ END_RCPP
 }
 // cpp_DH
 Eigen::VectorXd cpp_DH(Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> A, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, int N, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
-RcppExport SEXP _plFA_cpp_DH(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
+RcppExport SEXP _lavaan_pl_cpp_DH(SEXP C_VECSEXP, SEXP ASEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP THETASEXP, SEXP FREQSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -366,29 +366,29 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_plFA_cpp_compute_pair_ext", (DL_FUNC) &_plFA_cpp_compute_pair_ext, 16},
-    {"_plFA_cpp_loadings_theta2vec", (DL_FUNC) &_plFA_cpp_loadings_theta2vec, 3},
-    {"_plFA_cpp_loadings_theta2mat", (DL_FUNC) &_plFA_cpp_loadings_theta2mat, 5},
-    {"_plFA_cpp_loadings_mat2vec", (DL_FUNC) &_plFA_cpp_loadings_mat2vec, 3},
-    {"_plFA_cpp_latvar_vec2cmat", (DL_FUNC) &_plFA_cpp_latvar_vec2cmat, 3},
-    {"_plFA_cpp_latvar_vec2dmat", (DL_FUNC) &_plFA_cpp_latvar_vec2dmat, 5},
-    {"_plFA_cpp_latvar_theta2cmat", (DL_FUNC) &_plFA_cpp_latvar_theta2cmat, 6},
-    {"_plFA_cpp_latvar_theta2dmat", (DL_FUNC) &_plFA_cpp_latvar_theta2dmat, 7},
-    {"_plFA_cpp_latvar_theta2mat", (DL_FUNC) &_plFA_cpp_latvar_theta2mat, 7},
-    {"_plFA_cpp_latvar_mat2vec", (DL_FUNC) &_plFA_cpp_latvar_mat2vec, 4},
-    {"_plFA_cpp_latvar_mat2cmat", (DL_FUNC) &_plFA_cpp_latvar_mat2cmat, 1},
-    {"_plFA_cpp_sa_proj", (DL_FUNC) &_plFA_cpp_sa_proj, 10},
-    {"_plFA_pairs_freq", (DL_FUNC) &_plFA_pairs_freq, 2},
-    {"_plFA_cpp_multiThread_completePairwise2", (DL_FUNC) &_plFA_cpp_multiThread_completePairwise2, 14},
-    {"_plFA_cpp_multiThread_completePairwise", (DL_FUNC) &_plFA_cpp_multiThread_completePairwise, 14},
-    {"_plFA_cpp_plSA2", (DL_FUNC) &_plFA_cpp_plSA2, 28},
-    {"_plFA_estimate_H", (DL_FUNC) &_plFA_estimate_H, 12},
-    {"_plFA_estimate_J", (DL_FUNC) &_plFA_estimate_J, 11},
-    {"_plFA_cpp_DH", (DL_FUNC) &_plFA_cpp_DH, 12},
+    {"_lavaan_pl_cpp_compute_pair_ext", (DL_FUNC) &_lavaan_pl_cpp_compute_pair_ext, 16},
+    {"_lavaan_pl_cpp_loadings_theta2vec", (DL_FUNC) &_lavaan_pl_cpp_loadings_theta2vec, 3},
+    {"_lavaan_pl_cpp_loadings_theta2mat", (DL_FUNC) &_lavaan_pl_cpp_loadings_theta2mat, 5},
+    {"_lavaan_pl_cpp_loadings_mat2vec", (DL_FUNC) &_lavaan_pl_cpp_loadings_mat2vec, 3},
+    {"_lavaan_pl_cpp_latvar_vec2cmat", (DL_FUNC) &_lavaan_pl_cpp_latvar_vec2cmat, 3},
+    {"_lavaan_pl_cpp_latvar_vec2dmat", (DL_FUNC) &_lavaan_pl_cpp_latvar_vec2dmat, 5},
+    {"_lavaan_pl_cpp_latvar_theta2cmat", (DL_FUNC) &_lavaan_pl_cpp_latvar_theta2cmat, 6},
+    {"_lavaan_pl_cpp_latvar_theta2dmat", (DL_FUNC) &_lavaan_pl_cpp_latvar_theta2dmat, 7},
+    {"_lavaan_pl_cpp_latvar_theta2mat", (DL_FUNC) &_lavaan_pl_cpp_latvar_theta2mat, 7},
+    {"_lavaan_pl_cpp_latvar_mat2vec", (DL_FUNC) &_lavaan_pl_cpp_latvar_mat2vec, 4},
+    {"_lavaan_pl_cpp_latvar_mat2cmat", (DL_FUNC) &_lavaan_pl_cpp_latvar_mat2cmat, 1},
+    {"_lavaan_pl_cpp_sa_proj", (DL_FUNC) &_lavaan_pl_cpp_sa_proj, 10},
+    {"_lavaan_pl_pairs_freq", (DL_FUNC) &_lavaan_pl_pairs_freq, 2},
+    {"_lavaan_pl_cpp_multiThread_completePairwise2", (DL_FUNC) &_lavaan_pl_cpp_multiThread_completePairwise2, 14},
+    {"_lavaan_pl_cpp_multiThread_completePairwise", (DL_FUNC) &_lavaan_pl_cpp_multiThread_completePairwise, 14},
+    {"_lavaan_pl_cpp_plSA2", (DL_FUNC) &_lavaan_pl_cpp_plSA2, 28},
+    {"_lavaan_pl_estimate_H", (DL_FUNC) &_lavaan_pl_estimate_H, 12},
+    {"_lavaan_pl_estimate_J", (DL_FUNC) &_lavaan_pl_estimate_J, 11},
+    {"_lavaan_pl_cpp_DH", (DL_FUNC) &_lavaan_pl_cpp_DH, 12},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_plFA(DllInfo *dll) {
+RcppExport void R_init_lavaan_pl(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

@@ -1,54 +1,54 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# plFA
+# lavaan.pl
 
 <!-- badges: start -->
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN
-status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
-[![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
+status](https://www.r-pkg.org/badges/version/lavaan.pl)](https://CRAN.R-project.org/package=lavaan.pl)
+[![R-CMD-check](https://github.com/giuseppealfonzetti/lavaan.pl/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/lavaan.pl/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
-coverage](https://codecov.io/gh/giuseppealfonzetti/plFA/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/plFA)
+coverage](https://codecov.io/gh/giuseppealfonzetti/lavaan.pl/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/lavaan.pl)
 <!-- badges: end -->
 
-The `{plFA}` package allows the estimation of confirmatory factor models
+The `{lavaan.pl}` package allows the estimation of confirmatory factor models
 for ordinal data using stochastic and numeric pairwise likelihood
 optimisation.
 
 ## Installation
 
-You can install the development version of plFA from
+You can install the development version of lavaan.pl from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("giuseppealfonzetti/plFA")
+devtools::install_github("giuseppealfonzetti/lavaan.pl")
 ```
 
 When the package is installed, you can load it with:
 
 ``` r
-library(plFA)
+library(lavaan.pl)
 #> ℹ Loading required package: lavaan
 #> This is lavaan 0.6-19
 #> lavaan is FREE software! Please report any bugs.
 #> 
-#> ── Conflicts ──────────────────────────────────────────────── plFA 0.1.0.9002 ──
-#> ✖ plFA::cfa() masks lavaan::cfa()
+#> ── Conflicts ──────────────────────────────────────────────── lavaan.pl 0.1.0.9002 ──
+#> ✖ lavaan.pl::cfa() masks lavaan::cfa()
 ```
 
-The startup message indicates that the `{plFA}` package provides its own
-version of the `cfa()` function, which can be used to estimate plFA
+The startup message indicates that the `{lavaan.pl}` package provides its own
+version of the `cfa()` function, which can be used to estimate lavaan.pl
 models using the `lavaan` syntax. An example is given below.
 
 ## Fitting an ordinal CFA model
 
 Consider the data containing 25 personality items measured on 6-point
 scale from the International Personality Item Pool (IPIP) dataset. The
-data set is available in the `{plFA}` package and can be loaded with the
+data set is available in the `{lavaan.pl}` package and can be loaded with the
 following code:
 
 ``` r
@@ -86,10 +86,10 @@ Users of `{lavaan}` will be familiar with this syntax. The call to the
 `cfa()` function is made as usual:
 
 ``` r
-# Fit the model (note, this cfa() function is from the plFA package)
+# Fit the model (note, this cfa() function is from the lavaan.pl package)
 fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "mean.var.adjusted")
 summary(fit)
-#> plFA 0.1.0.9002 
+#> lavaan.pl 0.1.0.9002 
 #>   ⨉
 #> lavaan 0.6-19 ended normally after 98 iterations
 #> 
@@ -479,7 +479,7 @@ sessioninfo::session_info()
 #>  pbivnorm       0.6.0      2015-01-23 [1] CRAN (R 4.4.0)
 #>  pillar         1.10.1     2025-01-07 [1] CRAN (R 4.4.1)
 #>  pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.4.0)
-#>  plFA         * 0.1.0.9002 2025-02-08 [1] local
+#>  lavaan.pl         * 0.1.0.9002 2025-02-08 [1] local
 #>  plyr           1.8.9      2023-10-02 [1] CRAN (R 4.4.0)
 #>  png            0.1-8      2022-11-29 [1] CRAN (R 4.4.0)
 #>  psych          2.4.6.26   2024-06-27 [1] CRAN (R 4.4.0)

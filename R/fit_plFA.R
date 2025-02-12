@@ -113,7 +113,7 @@ fit_plFA <- function(
              method = METHOD)
 
   # Version
-  tmp@version <- as.character(utils::packageVersion("plFA"))
+  tmp@version <- as.character(utils::packageVersion("lavaan.pl"))
 
   # Set up multi-threads computations
   if (is.null(NCORES)) NCORES <- 1L

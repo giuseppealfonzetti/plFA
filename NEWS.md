@@ -1,8 +1,8 @@
-# plFA (development version)
+# lavaan.pl (development version)
 
 * Add GOF tests.
 
-# plFA 0.1.0
+# lavaan.pl 0.1.0
 
 * This version stable enough for use, talk at Psychoco 2025 (Ghent).
 * Added a user-friendly `{lavaan}`-style `cfa()` wrapper.

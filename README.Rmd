@@ -15,39 +15,39 @@ knitr::opts_chunk$set(
 )
 ```
 
-# plFA
+# lavaan.pl
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/plFA)](https://CRAN.R-project.org/package=plFA)
-[![R-CMD-check](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/plFA/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/giuseppealfonzetti/plFA/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/plFA)
+[![CRAN status](https://www.r-pkg.org/badges/version/lavaan.pl)](https://CRAN.R-project.org/package=lavaan.pl)
+[![R-CMD-check](https://github.com/giuseppealfonzetti/lavaan.pl/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/giuseppealfonzetti/lavaan.pl/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/giuseppealfonzetti/lavaan.pl/graph/badge.svg)](https://app.codecov.io/gh/giuseppealfonzetti/lavaan.pl)
 <!-- badges: end -->
 
-The `{plFA}` package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
+The `{lavaan.pl}` package allows the estimation of confirmatory factor models for ordinal data using stochastic and numeric pairwise likelihood optimisation. 
 
 ## Installation
 
-You can install the development version of plFA from [GitHub](https://github.com/) with:
+You can install the development version of lavaan.pl from [GitHub](https://github.com/) with:
 
 ```r
 # install.packages("devtools")
-devtools::install_github("giuseppealfonzetti/plFA")
+devtools::install_github("giuseppealfonzetti/lavaan.pl")
 ```
 
 When the package is installed, you can load it with:
 
 ```{r}
-library(plFA)
+library(lavaan.pl)
 ```
 
-The startup message indicates that the `{plFA}` package provides its own version of the `cfa()` function, which can be used to estimate plFA models using the `lavaan` syntax.
+The startup message indicates that the `{lavaan.pl}` package provides its own version of the `cfa()` function, which can be used to estimate lavaan.pl models using the `lavaan` syntax.
 An example is given below.
 
 ## Fitting an ordinal CFA model
 
 Consider the data containing 25 personality items measured on 6-point scale from the International Personality Item Pool (IPIP) dataset.
-The data set is available in the `{plFA}` package and can be loaded with the following code:
+The data set is available in the `{lavaan.pl}` package and can be loaded with the following code:
 
 ```{r}
 data("bfi")
@@ -70,7 +70,7 @@ Users of `{lavaan}` will be familiar with this syntax.
 The call to the `cfa()` function is made as usual:
 
 ```{r}
-# Fit the model (note, this cfa() function is from the plFA package)
+# Fit the model (note, this cfa() function is from the lavaan.pl package)
 fit <- cfa(model = mod, data = bfi, std.lv = TRUE, test = "mean.var.adjusted")
 summary(fit)
 ```

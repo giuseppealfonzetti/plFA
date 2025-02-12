@@ -90,8 +90,8 @@ test_that("`std.lv` argument works", {
   fit1 <- cfa(mod, bfi, std.lv = FALSE)
   fit2 <- cfa(mod, bfi, std.lv = TRUE)
   expect_equal(
-    fit1@external$plFA@numFit$value,
-    fit2@external$plFA@numFit$value
+    fit1@external$lavaan.pl@numFit$value,
+    fit2@external$lavaan.pl@numFit$value
   )
   expect_equal(fitted(fit1), fitted(fit2), tolerance = 1e-3)
 })
@@ -169,12 +169,12 @@ test_that("Hinv is the same", {
     return(out)
   }
 
-  # From plFA
+  # From lavaan.pl
   mod <- "eta1 =~ y1 + y2 + y3 + y4 + y5"
 
   # Getting Hinv from ucminf for free
   fit <- cfa(mod, LSAT, std.lv = TRUE)
-  Hinv1 <- with(fit@external, computeVar(plFA, D)$invH[idx_plFA2lav, idx_plFA2lav])
+  Hinv1 <- with(fit@external, computeVar(lavaan.pl, D)$invH[idx_plFA2lav, idx_plFA2lav])
 
   # Getting Hinv via numDeriv
   fit <- cfa(mod, LSAT, std.lv = TRUE,
@@ -195,7 +195,7 @@ test_that("Jmat is the same", {
   fit2 <- lavaan::cfa(mod, LSAT, std.lv = TRUE, estimator = "PML")
 
   # Getting Hinv from ucminf for free
-  J1 <- with(fit1@external, computeVar(plFA, D)$J[idx_plFA2lav, idx_plFA2lav])
+  J1 <- with(fit1@external, computeVar(lavaan.pl, D)$J[idx_plFA2lav, idx_plFA2lav])
   J2 <- lavaan:::lav_model_information_firstorder(
     lavmodel =fit2@Model,
     lavsamplestats = fit2@SampleStats,

@@ -11,7 +11,7 @@ setClass(
 
 print_before <- function(object) {
   class(object) <- "lavaan"
-  cat("plFA", object@external$plFA@version, "\n")
+  cat("lavaan.pl", object@external$lavaan.pl@version, "\n")
   cat("  \u2A09 ")
   callNextMethod()
 }
@@ -29,9 +29,9 @@ print_stuff <- function(what, res) {
 #   print_before(object)
 #   print_stuff("Total time", paste0(round(object@timing$total, 2), " s"))
 #   cat("\n")
-#   print_stuff(" - Data reduction", paste0(round(object@external$plFA@freqTime, 2), " s"))
+#   print_stuff(" - Data reduction", paste0(round(object@external$lavaan.pl@freqTime, 2), " s"))
 #   cat("\n")
-#   print_stuff(" - Optimization", paste0(round(object@external$plFA@RTime, 2), " s"))
+#   print_stuff(" - Optimization", paste0(round(object@external$lavaan.pl@RTime, 2), " s"))
 #   cat("\n")
 #   print_stuff(" - Computing variance", paste0(round(object@timing$vcov, 2), " s"))
 # })
@@ -60,7 +60,7 @@ setMethod("BIC", "plFAlavaan", function(object, ...) {
 })
 
 setMethod("plotTraj", "plFAlavaan", function(OBJ) {
-  plotTraj(OBJ@external$plFA)
+  plotTraj(OBJ@external$lavaan.pl)
 })
 
 setMethod(
@@ -83,8 +83,8 @@ setMethod(
       extra_args$vars <- object@external$vars
     }
 
-    # 3. Replace the function name in the call from lavaan::lavaan to plFA::cfa
-    cl[[1]] <- quote(plFA::cfa)
+    # 3. Replace the function name in the call from lavaan::lavaan to lavaan.pl::cfa
+    cl[[1]] <- quote(lavaan.pl::cfa)
 
     # 4. Evaluate the updated call (if requested) or return the call for inspection
     if (evaluate) {

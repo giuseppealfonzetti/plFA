@@ -1,4 +1,4 @@
-library(plFA)
+library(lavaan.pl)
 data("bfi")
 mod <- "
   opn =~ O1 + O2 + O3 + O4 + O5  # Openness

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(plFA)
+library(lavaan.pl)
 
-test_check("plFA")
+test_check("lavaan.pl")

@@ -11,6 +11,6 @@
 #' @importFrom rlang inform
 #' @importFrom stats runif
 #' @importFrom stringr str_pad
-#' @useDynLib plFA, .registration = TRUE
+#' @useDynLib lavaan.pl, .registration = TRUE
 ## usethis namespace: end
 NULL
