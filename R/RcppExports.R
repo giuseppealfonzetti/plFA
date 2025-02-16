@@ -49,6 +49,10 @@ cpp_sa_proj <- function(THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTH
     .Call(`_lavaan_pl_cpp_sa_proj`, THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
+cpp_sample_estimators_HJ <- function(THETA, FREQ, DATA, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_lavaan_pl_cpp_sample_estimators_HJ`, THETA, FREQ, DATA, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+}
+
 #' Compute pairwise frequencies
 #'
 #' @param Y Integer matrix of dimension \eqn{n*p}, where \eqn{n} is the sample size

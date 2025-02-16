@@ -201,6 +201,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_sample_estimators_HJ
+Rcpp::List cpp_sample_estimators_HJ(Eigen::Map<Eigen::VectorXd> THETA, Eigen::Map<Eigen::MatrixXd> FREQ, Eigen::Map<Eigen::MatrixXd> DATA, Eigen::Map<Eigen::VectorXd> C_VEC, Eigen::Map<Eigen::MatrixXd> CONSTRMAT, Eigen::Map<Eigen::VectorXd> CONSTRLOGSD, const std::vector<std::vector<std::vector<double>>> LLC, int N, int CORRFLAG, const int NTHR, const int NLOAD, const int NCORR, const int NVAR);
+RcppExport SEXP _lavaan_pl_cpp_sample_estimators_HJ(SEXP THETASEXP, SEXP FREQSEXP, SEXP DATASEXP, SEXP C_VECSEXP, SEXP CONSTRMATSEXP, SEXP CONSTRLOGSDSEXP, SEXP LLCSEXP, SEXP NSEXP, SEXP CORRFLAGSEXP, SEXP NTHRSEXP, SEXP NLOADSEXP, SEXP NCORRSEXP, SEXP NVARSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type THETA(THETASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type FREQ(FREQSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type DATA(DATASEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type C_VEC(C_VECSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type CONSTRMAT(CONSTRMATSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type CONSTRLOGSD(CONSTRLOGSDSEXP);
+    Rcpp::traits::input_parameter< const std::vector<std::vector<std::vector<double>>> >::type LLC(LLCSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type CORRFLAG(CORRFLAGSEXP);
+    Rcpp::traits::input_parameter< const int >::type NTHR(NTHRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NLOAD(NLOADSEXP);
+    Rcpp::traits::input_parameter< const int >::type NCORR(NCORRSEXP);
+    Rcpp::traits::input_parameter< const int >::type NVAR(NVARSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_sample_estimators_HJ(THETA, FREQ, DATA, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pairs_freq
 Eigen::MatrixXd pairs_freq(Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::VectorXd> C_VEC);
 RcppExport SEXP _lavaan_pl_pairs_freq(SEXP YSEXP, SEXP C_VECSEXP) {
@@ -354,6 +377,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_lavaan_pl_cpp_latvar_mat2vec", (DL_FUNC) &_lavaan_pl_cpp_latvar_mat2vec, 4},
     {"_lavaan_pl_cpp_latvar_mat2cmat", (DL_FUNC) &_lavaan_pl_cpp_latvar_mat2cmat, 1},
     {"_lavaan_pl_cpp_sa_proj", (DL_FUNC) &_lavaan_pl_cpp_sa_proj, 10},
+    {"_lavaan_pl_cpp_sample_estimators_HJ", (DL_FUNC) &_lavaan_pl_cpp_sample_estimators_HJ, 13},
     {"_lavaan_pl_pairs_freq", (DL_FUNC) &_lavaan_pl_pairs_freq, 2},
     {"_lavaan_pl_cpp_multiThread_completePairwise", (DL_FUNC) &_lavaan_pl_cpp_multiThread_completePairwise, 14},
     {"_lavaan_pl_cpp_plSA2", (DL_FUNC) &_lavaan_pl_cpp_plSA2, 28},

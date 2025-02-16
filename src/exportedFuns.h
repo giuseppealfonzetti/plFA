@@ -3,6 +3,7 @@
 
 #include "pairs.h"
 #include "optimisationUtils.h"
+#include "variance.h"
 
 
 // [[Rcpp::export]]
@@ -87,16 +88,6 @@ Eigen::MatrixXd cpp_loadings_theta2mat(
   return params::loadings::theta2mat(THETA, CONSTRMAT, LLC, NTHR, NLOAD);
 }
 
-// // [[Rcpp::export]]
-// Eigen::MatrixXd cpp_loadings_theta2mat_lc(
-//     Eigen::Map<Eigen::VectorXd> THETA,
-//     Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
-//     const std::vector<std::vector<std::vector<int>>> LLC,
-//     const int NTHR,
-//     const int NLOAD
-// ){
-//   return params::loadings::theta2matlc(THETA, CONSTRMAT, LLC, NTHR, NLOAD);
-// }
 
 // [[Rcpp::export]]
 Eigen::MatrixXd cpp_loadings_mat2vec(
@@ -204,7 +195,44 @@ Eigen::VectorXd cpp_sa_proj(
   return theta;
 }
 
+// [[Rcpp::export]]
+Rcpp::List cpp_sample_estimators_HJ(
+    Eigen::Map<Eigen::VectorXd> THETA,
+    Eigen::Map<Eigen::MatrixXd> FREQ,
+    Eigen::Map<Eigen::MatrixXd> DATA,
+    Eigen::Map<Eigen::VectorXd> C_VEC,
+    Eigen::Map<Eigen::MatrixXd> CONSTRMAT,
+    Eigen::Map<Eigen::VectorXd> CONSTRLOGSD,
+    const std::vector<std::vector<std::vector<double>>> LLC,
+    int N,
+    int CORRFLAG,
+    const int NTHR,
+    const int NLOAD,
+    const int NCORR,
+    const int NVAR
+){
+  // Rcpp::Rcout << "ef|theta:\n";
+  // Rcpp::Rcout << THETA.transpose()<<"\n";
+  Rcpp::List output = variance::sampleEstimators(
+    THETA,
+    FREQ,
+    DATA,
+    C_VEC,
+    CONSTRMAT,
+    CONSTRLOGSD,
+    LLC,
+    N,
+    CORRFLAG,
+    NTHR,
+    NLOAD,
+    NCORR,
+    NVAR
+  );
 
+  return output;
+
+
+}
 
 
 #endif

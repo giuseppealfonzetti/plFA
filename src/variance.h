@@ -468,10 +468,13 @@ namespace variance{
   ){
     const int d  = THETA.size();
     const int pp = FREQ.cols();
+    const int n  = DATA.rows();
     // Initialize vector of indexes for entries in pairs_table
     std::vector<int> idx(pp) ;
     std::iota (std::begin(idx), std::end(idx), 0);
 
+    // Rcpp::Rcout << "v|theta:\n";
+    // Rcpp::Rcout << THETA.transpose()<<"\n";
     Eigen::MatrixXd gradmat = Eigen::MatrixXd::Zero(d, pp);
     parallelWorkers::patternwiseOuterProd estH(
         CONSTRMAT,
@@ -488,14 +491,29 @@ namespace variance{
         gradmat
     );
 
-    RcppParallel::parallelReduce(0,pp, estH);
+    RcppParallel::parallelReduce(0, pp, estH);
     Eigen::VectorXd gradH = estH.gradient;
     Eigen::MatrixXd H = estH.hessian;
 
+
+    parallelWorkers::casewiseOuterProd estJ(
+      DATA,
+      gradmat,
+      C_VEC
+    );
+
+    RcppParallel::parallelReduce(0, n, estJ);
+    Eigen::VectorXd gradJ = estJ.gradient;
+    Eigen::MatrixXd J = estJ.variability;
+
+
     Rcpp::List output =
       Rcpp::List::create(
-        Rcpp::Named("gradient") = gradH,
-        Rcpp::Named("est_J") = H
+        Rcpp::Named("gradmat") = gradmat,
+        Rcpp::Named("gradH") = gradH,
+        Rcpp::Named("gradJ") = gradJ,
+        Rcpp::Named("H") = H/n,
+        Rcpp::Named("J") = J/n
       );
 
     return(output);

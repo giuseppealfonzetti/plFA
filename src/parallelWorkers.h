@@ -135,7 +135,7 @@ namespace parallelWorkers{
     const int nvar;
 
     //// Iteration:
-    const Eigen::VectorXd &theta;
+    const Eigen::Ref<const Eigen::VectorXd> theta;
     Eigen::MatrixXd &gradmat;
 
     // Output quantities:
@@ -155,7 +155,7 @@ namespace parallelWorkers{
       const int NLOAD_,
       const int NCORR_,
       const int NVAR_,
-      const Eigen::VectorXd &THETA_,
+      const Eigen::Ref<const Eigen::VectorXd> THETA_,
       Eigen::MatrixXd &GRADMAT_
 
     ):
@@ -190,13 +190,23 @@ namespace parallelWorkers{
     const int q = constrmat.cols();
     const int p = constrmat.rows();
 
+    // Rcpp::Rcout << "d:"<<d<<",q:"<<q<<", p:"<<p<<"\n";
     // rearrange parameters
     const Eigen::MatrixXd Lam             = params::loadings::theta2mat(theta, constrmat, llc, nthr, nload);
     const Eigen::MatrixXd Ru              = params::latvar::theta2cmat(theta, nthr, nload, ncorr, nvar, q);
     const Eigen::MatrixXd Du              = params::latvar::theta2dmat(theta, constrsd, nthr, nload, ncorr, nvar, q);
     const Eigen::MatrixXd Sigma_u         = Du * Ru * Du;
     const Eigen::VectorXd tau             = params::thresholds::theta2vec(theta, nthr);
+    const Eigen::MatrixXd Sigma_y         = Lam*Sigma_u*Lam.transpose();
 
+    // Rcpp::Rcout << "theta:\n";
+    // Rcpp::Rcout << theta.transpose()<<"\n";
+    // Rcpp::Rcout << "Lam:\n";
+    // Rcpp::Rcout << Lam<<"\n";
+    // Rcpp::Rcout << "Sigma_u:\n";
+    // Rcpp::Rcout << Sigma_u<<"\n";
+    // Rcpp::Rcout << "Sigma_y:\n";
+    // Rcpp::Rcout << Sigma_y<<"\n";
     //subset_gradient.resize(d); subset_gradient.setZero();
     for (int h = BEGIN; h < END; h++){
 
@@ -212,15 +222,12 @@ namespace parallelWorkers{
       Eigen::VectorXd pi_thresholds = params::extract_thresholds(tau, c_vec, k, l, sk, sl);
 
       // implied model correlation
-      double rho_kl = Sigma_u(k,l);
+      double rho_kl = Sigma_y(k,l);
 
       // compute pi
       double pi_sksl = biprobs::compute_pi(c_vec, pi_thresholds, rho_kl, k, l, sk, sl);
 
-      // initialize empty pair-output
-      double pair_ll = 0;
-      Eigen::VectorXd pair_gradient = Eigen::VectorXd::Zero(d);
-
+      // Rcpp::Rcout << "k:"<<k<<", l:"<<l<<", sk:"<<sk<<", sl:"<< sl <<", n:"<<n_sksl<<", rho:"<<rho_kl<<", pi:"<<pi_sksl<<"\n";
 
       Eigen::VectorXd pi_grad = grads::pi(theta,
                                           constrmat,
@@ -252,7 +259,11 @@ namespace parallelWorkers{
       // update
       {
        gradient += (n_sksl/(pi_sksl+1e-8))*pi_grad;
+       // gradient +=pi_grad;
+
        hessian +=  (n_sksl/(pow(pi_sksl,2)+1e-8))*pi_grad*pi_grad.transpose();
+       // hessian +=  pi_grad*pi_grad.transpose();
+
       }
 
 
@@ -260,8 +271,13 @@ namespace parallelWorkers{
   }
 
   void patternwiseOuterProd::join(const patternwiseOuterProd &RHS){
-    gradient += RHS.gradient;
-    hessian += RHS.hessian;
+     gradient += RHS.gradient;
+      hessian += RHS.hessian;
+     // for(int par_row = 0; par_row < RHS.gradient.size(); par_row++){
+     //   for(int par_col = 0; par_col < RHS.gradient.size(); par_col++){
+     //     hessian(par_row, par_col) += RHS.hessian(par_row, par_col);
+     //   }
+     // }
   }
 
 
@@ -272,7 +288,6 @@ namespace parallelWorkers{
     const Eigen::Ref<const Eigen::MatrixXd> data;
     const Eigen::Ref<const Eigen::MatrixXd> gradmat;
     const Eigen::Ref<const Eigen::VectorXd> c_vec;
-
     // Output quantities:
     Eigen::VectorXd gradient;
     Eigen::MatrixXd variability;
@@ -285,11 +300,17 @@ namespace parallelWorkers{
       const Eigen::Ref<const Eigen::MatrixXd> GRADMAT_,
       const Eigen::Ref<const Eigen::VectorXd> C_VEC_
     ):
-      data(DATA_), gradmat(GRADMAT_), c_vec(C_VEC_){}
+      data(DATA_), gradmat(GRADMAT_), c_vec(C_VEC_),
+      gradient(Eigen::VectorXd::Zero(GRADMAT_.rows())),
+      variability(Eigen::MatrixXd::Zero(GRADMAT_.rows(), GRADMAT_.rows())){
+      const int d = gradmat.rows();
+    }
 
     // Constructor 2:
     casewiseOuterProd(const casewiseOuterProd &OBJ_, RcppParallel::Split):
-      data(OBJ_.data), gradmat(OBJ_.gradmat), c_vec(OBJ_.c_vec){}
+      data(OBJ_.data), gradmat(OBJ_.gradmat), c_vec(OBJ_.c_vec),
+      gradient(Eigen::VectorXd::Zero(gradmat.rows())),
+      variability(Eigen::MatrixXd::Zero(gradmat.rows(), gradmat.rows())){}
 
     // MEMBER FUNCTIONS:
     //// Overload operator () for main computation:
