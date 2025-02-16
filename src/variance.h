@@ -4,6 +4,7 @@
 #include "bivariateProbs.h"
 #include "genericUtils.h"
 #include "gradients.h"
+#include "parallelWorkers.h"
 
 //' Estimate of H
 //'
@@ -122,12 +123,12 @@ Rcpp::List estimate_H(
                                               q,
                                               k,
                                               l,
-                                              ck,
-                                              cl,
+                                              // ck,
+                                              // cl,
                                               sk,
                                               sl,
-                                              i1,
-                                              i2,
+                                              // i1,
+                                              // i2,
                                               CORRFLAG,
                                               NTHR,
                                               NLOAD,
@@ -269,12 +270,12 @@ Rcpp::List estimate_J(
                                             q,
                                             k,
                                             l,
-                                            ck,
-                                            cl,
+                                            // ck,
+                                            // cl,
                                             sk,
                                             sl,
-                                            i1,
-                                            i2,
+                                            // i1,
+                                            // i2,
                                             CORRFLAG,
                                             NTHR,
                                             NLOAD,
@@ -420,12 +421,12 @@ Eigen::VectorXd cpp_DH(
                                               q,
                                               k,
                                               l,
-                                              ck,
-                                              cl,
+                                              // ck,
+                                              // cl,
                                               sk,
                                               sl,
-                                              i1,
-                                              i2,
+                                              // i1,
+                                              // i2,
                                               CORRFLAG,
                                               NTHR,
                                               NLOAD,
@@ -445,5 +446,59 @@ Eigen::VectorXd cpp_DH(
 
   diagH /=N;
   return(diagH);
+}
+
+
+
+namespace variance{
+  Rcpp::List sampleEstimators(
+      const Eigen::Ref<const Eigen::VectorXd> THETA,
+      const Eigen::Ref<const Eigen::MatrixXd> FREQ,
+      const Eigen::Ref<const Eigen::MatrixXd> DATA,
+      const Eigen::Ref<const Eigen::VectorXd> C_VEC,
+      const Eigen::Ref<const Eigen::MatrixXd> CONSTRMAT,
+      const Eigen::Ref<const Eigen::VectorXd> CONSTRLOGSD,
+      const std::vector<std::vector<std::vector<double>>> LLC,
+      int N,
+      int CORRFLAG,
+      const int NTHR,
+      const int NLOAD,
+      const int NCORR,
+      const int NVAR
+  ){
+    const int d  = THETA.size();
+    const int pp = FREQ.cols();
+    // Initialize vector of indexes for entries in pairs_table
+    std::vector<int> idx(pp) ;
+    std::iota (std::begin(idx), std::end(idx), 0);
+
+    Eigen::MatrixXd gradmat = Eigen::MatrixXd::Zero(d, pp);
+    parallelWorkers::patternwiseOuterProd estH(
+        CONSTRMAT,
+        CONSTRLOGSD,
+        LLC,
+        C_VEC,
+        FREQ,
+        CORRFLAG,
+        NTHR,
+        NLOAD,
+        NCORR,
+        NVAR,
+        THETA,
+        gradmat
+    );
+
+    RcppParallel::parallelReduce(0,pp, estH);
+    Eigen::VectorXd gradH = estH.gradient;
+    Eigen::MatrixXd H = estH.hessian;
+
+    Rcpp::List output =
+      Rcpp::List::create(
+        Rcpp::Named("gradient") = gradH,
+        Rcpp::Named("est_J") = H
+      );
+
+    return(output);
+  }
 }
 #endif
