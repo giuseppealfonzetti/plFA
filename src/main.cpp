@@ -12,10 +12,9 @@
 #include "frequencies.h"
 #include "pairs.h"
 #include "optimisationUtils.h"
-#include "variance.h"
 #include "fullPairwise.h"
 #include "exportedFuns.h"
-
+#include "parallelWorkers.h"
 
 
 //' Full pairwise iteration
@@ -259,9 +258,9 @@ Rcpp::List cpp_plSA2(
       }
       idx_1pair += PAIRS_PER_ITERATION;
 
-      pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, FREQ, items_pairs, corrflag,
-                                           NTHR, NLOAD, NCORR, NVAR,
-                                           1, 1, theta, iter_chosen_pairs);
+      parallelWorkers::pairsGradient iteration_subset(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, FREQ, items_pairs, corrflag,
+                                                      NTHR, NLOAD, NCORR, NVAR,
+                                                      1, 1, theta, iter_chosen_pairs);
       RcppParallel::parallelReduce(0, iter_chosen_pairs.size(), iteration_subset);
 
       iter_gradient = -iteration_subset.subset_gradient;
@@ -348,8 +347,8 @@ Rcpp::List cpp_plSA2(
     ///////////////////////
     double prev_nll = nll;
     if(epoch%EPOCHS_PER_CHECK==0){
-      pairs::SubsetWorker fullpool_worker(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, VALFREQ, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
-                                          1, 0, theta, full_pool);
+      parallelWorkers::pairsGradient fullpool_worker(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, VALFREQ, items_pairs, corrflag, NTHR, NLOAD, NCORR, NVAR,
+                                                    1, 0, theta, full_pool);
       RcppParallel::parallelReduce(0, pairs, fullpool_worker);
       nll = -fullpool_worker.subset_ll/n;
     }

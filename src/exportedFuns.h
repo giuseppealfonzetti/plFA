@@ -3,7 +3,7 @@
 
 #include "pairs.h"
 #include "optimisationUtils.h"
-#include "variance.h"
+#include "fullPairwise.h"
 
 
 // [[Rcpp::export]]
@@ -213,7 +213,7 @@ Rcpp::List cpp_sample_estimators_HJ(
 ){
   // Rcpp::Rcout << "ef|theta:\n";
   // Rcpp::Rcout << THETA.transpose()<<"\n";
-  Rcpp::List output = variance::sampleEstimators(
+  Rcpp::List output = fullPairwise::multiThreadSamplEstHJ(
     THETA,
     FREQ,
     DATA,

@@ -163,6 +163,7 @@ setMethod('computeVar', 'PlFaFit',
                        METHOD      = OBJ@method,
                        NUMDERIV    = NUMDERIV,
                        INVHAPPRX   = OBJ@numFit$invhessian,
+                       NCORES      = OBJ@cores,
                        VERBOSE     = VERBOSE)
           }else{
             compute_var(THETA      = OBJ@theta,
@@ -183,19 +184,22 @@ setMethod('computeVar', 'PlFaFit',
                        METHOD      = OBJ@method,
                        NUMDERIV    = NUMDERIV,
                        INVHAPPRX   = NULL,
+                       NCORES      = OBJ@cores,
                        VERBOSE     = VERBOSE)
           }}
 )
 
 compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
                         CONSTRMAT, CONSTRLOGSD, LLC, NTHR, NLOAD, NCORR, NVAR,
-                        FREQ, DATA, METHOD, NUMDERIV = F, INVHAPPRX=NULL,
+                        FREQ, DATA, METHOD, NUMDERIV = F, INVHAPPRX=NULL, NCORES=1,
                         VERBOSE = FALSE){
 
   start_time <- Sys.time()
 
-  if (isTRUE(VERBOSE)) message('- Computing Delta...')
+
+
   # Get jacobian of reparameterisation
+  if (isTRUE(VERBOSE)) message('- Computing Delta...')
   Rwr_getPar <- function(x){
     getPar(OBJ         = x,
            OPTION      = "transformed",
@@ -208,6 +212,30 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
            NVAR        = NVAR)
   }
   trJacob <- numDeriv::jacobian(Rwr_getPar, x=THETA)
+  end_time <- Sys.time()
+  totaltime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
+  if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
+
+  # Sample estimation of of J (and H)
+  if (isTRUE(VERBOSE)) message('- Estimating J...')
+  RcppParallel::setThreadOptions(numThreads = NCORES)
+  HJ <- cpp_sample_estimators_HJ(
+    THETA = THETA,
+    FREQ = FREQ,
+    DATA = DATA,
+    C_VEC = C_VEC,
+    CONSTRMAT = CONSTRMAT,
+    CONSTRLOGSD = CONSTRLOGSD,
+    LLC = LLC,
+    N = nrow(DATA),
+    CORRFLAG = NCORR>0,
+    NTHR = NTHR,
+    NLOAD = NLOAD,
+    NCORR= NCORR,
+    NVAR = NVAR
+  )
+  Jhat <- HJ$J
+
   end_time <- Sys.time()
   totaltime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
   if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
@@ -245,41 +273,10 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
   }else{
     if(is.null(INVHAPPRX)){
       if (isTRUE(VERBOSE)) message('- Estimating H...')
-      Hhat <- estimate_H(
-        C_VEC       = C_VEC,
-        A           = CONSTRMAT,
-        CONSTRLOGSD = CONSTRLOGSD,
-        LLC         = LLC,
-        THETA       = THETA,
-        FREQ        = FREQ,
-        N           = N,
-        CORRFLAG    = (NCORR>0),
-        NTHR        = NTHR,
-        NLOAD       = NLOAD,
-        NCORR       = NCORR,
-        NVAR        = NVAR
-      )$est_H
+      Hhat <- HJ$H
     }
 
   }
-
-  if (isTRUE(VERBOSE)) message('- Estimating J...')
-  Jhat <- estimate_J(
-    Y           = DATA,
-    C_VEC       = C_VEC,
-    A           = CONSTRMAT,
-    CONSTRLOGSD = CONSTRLOGSD,
-    LLC         = LLC,
-    THETA       = THETA,
-    CORRFLAG    = as.numeric((NCORR>0)),
-    NTHR        = NTHR,
-    NLOAD       = NLOAD,
-    NCORR       = NCORR,
-    NVAR        = NVAR
-  )$est_J
-  end_time <- Sys.time()
-  totaltime <- as.numeric(difftime(end_time, start_time, units = 'secs')[1])
-  if (isTRUE(VERBOSE)) message('Done! (', round(totaltime, 2),' secs)')
 
   invH <- INVHAPPRX
   if(NUMDERIV | is.null(INVHAPPRX)){
@@ -291,7 +288,6 @@ compute_var <- function(THETA, C_VEC, N, IT = NULL, PAIRS = NULL, PPI = NULL,
 
   vcov <- trJacob %*% invH %*% Jhat %*% invH %*% t(trJacob)
 
-  if (isTRUE(VERBOSE)) message('- Computing the variances...')
   if(METHOD =='ucminf'){
     asy_var <- diag(vcov)
   } else {

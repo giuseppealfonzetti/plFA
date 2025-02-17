@@ -1,6 +1,7 @@
 #ifndef fullPairwise_H
 #define fullPairwise_H
 #include "pairs.h"
+#include "parallelWorkers.h"
 
 namespace fullPairwise{
 
@@ -48,11 +49,11 @@ namespace fullPairwise{
     double iter_ll = 0;
     Eigen::VectorXd iter_gradient = Eigen::VectorXd::Zero(d);
 
-    pairs::SubsetWorker iteration_subset(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, FREQ, items_pairs, CORRFLAG, NTHR, NLOAD, NCORR, NVAR,
+    parallelWorkers::pairsGradient fullpool(CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, FREQ, items_pairs, CORRFLAG, NTHR, NLOAD, NCORR, NVAR,
                                          SILENTFLAG, GRFLAG, theta, vector_pairs);
-    RcppParallel::parallelReduce(0, R, iteration_subset);
-    iter_ll = iteration_subset.subset_ll;
-    iter_gradient = iteration_subset.subset_gradient;
+    RcppParallel::parallelReduce(0, R, fullpool);
+    iter_ll = fullpool.subset_ll;
+    iter_gradient = fullpool.subset_gradient;
 
     // output list
     Rcpp::List output =
@@ -60,6 +61,77 @@ namespace fullPairwise{
         Rcpp::Named("iter_nll") = -iter_ll,
         Rcpp::Named("iter_ngradient") = -iter_gradient
       );
+    return(output);
+  }
+
+
+
+
+  Rcpp::List multiThreadSamplEstHJ(
+      const Eigen::Ref<const Eigen::VectorXd> THETA,
+      const Eigen::Ref<const Eigen::MatrixXd> FREQ,
+      const Eigen::Ref<const Eigen::MatrixXd> DATA,
+      const Eigen::Ref<const Eigen::VectorXd> C_VEC,
+      const Eigen::Ref<const Eigen::MatrixXd> CONSTRMAT,
+      const Eigen::Ref<const Eigen::VectorXd> CONSTRLOGSD,
+      const std::vector<std::vector<std::vector<double>>> LLC,
+      int N,
+      int CORRFLAG,
+      const int NTHR,
+      const int NLOAD,
+      const int NCORR,
+      const int NVAR
+  ){
+    const int d  = THETA.size();
+    const int pp = FREQ.cols();
+    const int n  = DATA.rows();
+    // Initialize vector of indexes for entries in pairs_table
+    std::vector<int> idx(pp) ;
+    std::iota (std::begin(idx), std::end(idx), 0);
+
+    // Rcpp::Rcout << "v|theta:\n";
+    // Rcpp::Rcout << THETA.transpose()<<"\n";
+    Eigen::MatrixXd gradmat = Eigen::MatrixXd::Zero(d, pp);
+    parallelWorkers::patternwiseOuterProd estH(
+        CONSTRMAT,
+        CONSTRLOGSD,
+        LLC,
+        C_VEC,
+        FREQ,
+        CORRFLAG,
+        NTHR,
+        NLOAD,
+        NCORR,
+        NVAR,
+        THETA,
+        gradmat
+    );
+
+    RcppParallel::parallelReduce(0, pp, estH);
+    Eigen::VectorXd gradH = estH.gradient;
+    Eigen::MatrixXd H = estH.hessian;
+
+
+    parallelWorkers::casewiseOuterProd estJ(
+        DATA,
+        gradmat,
+        C_VEC
+    );
+
+    RcppParallel::parallelReduce(0, n, estJ);
+    Eigen::VectorXd gradJ = estJ.gradient;
+    Eigen::MatrixXd J = estJ.variability;
+
+
+    Rcpp::List output =
+      Rcpp::List::create(
+        Rcpp::Named("gradmat") = gradmat,
+        Rcpp::Named("gradH") = gradH,
+        Rcpp::Named("gradJ") = gradJ,
+        Rcpp::Named("H") = H/n,
+        Rcpp::Named("J") = J/n
+      );
+
     return(output);
   }
 }
