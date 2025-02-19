@@ -49,6 +49,10 @@ cpp_sa_proj <- function(THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTH
     .Call(`_lavaan_pl_cpp_sa_proj`, THETA, CONSTRMAT, CONSTRLOGSD, LLC, C_VEC, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
+cpp_sample_estimators_HJ <- function(THETA, FREQ, DATA, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
+    .Call(`_lavaan_pl_cpp_sample_estimators_HJ`, THETA, FREQ, DATA, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
+}
+
 #' Compute pairwise frequencies
 #'
 #' @param Y Integer matrix of dimension \eqn{n*p}, where \eqn{n} is the sample size
@@ -89,104 +93,11 @@ pairs_freq <- function(Y, C_VEC) {
 #' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
 #' @param SILENTFLAG optional for verbose output
 #'
-cpp_multiThread_completePairwise2 <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
-    .Call(`_lavaan_pl_cpp_multiThread_completePairwise2`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
-}
-
-#' Full pairwise iteration
-#'
-#' @description
-#' Evaluate negative log pairwise likelihood or gradient of the complete pool of pairs.
-#' Used by external optimisers. Multithreading options via `RcppParallel`.
-#'
-#' @param N Number of observations
-#' @param C_VEC Vector containing the number of categories for each item
-#' @param CONSTRMAT \eqn{p*q}-dimensional matrix. Elements set to `NA` refers to free loading parameters. Elements set to numerical values denote fixed values constraints.
-#' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
-#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
-#' @param THETA Parameter vector
-#' @param FREQ Frequency table
-#' @param CORRFLAG TRUE to estimate latent correlations. 0 for orthogonal latent factors.
-#' @param NTHR Number of thresholds parameters.
-#' @param NLOAD Number of free loadings parameters
-#' @param NCORR Number of free latent correlations parameters.
-#' @param NVAR Number of free latent variance parameters.
-#' @param GRFLAG 0 to only compute the likelihood. 1 to also compute the gradient.
-#' @param SILENTFLAG optional for verbose output
-#'
 cpp_multiThread_completePairwise <- function(N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG = 0L, SILENTFLAG = 1L) {
     .Call(`_lavaan_pl_cpp_multiThread_completePairwise`, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA, FREQ, CORRFLAG, NTHR, NLOAD, NCORR, NVAR, GRFLAG, SILENTFLAG)
 }
 
 cpp_plSA2 <- function(FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER = FALSE) {
     .Call(`_lavaan_pl_cpp_plSA2`, FREQ, VALFREQ, N, C_VEC, CONSTRMAT, CONSTRLOGSD, LLC, THETA_INIT, DIH, NTHR, NLOAD, NCORR, NVAR, PAIRS_PER_ITERATION, STEP0, STEP1, STEP2, STEP3, BURNE, MAXE, EPOCHS_PER_CHECK, MAX_TOL_COUNTER, TOL_BURN, TOL_END, CHECK_TOL, SEED, VERBOSE, VERBOSE_ITER)
-}
-
-#' Estimate of H
-#'
-#' @description
-#' Compute a sample estimate of the expected negative Hessian by taking
-#' advantage of the second Bartlett's identity at the single pair level
-#'
-#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
-#' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
-#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
-#' @param C_VEC Vector containing the number of categories for each item
-#' @param THETA Parameter vector
-#' @param FREQ output from [pairs_freq()]
-#' @param N sample size
-#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
-#' @param NTHR Number of thresholds parameters.
-#' @param NLOAD Number of free loadings parameters
-#' @param NCORR Number of free latent correlations parameters.
-#' @param NVAR Number of free latent variance parameters.
-#'
-estimate_H <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_lavaan_pl_estimate_H`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
-}
-
-#' Estimate of J
-#'
-#' @description
-#' Compute a sample estimate of the variability matrix via the sample average outer product
-#' of the composite score
-#'
-#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
-#' @param C_VEC Vector containing the number of categories for each item
-#' @param THETA Parameter vector
-#' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
-#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
-#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
-#' @param Y data matrix
-#' @param NTHR Number of thresholds parameters.
-#' @param NLOAD Number of free loadings parameters
-#' @param NCORR Number of free latent correlations parameters.
-#' @param NVAR Number of free latent variance parameters.
-#'
-estimate_J <- function(Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_lavaan_pl_estimate_J`, Y, C_VEC, A, CONSTRLOGSD, LLC, THETA, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
-}
-
-#' Estimate Diagonal of H
-#'
-#' @description
-#' Compute a sample estimate of the expected negative Hessian by taking
-#' advantage of the second Bartlett's identity at the single pair level
-#'
-#' @param A Constraint matrix. Loadings free to be estimated are identified by a 1.
-#' @param CONSTRLOGSD \eqn{q}-dimensional vector. Elements set to `NA` refers to free latent log standard deviations parameters. Elements set to numerical values denote fixed values constraints.
-#' @param LLC Linear loadings constraints. Expects a list of constraints. See [fit_plFA] documentation.
-#' @param C_VEC Vector containing the number of categories for each item
-#' @param THETA Parameter vector
-#' @param FREQ output from [pairs_freq()]
-#' @param N sample size
-#' @param CORRFLAG 1 to estimate latent correlations. 0 for orthogonal latent factors.
-#' @param NTHR Number of thresholds parameters.
-#' @param NLOAD Number of free loadings parameters
-#' @param NCORR Number of free latent correlations parameters.
-#' @param NVAR Number of free latent variance parameters.
-#'
-cpp_DH <- function(C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR) {
-    .Call(`_lavaan_pl_cpp_DH`, C_VEC, A, CONSTRLOGSD, LLC, THETA, FREQ, N, CORRFLAG, NTHR, NLOAD, NCORR, NVAR)
 }
 
